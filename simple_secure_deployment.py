@@ -933,111 +933,98 @@ def show_analytics_page(auth, username, user_info):
         """
         product_df = execute_safe_query(product_query)
         if product_df is not None and not product_df.empty:
-            product_count = product_df['PRODUCT_COUNT'].iloc[0] or 0
+            product_count = product_df.iloc[0]['product_count']
             st.metric("📦 Total Products", f"{product_count:,}")
         else:
             st.metric("📦 Total Products", "0")
     
     with col2:
-        # Active Products (with sales)
-        active_products_query = """
-        SELECT COUNT(DISTINCT pt."ItemID") as active_products
-        FROM "DBO_POSTRANSACTION" pt
-        WHERE pt."Amount" > 0 AND pt."ItemID" IS NOT NULL
+        # Transaction Types (different types of transactions)
+        transaction_types_query = """
+        SELECT COUNT(DISTINCT "TransactionTypeID") as transaction_types
+        FROM "DBO_POSTRANSACTION"
+        WHERE "TransactionTypeID" IS NOT NULL
         """
-        active_products_df = execute_safe_query(active_products_query)
-        if active_products_df is not None and not active_products_df.empty:
-            active_products = active_products_df['ACTIVE_PRODUCTS'].iloc[0] or 0
-            st.metric("🟢 Products with Sales", f"{active_products:,}")
+        types_df = execute_safe_query(transaction_types_query)
+        if types_df is not None and not types_df.empty:
+            transaction_types = types_df.iloc[0]['TRANSACTION_TYPES']
+            st.metric("🔄 Transaction Types", f"{transaction_types:,}")
         else:
-            st.metric("🟢 Products with Sales", "0")
+            st.metric("🔄 Transaction Types", "0")
     
     with col3:
-        # Average Product Price
-        avg_price_query = """
-        SELECT AVG(CAST(pt."Amount" AS FLOAT)) as avg_price
+        # Average Transaction Amount
+        avg_amount_query = """
+        SELECT AVG(CAST(pt."Amount" AS FLOAT)) as avg_amount
         FROM "DBO_POSTRANSACTION" pt
         WHERE CAST(pt."Amount" AS FLOAT) > 0
         """
-        avg_price_df = execute_safe_query(avg_price_query)
-        if avg_price_df is not None and not avg_price_df.empty:
-            avg_price = avg_price_df['AVG_PRICE'].iloc[0] or 0
-            st.metric("💰 Avg Transaction", f"${avg_price:.2f}")
+        avg_amount_df = execute_safe_query(avg_amount_query)
+        if avg_amount_df is not None and not avg_amount_df.empty:
+            avg_amount = avg_amount_df.iloc[0]['AVG_AMOUNT'] or 0
+            st.metric("💰 Avg Transaction", f"${avg_amount:.2f}")
         else:
             st.metric("💰 Avg Transaction", "$0.00")
     
     with col4:
-        # Product Categories
-        category_query = """
-        SELECT COUNT(DISTINCT "ItemType") as category_count
-        FROM "DBO_ITEMTYPE"
-        """
-        category_df = execute_safe_query(category_query)
-        if category_df is not None and not category_df.empty:
-            category_count = category_df['CATEGORY_COUNT'].iloc[0] or 0
-            st.metric("📋 Product Categories", f"{category_count:,}")
-        else:
-            st.metric("📋 Product Categories", "0")
-    
-    # Top Selling Products
-    st.subheader("🔥 Top Selling Products")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # Top products by sales count
-        top_products_query = """
-        SELECT 
-            i."ItemName" as product_name,
-            COUNT(*) as sales_count,
-            SUM(CAST(pt."Amount" AS FLOAT)) as total_revenue
+        # Total Revenue
+        revenue_query = """
+        SELECT SUM(CAST(pt."Amount" AS FLOAT)) as total_revenue
         FROM "DBO_POSTRANSACTION" pt
-        JOIN "DBO_ITEM" i ON pt."ItemID" = i."ID"
         WHERE CAST(pt."Amount" AS FLOAT) > 0
-        GROUP BY i."ItemName"
-        ORDER BY sales_count DESC
+        """
+        revenue_df = execute_safe_query(revenue_query)
+        if revenue_df is not None and not revenue_df.empty:
+            total_revenue = revenue_df.iloc[0]['TOTAL_REVENUE'] or 0
+            st.metric("💸 Total Revenue", f"${total_revenue:,.2f}")
+        else:
+            st.metric("💸 Total Revenue", "$0.00")
+    
+    # Top Transaction Types
+    st.subheader("🔥 Top Transaction Types")
+    with col1:
+        # Top transaction types by count and revenue
+        top_types_query = """
+        SELECT 
+            "TransactionTypeID" as transaction_type,
+            COUNT(*) as transaction_count,
+            SUM(CAST("Amount" AS FLOAT)) as total_revenue
+        FROM "DBO_POSTRANSACTION"
+        WHERE CAST("Amount" AS FLOAT) > 0
+        GROUP BY "TransactionTypeID"
+        ORDER BY transaction_count DESC
         LIMIT 10
         """
-        top_products_df = execute_safe_query(top_products_query)
-        if top_products_df is not None and not top_products_df.empty:
-            fig = px.bar(
-                top_products_df, 
-                x='SALES_COUNT', 
-                y='PRODUCT_NAME',
-                title='Top Products by Sales Volume',
-                labels={'SALES_COUNT': 'Number of Sales', 'PRODUCT_NAME': 'Product'},
-                orientation='h'
-            )
+        types_df = execute_safe_query(top_types_query)
+        if types_df is not None and not types_df.empty:
+            fig = px.bar(types_df, x='transaction_count', y='transaction_type', 
+                        title='Top Transaction Types by Count',
+                        orientation='h')
+            fig.update_layout(height=400)
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("📊 No product sales data available")
+            st.info("📊 No transaction type data available")
     
     with col2:
-        # Revenue by product category
-        category_revenue_query = """
+        # Revenue by transaction type
+        type_revenue_query = """
         SELECT 
-            it."Description" as category,
-            SUM(CAST(pt."Amount" AS FLOAT)) as total_revenue,
+            "TransactionTypeID" as transaction_type,
+            SUM(CAST("Amount" AS FLOAT)) as total_revenue,
             COUNT(*) as transaction_count
-        FROM "DBO_POSTRANSACTION" pt
-        JOIN "DBO_ITEM" i ON pt."ItemID" = i."ID"
-        JOIN "DBO_ITEMTYPE" it ON i."ItemType" = it."ItemType"
-        WHERE CAST(pt."Amount" AS FLOAT) > 0
-        GROUP BY it."Description"
+        FROM "DBO_POSTRANSACTION"
+        WHERE CAST("Amount" AS FLOAT) > 0
+        GROUP BY "TransactionTypeID"
         ORDER BY total_revenue DESC
         LIMIT 10
         """
-        category_revenue_df = execute_safe_query(category_revenue_query)
-        if category_revenue_df is not None and not category_revenue_df.empty:
-            fig = px.pie(
-                category_revenue_df, 
-                values='TOTAL_REVENUE', 
-                names='CATEGORY',
-                title='Revenue by Product Category'
-            )
+        type_revenue_df = execute_safe_query(type_revenue_query)
+        if type_revenue_df is not None and not type_revenue_df.empty:
+            fig = px.pie(type_revenue_df, values='total_revenue', names='transaction_type', 
+                        title='Revenue by Transaction Type')
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("📊 No category revenue data available")
+            st.info("📊 No transaction type revenue data available")
     
     # Sales Trends
     st.subheader("📈 Sales Trends Analysis")
