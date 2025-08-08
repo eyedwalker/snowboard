@@ -1,0 +1,5 @@
+Original_Pattern,Suggested_Schema,Suggested_Table,Confidence
+InvoiceDetail,dbo,InvoiceDetailTaxBreakDown,High
+OrderItem,dbo,ItemOrderReplenishRule,Medium
+BillingClaimDetail,dbo,BillingClaimChangeDetail,Medium
+AppSchedule,dbo,__ConversionOMtoALSchedule,Medium

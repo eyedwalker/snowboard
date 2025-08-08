@@ -1,0 +1,2129 @@
+schema_name,view_name,create_date,modify_date,definition_length,definition_preview
+dbo,V_ExtSchedException,2014-03-10 00:07:59.213,2025-08-08 07:56:59.147,0,
+dbo,V_ExtPatient,2014-03-10 00:08:54.387,2025-08-08 07:56:59.140,0,
+dbo,V_ExtAppointment,2014-03-10 00:07:59.197,2025-08-08 07:56:59.130,0,
+dbo,V_CashReceiptSummary,2014-03-10 00:08:06.650,2025-07-25 07:58:57.133,3469,"
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE VIEW [dbo].[V_CashReceiptSummary]
+AS
+SELECT     Convert(varchar,d.DayCloseId) + '-' +d.OfficeNum as ID ,d.DayCloseId, d.OfficeNum,o.CompanyID as CompanyID, o.OfficeName, d.TransDate as TransactionDate,
+					  SUM(CASE WHEN dd.paymenttyp"
+dbo,V_KPIDailyDetail,2013-02-20 00:00:53.837,2025-07-10 07:56:09.760,2119,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+
+CREATE VIEW [dbo].[V_KPIDailyDetail]
+AS
+select ROW_NUMBER() over(order by KPIID) ID, ko.KPIID,
+(case when (select UseBookIncentives from CompanyInfo where ID = o.CompanyID) = 1
+then convert(date, p.BookDate)
+else
+convert(date, p.TransactionDate)
+END) as Date,
+p.OfficeNum, o.MarketId as MarketId, o.OfficeName, ko.KPIEmployee as EmployeeID,
+sum(ko.quantity) as Quantity,(sum(ko.quantity) * k.CommRate) as A"
+dbo,V_GetNetReceiptbyDetailedDoctor,2014-03-10 00:07:59.243,2025-06-25 07:55:36.780,9046,"CREATE View V_GetNetReceiptbyDetailedDoctor
+ As
+ 
+ select distinct Cast((pd.Amount* ISNULL((ISNULL(PT.Amount,0)/ NULLIF(ppt.Amount,0)),0)) as decimal(9,2)) as Amount,
+ isum.DoctorID as DoctorID,E.FirstName + ' ' + E.LastName as Doctor, 'EG' as ordertype ,'POS' as Type,Oe.OfficeName as  OfficeName,PT.OfficeNum as officenum,
+ Convert(datetime,convert(varchar, TransactionDate, 101)) as transactiondate,pt.PaymentID,O.CustomerID, P.FirstName + ' ' + P.LastName as PatientName,O.OrderNum,TransactionID,"
+dbo,V_GetNetReceiptbyOutsideDoctor,2014-03-10 00:08:06.740,2025-06-25 07:55:36.770,9900,"---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE View [dbo].[V_GetNetReceiptbyOutsideDoctor] 
+As 
+select distinct o.OrderNum,cast((pd.Amount* (ISNULL(PT.Amount,0)/NULLIF(ppt.Amount,0))) as decimal(9,2)) as Amount,'' as DoctorID ,'OutsideDoctor' as  Doctor,  'E' as ordertype ,Convert(da"
+dbo,V_GMFortneBillingReport,2010-04-29 21:33:24.567,2025-06-25 07:55:36.763,7530,"
+
+
+
+CREATE VIEW [dbo].[V_GMFortneBillingReport]
+AS
+SELECT   convert(varchar,Row_number() over(order by  oi.OrderID)) as ID,
+					'10' AS RECTYPE, '034' AS Provider, '0034' AS DISPENSER, +isnull(CONVERT(VARCHAR(8), bc.BillingDate,112),'')+ '' AS StateDate, bc.claimid AS STATENUM, 
+                     (CASE WHEN inp.PurchaseOrder IS NULL THEN '' ELSE +substring(inp.PurchaseOrder,1,5) END) AS Cisco, '' AS AccountCode, 
+                       cast(oi.OrderID as varchar(32)) AS OrderNum, 
+"
+dbo,V_AppointmentInsurance,2014-03-10 00:07:51.223,2025-06-25 07:55:36.750,3188,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+CREATE VIEW [dbo].[V_AppointmentInsurance]
+AS
+SELECT                ROW_NUMBER() OVER (order by dbo.InsCarrier.CarrierName )  as ID,dbo.Appointment.ApptNum AS ApptNum, dbo.Appointment.ApptDate, CE.Value AS ApptStatus, 
+                      dbo.V_PatientDemographics.PatientID, dbo.V_PatientDemographics.PatientFullName, 
+                      dbo.V_PatientDemographics.PhoneNumber, dbo.V_PatientDem"
+dbo,V_SalesReport,2009-07-16 17:43:52.240,2025-06-25 07:55:36.747,1387,"create VIEW [dbo].[V_SalesReport]
+AS
+select 
+(select sum(Amount)+sum(Receivable)-sum(Tax) from V_InvoiceDetailwithInsurance v1 where idet.insplanid=v1.insplanid 
+and v1.itemtype in(9,10,11,12,13,14,15,16)) as NetSaleLens,
+(select sum(Amount)+sum(Receivable)-sum(Tax) from V_InvoiceDetailwithInsurance v2 where idet.insplanid=v2.insplanid 
+and v2.itemtype =1) as NetSaleFrame,
+(select sum(Amount)+sum(Receivable)-sum(Tax) from V_InvoiceDetailwithInsurance v3 where idet.insplanid=v3.insplanid "
+dbo,V_InsuranceByInvoice,2009-08-29 12:35:52.393,2025-06-25 07:55:36.740,1076,"
+
+CREATE VIEW [dbo].[V_InsuranceByInvoice]
+AS 
+SELECT  Row_number() over(order by TransactionID) as ID ,TransactionID,InvoiceID, OrderNum, SUM(Price) AS Price, SUM(Tax) AS Tax, SUM(ISNULL(Discount, 0)) + SUM(ISNULL(LineDisc, 0)) + SUM(ISNULL(PackageDisc, 0)) 
+                      + SUM(ISNULL(InsuranceDiscount, 0)) AS Discount, SUM(ISNULL(Amount, 0)) AS Amount, SUM(ISNULL(Allowance, 0)) AS Allowance, 
+                      SUM(ISNULL(Copay, 0)) AS Copay, SUM(ISNULL(Receivable, 0)) AS Rece"
+dbo,V_ClaimSummary,2009-12-08 12:19:11.627,2025-06-25 07:55:36.733,6796,"
+
+
+
+
+CREATE VIEW [dbo].[V_ClaimSummary]
+AS
+SELECT     '""10""' AS RECTYPE, '""034""' AS Provider, '""0034""' AS DISPENSER, '""'+isnull(CONVERT(VARCHAR(8), bc.BillingDate,112),'')+'""' AS StateDate, '""""' AS STATENUM, 
+                     (CASE WHEN inp.PurchaseOrder IS NULL THEN '""""' ELSE '""'+substring(inp.PurchaseOrder,1,5)+'""' END) AS Cisco, '""""' AS AccountCode, 
+                      '""'+ cast(oi.OrderID as varchar(32))+'""' AS OrderNum, 
+                      '""'+ substring(bcd.InsuredId,1,"
+dbo,V_CLOrdersSEE,2009-08-25 11:00:03.357,2025-06-25 07:55:36.727,3243,"CREATE VIEW dbo.V_CLOrdersSEE
+AS
+SELECT     dbo.Orders.OfficeNum, dbo.Orders.OrderNum, dbo.Orders.LabNum, dbo.Orders.ShipToType, dbo.Orders.StatusCode, dbo.Orders.LabOrderWorkflowID, 
+                      SUBSTRING(dbo.Orders.LabInstructions, 1, 50) AS Comment1, SUBSTRING(dbo.Orders.LabInstructions, 51, 100) AS Comment2, dbo.Orders.OrderDate, 
+                      dbo.Orders.ExpectDate, dbo.Orders.CustomerID, ShipToAddress.Address1 AS ShipToAddress1, ShipToAddress.Address2 AS ShipToAddress"
+dbo,V_GetNetReceiptbyOffice,2014-03-10 00:09:07.700,2025-06-25 07:55:36.720,9936,"CREATE view V_GetNetReceiptbyOffice
+ As
+ 
+ select distinct o.OrderNum,cast((pd.Amount* (ISNULL(PT.Amount,0)/NULLIF(ppt.Amount,0))) as decimal(9,2)) as Amount,--PT.Amount as Amount,
+ isum.DoctorID as DoctorID,E.FirstName + ' ' + E.LastName as Doctor, 'E' as ordertype, PT.OfficeNum,Convert(datetime,convert(varchar, TransactionDate, 101)) as transactiondate,pt.PaymentID, TransactionID,PaymentTypeID
+  from PosTransaction PT 
+  inner join orders o on o.OrderNum = PT.OrderID
+  inner join InvoiceSum is"
+dbo,V_CLReplenishment,2014-03-10 00:07:59.150,2025-06-25 07:55:36.713,2516,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/ 
+
+CREATE VIEW [dbo].[V_CLReplenishment] 
+AS
+SELECT    Row_number() over(order by  o.OrderNum) as ID,  o.OfficeNum, clm.MfgNum, clm.VendName, o.ProcessDate, o.OrderDate, o.OrderNum, p.LastName, p.FirstName, clst.CLStyleId, clst.Style, cls.Base, 
+                      cls.Diameter, cls.Sphere, cls.Cylinder, cls.Axis, cls.add1 as Add1, cls.LensQty,pd.Eye,clc.Description,cl.supplytype as SupplyType, clu.value a"
+dbo,V_EGOrdersSEE,2009-08-25 11:00:04.230,2025-06-25 07:55:36.700,7358,"CREATE VIEW dbo.V_EGOrdersSEE
+AS
+SELECT     dbo.Orders.OfficeNum, dbo.Orders.OrderNum, dbo.Orders.LabNum, dbo.Orders.ShipToType, dbo.Orders.StatusCode, dbo.Orders.LabOrderWorkflowID, 
+                      SUBSTRING(dbo.Orders.LabInstructions, 1, 50) AS Comment1, SUBSTRING(dbo.Orders.LabInstructions, 51, 100) AS Comment2, dbo.Orders.OrderDate, 
+                      dbo.Orders.ExpectDate, dbo.Orders.CustomerID, ShipToAddress.Address1 AS ShipToAddress1, ShipToAddress.Address2 AS ShipToAddress"
+dbo,V_RefundOnly,2012-02-29 08:07:44.550,2025-06-25 07:55:36.697,628,"
+   
+   CREATE VIEW [dbo].[V_RefundOnly]
+AS
+SELECT     pt.OrderID, pt.TransactionID, pt.TransactionDate, pt.Amount, ins.RefundTypeID, p.FirstName, p.LastName, o.OfficeName, pt.OfficeNum, o.CompanyID,
+pt.TransactionTypeID,
+e.LastName+', '+ e.FirstName as Employee
+FROM         dbo.PosTransaction AS pt left outer JOIN
+                      dbo.InvoiceSum AS ins ON pt.InvoiceSummaryID = ins.InvoiceID INNER JOIN
+                      dbo.Patient AS p ON pt.PatientID = p.ID INNER JOIN
+                "
+dbo,V_RemakeReasonReport,2012-02-29 08:07:44.063,2025-06-25 07:55:36.693,2261,"/*******************************************************************
+** V_RemakeReasonReport - The View for the remake reason report information.
+** 
+** 7/27/2021 - Added a remake note
+********************************************************************/
+CREATE VIEW [dbo].[V_RemakeReasonReport]
+AS
+SELECT office.companyID as CompanyID
+	, p.id as patientID
+	, upper(substring(p.FirstName, 1, 1)) + lower(substring(p.FirstName, 2, len(p.firstname))) as FirstName
+	, upper(substring(p.LastName, 1, 1)) "
+dbo,V_PatientDemographics,2014-03-10 00:08:57.877,2025-06-25 07:55:36.683,3672,"
+
+CREATE VIEW [dbo].[V_PatientDemographics]
+AS
+SELECT     
+	dbo.Patient.ID AS PatientID, 
+	dbo.Patient.CompanyID, 
+	dbo.Patient.FirstName, 
+	dbo.Patient.Middle, 
+	dbo.Patient.LastName, 
+    dbo.Patient.FirstName + RTRIM(' ' + COALESCE (dbo.Patient.Middle, '')) + ' ' + dbo.Patient.LastName AS PatientFullName, 
+    dbo.Patient.Sex, 
+	dbo.Patient.SSN, 
+	dbo.Patient.email AS EmailAddress, 
+	dbo.V_PatientAddresses.Address1, 
+	dbo.V_PatientAddresses.Address2, 
+	dbo.V_PatientAddresses.C"
+dbo,V_EGLabOrder,2009-01-28 15:58:51.653,2025-06-25 07:55:36.673,8471,"
+CREATE VIEW [dbo].[V_EGLabOrder]
+AS
+SELECT     dbo.Orders.OrderNum, dbo.Orders.OfficeNum, dbo.Orders.LabNum, dbo.Orders.ShipToType, dbo.Orders.OrderDate, dbo.Orders.ExpectDate, 
+                      dbo.Orders.StatusCode, dbo.Orders.OrderType, dbo.Orders.LabOrderWorkflowID, dbo.Orders.LabInstructions, 
+                      ShipToAddress.Address1 AS ShipToAddress1, ShipToAddress.Address2 AS ShipToAddress2, ShipToAddress.City AS ShipToCity, 
+                      ShipToAddress.State AS Sh"
+dbo,V_SalesAdjustments,2014-03-10 00:07:59.367,2025-06-25 07:55:36.667,1122,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/ 
+
+CREATE VIEW [dbo].[V_SalesAdjustments] 
+AS
+select convert(varchar,Row_number() over(order by  pt.TransactionID)) + '-' + pt.OFficeNum as ID, 
+	pt.TransactionID,pt.transactiondate as TransactionDate, pt.ORderID as OrderNum, 
+	pt.employeeid as Employee,dbo.GetProperCasing(e.FirstName) + ','+ dbo.GetProperCasing(e.LastName) as EmployeeName
+	,  pt.Amount, pt.patientid as PatientID,
+	dbo.GetProperCa"
+dbo,V_RecallDetailsReport,2010-02-02 09:22:32.440,2025-06-25 07:55:36.663,1651,"
+CREATE VIEW [dbo].[V_RecallDetailsReport]
+AS         
+               
+
+select  rd.ID as ID, rd.RecallID, p.ID as PatientID, upper(substring(p.FirstName, 1, 1)) + lower(substring(p.FirstName, 2, len(p.firstname))) as FirstName
+		,  upper(substring(p.LastName, 1, 1)) + lower(substring(p.LastName, 2, len(p.LastName))) as LastName, p.Middle as MiddleInitial, cl.Value as Title
+		, p.Sex, p.DOB,p.BirthDate, ph.PhoneNumber as PhoneNumber,p.email as Email , 
+		a.address1 as Address1, a.address2"
+dbo,V_DiscountDetail,2013-02-20 00:00:52.507,2025-06-25 07:55:36.657,2904,"
+
+CREATE view V_DiscountDetail
+as
+
+	select isum.ordernum,sum(Discount) as discount,p.firstname + ' ' + p.lastname as patientname,
+	isum.discounttypeid,pt.EmployeeId AS Associate, o.OrderDate, pt.TransactionDate,pt.officenum from invoicedet id
+	inner join invoicesum isum on id.invoiceid = isum.invoiceid  and (isum.discounttypeid not in(select discounttypeid from invoicedet where ordernum = isum.ordernum) OR isum.discounttypeid is NULL)
+	inner join orders o on o.OrderNum = isum.ordernum
+	INNER JOI"
+dbo,V_InventoryActivity,2014-03-10 00:07:59.307,2025-06-25 07:55:36.650,2241,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+CREATE VIEW [dbo].[V_InventoryActivity]
+AS
+SELECT     TOP (100) PERCENT ia.ID, ia.TransactionDate, itt.Description AS TransType, ia.OfficeNum, dbo.Office.OfficeName, ia.ItemID, dbo.Item.ItemName, dbo.Item.ItemNum, dbo.Item.UPCCode, 
+                      ia.Quantity AS TransQty, ia.OnHandQuantity AS OnHand, ia.OnOrderQuantity AS OnOrder, ia.TransitInQuantity AS InTransit, ia.CommittedQuantity AS [Committ"
+dbo,V_GetNetReceiptbyDoctor,2014-03-10 00:09:07.683,2025-06-25 07:55:36.640,6288,"CREATE View V_GetNetReceiptbyDoctor 
+ As
+select distinct o.OrderNum,cast((pd.Amount* (ISNULL(PT.Amount,0)/NULLIF(ppt.Amount,0))) as decimal(9,2)) as Amount,--
+isum.DoctorID as DoctorID,E.FirstName + ' ' + E.LastName as Doctor, 'E' as ordertype,'' as  OfficeName,
+'' as officenum,Convert(datetime,convert(varchar, TransactionDate, 101)) as transactiondate,pt.PaymentID,TransactionID,PaymentTypeID
+from PosTransaction PT 
+inner join orders o on o.OrderNum = PT.OrderID
+inner join InvoiceSum isum on isu"
+dbo,V_InvoiceDetailWithItem,2011-06-21 15:33:44.470,2025-06-25 07:55:36.633,1632,"
+
+CREATE VIEW [dbo].[V_InvoiceDetailWithItem]
+AS
+SELECT     id.InvoiceID, ins.OrderNum, id.ItemType, id.ItemID, SUM((CASE WHEN (iid.isprimary = 0) THEN 0 ELSE isnull(id.Price, 0) END)) AS Price, 
+                      SUM((CASE WHEN (iid.isprimary = 0) THEN 0 ELSE isnull(id.Tax, 0) END)) AS Tax, (CASE WHEN (iid.isprimary = 0 AND SUM(iid.Receivable) IS NOT NULL) 
+                      THEN 0 ELSE SUM(id.Amount) END) AS Amount, SUM(ISNULL(iid.Receivable, 0)) AS Receivable, p.CompanyID, 
+   "
+dbo,V_SurveyDetailsReport,2010-01-29 21:48:05.960,2025-06-25 07:55:36.630,1208,"
+
+
+
+CREATE VIEW [dbo].[V_SurveyDetailsReport]
+AS
+
+select  sd.ID as ID, sd.SurveyID, p.ID as PatientID, upper(substring(p.FirstName, 1, 1)) + lower(substring(p.FirstName, 2, len(p.firstname))) as FirstName, 
+ upper(substring(p.LastName, 1, 1)) + lower(substring(p.LastName, 2, len(p.LastName))) as LastName, p.Sex, isnull(p.DOB, '1/1/1900') as DOB, p.BirthDate as BirthDate, ph.PhoneNumber as PhoneNum,p.email as Email , 
+		a.address1 as Address1, a.address2 as Address2, a.city as City,a.sta"
+dbo,V_GLDetailPOS,2009-08-25 11:00:01.387,2025-06-25 07:55:36.627,738,"CREATE VIEW [dbo].[V_GLDetailPOS]
+AS
+SELECT     gd.ID, gd.TransactionID, gd.AccountNum, gd.Amount AS PaidAmount, gd.GLCenter, gd.Source, gd.OfficeNum, dbo.DateOnly(gd.TransactionDate) 
+                      AS TransactionDate, gd.CloseID, ga.Description, o.OfficeName, ISNULL(p.FirstName, '') + ' ' + ISNULL(p.LastName, '') AS PatientName
+FROM         dbo.GLDetail AS gd INNER JOIN
+                      dbo.GLAccount AS ga ON gd.AccountNum = ga.AccountNum INNER JOIN
+                      dbo."
+dbo,V_KPITransactionDetail,2013-02-20 00:00:54.090,2025-06-25 07:55:36.623,1286,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+
+CREATE VIEW [dbo].[V_KPITransactionDetail]
+AS
+SELECT    Row_Number() over (order by ko.TransactionID) as ID, ko.TransactionID, p.TransactionDate, p.OfficeNum, p.OrderID,
+ pat.LastName + ' ' + pat.FirstName AS PatientName, 
+                      e.LastName + ' ' + e.FirstName AS EmployeeName , e.employee as EmployeeID,k.Description, ko.Quantity, 
+ko.Quantity * k.CommRate as Amount,ko.CommissionQuantity ,"
+dbo,V_LabOrderStatus,2014-03-10 00:08:54.463,2025-06-25 07:55:36.617,1178,"
+CREATE VIEW [dbo].[V_LabOrderStatus]
+AS
+	SELECT      dbo.Orders.OrderNum as OrderNum, dbo.Orders.LabNum, Orders.OrderNum as VisionStarOrderSentID , 0 as XifDataBatchID,
+					  dbo.patient.FirstName as FirstName, dbo.Patient.LastName as LastName,
+					  dbo.LabOrderStatus.OrderNum AS Expr1, dbo.Dateonly(dbo.LabOrderStatus.UpdateDate) as UpdateDate, dbo.LabOrderStatus.LabJobID as LabJobID, dbo.LabOrderStatus.LabStation as LabStation, 
+					  dbo.Dateonly(dbo.LabOrderStatus.InLabDate) as InL"
+dbo,V_PatientInformation,2011-11-16 15:19:41.090,2025-06-25 07:55:36.613,480,"CREATE VIEW dbo.V_PatientInformation
+AS
+SELECT     dbo.Patient.ID, dbo.Patient.FirstName, dbo.Patient.LastName, dbo.Patient.DOB, dbo.Address.Address1, dbo.Address.Address2, dbo.Address.City, dbo.Address.State, 
+                      dbo.Address.ZipCode
+FROM         dbo.Patient INNER JOIN
+                      dbo.PatientAddress ON dbo.Patient.ID = dbo.PatientAddress.PatientID INNER JOIN
+                      dbo.Address ON dbo.Address.ID = dbo.PatientAddress.AddressID
+"
+dbo,V_GMFortneBillingReport_WithQuotes,2010-04-29 21:33:24.580,2025-06-25 07:55:36.607,7078,"
+
+
+
+
+
+CREATE VIEW dbo.V_GMFortneBillingReport_WithQuotes
+AS
+SELECT   convert(varchar,Row_number() over(order by  oi.OrderID)) as ID,
+					'""10""' AS RECTYPE, '""034""' AS Provider, '""0034""' AS DISPENSER, '""'+isnull(CONVERT(VARCHAR(8), bc.BillingDate,112),'')+'""' AS StateDate, '""""' AS STATENUM, 
+                     (CASE WHEN inp.PurchaseOrder IS NULL THEN '""""' ELSE '""'+substring(inp.PurchaseOrder,1,5)+'""' END) AS Cisco, '""""' AS AccountCode, 
+                      '""'+ cast(oi.OrderID as"
+dbo,V_NetReceipt,2014-07-01 23:33:53.817,2025-06-25 07:55:36.593,7019,"CREATE View V_NetReceipt
+
+as
+ 
+ 
+select distinct o.OrderNum,cast((pd.Amount* (ISNULL(PT.Amount,0)/ppt.Amount)) as decimal(9,2)) as Amount,--PT.Amount as Amount,
+isum.DoctorID as DoctorID,E.FirstName + ' ' + E.LastName as Doctor, 
+-----'E' as ordertype, 
+Case when  (o.OrderType = 'E' or o.OrderType = 'M' or o.OrderType = 'X'  ) then 'E'
+when  (o.OrderType = 'S') then 'C'
+when  (o.OrderType = 'H') then 'C'
+Else '' End as ordertype,PT.OfficeNum,
+--'E' as ordertype,
+Convert(datetime,convert(varchar,"
+dbo,V_ContractDoctorPayReport,2011-06-21 15:34:59.820,2025-06-25 07:55:36.583,991,"
+
+CREATE VIEW [dbo].[V_ContractDoctorPayReport]
+AS
+SELECT     d.ID, d.Date, d.TransactionID, d.InsurancePay, d.PatientAmount, d.Sales, d.CarrierCode, d.Paymethod, d.PayAmount, d.EmployeeID, d.ItemID, 
+                      p.LastName + ' ' + p.FirstName AS PatientName, pt.OrderID, e.LastName + ' ' + e.FirstName AS EmployeeName, i.CarrierName, dbo.Item.ItemName, 
+                      ptt.Description AS TransactionType,pt.OfficeNum
+FROM         dbo.DoctorPayDailyDetail AS d INNER JOIN
+   "
+dbo,LOGI_InvoicedPatientDemographics,2023-11-29 07:53:56.630,2025-06-25 07:55:36.577,3369,"Create view  [dbo].[LOGI_InvoicedPatientDemographics] as
+SELECT distinct p.ID AS PatientID,
+	p.CompanyID, 
+	p.FirstName, 
+	p.Middle, 
+	p.LastName, 
+	p.NickName,
+	p.ReferralID,
+	p.IsPatient,
+    p.ProviderEmployeeId,
+	pr.RecallDate as NextRecallDate,
+	rt.Name as NextRecallType,
+    p.FirstName + RTRIM(' ' + COALESCE (p.Middle, '')) + ' ' + p.LastName AS PatientFullName, 
+    p.Sex, 
+	p.email AS EmailAddress, 
+	(CASE WHEN p.email = '' OR p.email IS NULL THEN 'No' 
+      WHEN p.email != ''  THEN 'Y"
+dbo,V_MiscPaymentReport,2013-02-20 00:00:54.350,2025-06-25 07:55:36.573,1513,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/  
+
+CREATE VIEW [dbo].[V_MiscPaymentReport]
+AS
+SELECT     pt.TransactionID, pt.OfficeNum, pt.TransactionDate, pt.Amount *-1 AS TransactionAmount, 
+                      CASE WHEN mpr.Description =  'Billing Credit Transfer' THEN pp.Amount ELSE pp.Amount * -1 END AS PaymentAmount, 
+                      p.LastName + ', ' + p.FirstName AS PatientName, e.LastName + ', ' + e.FirstName AS EmployeeName, pm.Origina"
+dbo,V_PatientSearch_Extension,2014-03-10 00:09:07.707,2025-06-25 07:55:36.570,694,"
+CREATE VIEW [dbo].[V_PatientSearch_Extension]
+AS
+
+SELECT  p.CompanyID AS CompanyId,
+        p.HomeOffice,
+        p.ID AS PatientId,
+        p.FirstName,
+        p.LastName,
+        p.BirthDate AS DateOfBirth,
+        ph.PhoneNumber,
+        a.Address1,
+        a.Address2,
+        a.City,
+        a.State,
+        a.ZipCode
+FROM    Patient p  WITH (NOLOCK) LEFT JOIN
+        Phone   ph WITH (NOLOCK) ON ph.ID = (SELECT TOP 1 PhoneID   FROM PatientPhone   WITH (NOLOCK) WHERE Patien"
+dbo,V_PatientRecallReport,2014-03-10 00:08:57.890,2025-06-25 07:55:36.563,2638,"
+
+CREATE VIEW [dbo].[V_PatientRecallReport]
+AS
+
+
+SELECT  DISTINCT  convert(varchar,Row_number() over(order by p.Id))+ '-' + o.officeNum as ID, max(p.id) as PatientID, office.companyID as CompanyID
+ ,upper(substring(p.FirstName, 1, 1)) + lower(substring(p.FirstName, 2, len(p.firstname))) as FirstName
+ ,upper(substring(p.LastName, 1, 1)) + lower(substring(p.LastName, 2, len(p.LastName))) as LastName 
+ ,p.BirthDate, p.DOB, o.OfficeNum as OfficeNum, office.OfficeName AS OfficeName,max(o.Ass"
+dbo,LOGI_PatientInsurances,2023-11-29 07:53:56.633,2025-06-25 07:55:36.560,362,"Create view [dbo].[LOGI_PatientInsurances] as 
+select distinct pi.""PatientID"",
+ ic.""CarrierName"" as ""PatientInsuranceName"",
+ ic.""ID"" as ""PatientInsuranceID"",
+ p.CompanyID as CompanyID
+FROM patientinsurance pi inner join
+     patient p on p.ID = pi.PatientID left join
+	 insPlan ip on ip.ID = pi.InsurancePlanID left join
+	 insCarrier ic on ic.ID = ip.CarrierCode"
+dbo,V_MailCheckDetail,2010-09-20 11:14:20.117,2025-06-25 07:55:36.557,986,"create VIEW [dbo].[V_MailCheckDetail]
+AS
+SELECT    top 100 percent newID() as ID, o.OfficeNum, o.OfficeName, pa.LastName + ', ' + pa.FirstName AS PatientName, ISNULL(pt.OrderID, '') AS OrderID, pt.TransactionID, 
+                      SUM(p.Amount) AS Amount, e.LastName + ', ' + e.FirstName AS EmployeeName, o.CompanyID
+FROM         dbo.PosPaymentDetail AS p INNER JOIN
+                      dbo.PosTransaction AS pt ON p.PaymentID = pt.PaymentID AND pt.TransactionDate >= '05/01/2010' AND pt.T"
+dbo,V_ESPatientLastModified,2024-11-13 18:41:48.527,2025-06-25 07:55:36.550,120,"CREATE VIEW [dbo].[V_ESPatientLastModified]
+WITH SCHEMABINDING
+AS
+SELECT 
+    ID,
+    LastModified
+FROM [dbo].[Patient];"
+dbo,v_OutstandingCreditBalance,2008-10-14 09:52:44.203,2025-06-25 07:55:36.537,863,"CREATE VIEW dbo.v_OutstandingCreditBalance
+AS
+SELECT     TOP (100) PERCENT dbo.PosTransaction.PatientID, SUM(dbo.PosPaymentDetail.Amount) AS Amount, dbo.Patient.LastName, dbo.Patient.FirstName, 
+                      dbo.PosTransaction.OfficeNum,
+					  o.OfficeName
+FROM         dbo.PosPaymentDetail INNER JOIN
+                      dbo.PosTransaction ON dbo.PosPaymentDetail.PaymentID = dbo.PosTransaction.PaymentID INNER JOIN
+                      dbo.Patient ON dbo.PosTransaction.PatientI"
+dbo,LOGI_SalesByProvider,2023-11-29 07:53:56.640,2025-06-25 07:55:36.530,2150,"Create view [dbo].[LOGI_SalesByProvider] as
+Select dbo.Office.OfficeName, dbo.Office.CompanyID, dbo.Item.ItemType, dbo.Item.ItemName, dbo.ItemExam.Description AS ItemExamDescription, dbo.ItemType.Description AS ItemTypeDescription
+, dbo.Address.City, dbo.Address.State, dbo.Address.ZipCode
+, dbo.Employee.LastName AS EmployeeLastName, dbo.Employee.FirstName AS EmployeeFirstName, dbo.InvoiceSum.Insurance
+, dbo.PosTransaction.TransactionID, dbo.PosTransaction.TransactionTypeID, dbo.PosTransaction.Or"
+dbo,V_VisionStarOrder,2009-02-25 14:34:15.393,2025-06-25 07:55:36.517,11345,"
+
+
+
+CREATE VIEW [dbo].[V_VisionStarOrder]
+AS
+SELECT     dbo.Orders.OrderNum, UPPER(dbo.Office.LabAccount) AS OfficeNum, dbo.Orders.ShipToType, dbo.Orders.OrderDate, dbo.Orders.ExpectDate, 
+                      dbo.Orders.StatusCode, dbo.Orders.OrderType, dbo.Orders.LabOrderWorkflowID, REPLACE(REPLACE(REPLACE(dbo.Orders.LabInstructions, CHAR(10) 
+                      + CHAR(13), ' '), CHAR(10), ' '), CHAR(13), ' ') AS LabInstructions, ShipToAddress.Address1 AS ShipToAddress1, 
+        "
+dbo,LOGI_Appointments,2023-11-29 07:53:56.600,2025-06-25 07:55:36.510,3874,"Create view [dbo].[LOGI_Appointments] as
+SELECT DISTINCT
+  asp.appt_no AS ""apptNumber"",
+  asp.patientId AS ""patientID"",
+  asp.appt_no_answer_ind,
+  asp.appt_left_msg_ind,
+  asp.appt_confirmed_ind,
+  asp.appt_cancel_ind,
+  asp.appt_deleted_ind,
+  asp.appt_show_ind
+  --set appointment status (cancelled 1, CheckIn 2, WalkIn 3, NoShow 4, Scheduled 5, Other 6, Confirmed 7, LeftMsg 8, NoAnswer 9  
+  ,
+  (CASE
+    WHEN asp.appt_cancel_ind = 1 THEN 'Cancelled'
+    WHEN (asp.appt_cancel_ind = 0 AND asp.a"
+dbo,V_RefundAdjustment,2010-05-24 21:37:58.763,2025-06-25 07:55:36.503,628,"
+CREATE VIEW V_RefundAdjustment
+AS
+SELECT     pt.OrderID, pt.TransactionID, pt.TransactionDate, pt.Amount, ins.RefundTypeID, p.FirstName, p.LastName, o.OfficeName, pt.OfficeNum, o.CompanyID,
+pt.TransactionTypeID,
+e.LastName+' ,'+ e.FirstName as Employee
+FROM         dbo.PosTransaction AS pt INNER JOIN
+                      dbo.InvoiceSum AS ins ON pt.InvoiceSummaryID = ins.InvoiceID INNER JOIN
+                      dbo.Patient AS p ON pt.PatientID = p.ID INNER JOIN
+                     "
+dbo,V_InvoiceDetailBYItemType,2010-01-29 21:48:06.057,2025-06-25 07:55:36.497,2934,"CREATE VIEW dbo.V_InvoiceDetailBYItemType
+AS
+SELECT     id.ID, id.ID AS InvoiceDetailId, id.InvoiceID, ins.OrderNum, id.ItemType, id.ItemID, SUM(ISNULL(iid.Receivable, 0)) + SUM(ISNULL(id.Amount, 0)) - SUM(ISNULL(id.Tax, 
+                      0)) AS NetSales, id.Price AS RetailPrice, ISNULL(oi.InsCarrierCode, '') AS InsCarrierCode, o.OrderType, pt.TransactionDate, o.OrderDate, pt.OfficeNum, 
+                      ISNULL(iid.IsPrimary, 0) AS isPrimary, ISNULL(p.FirstName, '') + ' ' + ISNULL("
+dbo,LOGI_SalesRevenues,2023-11-29 07:53:56.660,2025-06-25 07:55:36.490,4848,"Create view [dbo].[LOGI_SalesRevenues] as
+SELECT
+	pt.PatientID
+	,pat.FirstName AS FirstName
+	,pat.LastName AS LastName
+	,(pat.FirstName + ' ' + pat.LastName) AS PatientName
+	,o.CompanyID
+	,pt.TransactionTypeID
+	,ptype.Description AS ""TransactionType""
+	,pt.TransactionID
+	,pt.TransactionDate
+	,pt.OfficeNum
+	,isnull(cid.Associate, Orders.Associate) AS TransactionAssociate
+	,(emp.FirstName + ' ' + emp.LastName) AS OrderAssociateName
+	,isnull(Orders.Associate, cid.Associate) AS Associate
+	,(cidemp.Fi"
+dbo,V_OrdersRXDetail,2011-06-21 15:33:38.247,2025-06-25 07:55:36.483,1703,"
+CREATE VIEW [dbo].[V_OrdersRXDetail]    
+AS    
+SELECT     o.OrderNum, dbo.Dateonly(o.OrderDate) as OrderDate, o.CustomerID, p.LastName, p.FirstName, isnull(p.MedicalRecordNum,'') as MedicalRecordNum
+, CASE WHEN dateadd(year, datediff (year, p.BirthDate, getdate()), p.BirthDate) > getdate()
+THEN datediff(year, p.BirthDate, getdate()) - 1
+ELSE datediff(year, p.BirthDate, getdate())
+END as Age,      
+ ISNULL((CASE WHEN o.OrderType = 'E' THEN EGRX.Sphere WHEN o.OrderType = 'S' THEN CLSoftR"
+dbo,V_InvoiceDetailwithInsurance,2009-07-16 17:43:52.223,2025-06-25 07:55:36.473,3478,"
+
+
+
+CREATE VIEW [dbo].[V_InvoiceDetailwithInsurance]
+AS
+
+SELECT   id.ID AS InvoiceDetailId, id.InvoiceID, ins.OrderNum, id.ItemType, id.ItemID, isnull(id.Quantity,0) as Quantity, 
+(case when (iid.isprimary =0 )then 0 else isnull(id.Price,0) end)  as Price, id.DiscountTypeID, 
+(case when (iid.isprimary =0 )then 0 else isnull(id.Tax,0) end) as Tax,
+ isnull(id.Discount,0) as Discount, isnull(id.LineDisc,0) as LineDisc,
+ isnull(id.PackageDisc,0) as PackageDisc, isnull(id.PromotionDiscount,0) as Prom"
+dbo,v_AllCompaniesAndCarriers,2016-03-09 00:02:23.693,2025-05-21 07:55:43.670,1102,"CREATE VIEW [dbo].[v_AllCompaniesAndCarriers]
+--------------------------------------------------------------------------------
+-- This view shows the mapping status of every company to every insurance
+-- carrier. It infers that a carrier is mapped if any of the carriers' plans 
+-- are mapped and active.
+--------------------------------------------------------------------------------
+AS
+	WITH MappedCarriers AS
+	(
+		SELECT	DISTINCT
+				acap.CarrierId,
+				acap.CompanyID
+		FROM	v_AllCom"
+dbo,GB_BillingLabFeeTransaction,2024-10-22 07:55:41.627,2025-05-20 19:13:12.283,2177,"/**************************/   
+/****** CREATE VIEW ******/
+/**************************/
+CREATE VIEW [dbo].[GB_BillingLabFeeTransaction]
+AS
+SELECT blft.billinglabfeetransactionid AS BillingLabFeeTransactionId,
+       bco.ordernum                    AS OrderNum,
+       blft.createddatetimeutc         AS CreatedDateTimeUtc,
+       bp.depositdate                  AS DepositDate,
+       bcd.patientfirstname            AS PatientFirstName,
+       bcd.patientlastname             AS PatientLastName,
+  "
+dbo,V_ProductionReport,2014-03-10 00:07:59.333,2025-01-01 07:56:01.020,3687,"
+CREATE VIEW [dbo].[V_ProductionReport]
+AS
+
+SELECT     emp.firstname + '  ' + emp.lastname as DrName,employee, pt.TransactionTypeID, pt.TransactionDate, pt.OfficeNum, o.OfficeName,  isnull(cid.Associate,Orders.Associate) as  TransactionAssociate,
+ isnull(cid.Associate,Orders.Associate) as Associate ,  isnull(cid.Associate,Orders.Associate) as OriginalAssociate ,
+ dbo.ItemType.ItemType AS ItemTypeId, 
+                      dbo.ItemType.Description AS ProductType, SUM(ISNULL(cid.Price, 0)) AS Reta"
+dbo,V_PatientMedicalCondition,2009-11-24 21:05:51.560,2025-01-01 07:56:01.003,3454,"
+CREATE VIEW [dbo].[V_PatientMedicalCondition]
+AS
+SELECT Row_number() OVER (ORDER BY orderid) AS id
+	,oi.PatientFirstname AS PatientFirstName
+	, oi.PatientLastName AS PatientLastName
+	, oi.InsuredId AS InsuredID
+	, oi.InsuredSSN AS InsuredSSN
+	, oi.PatientBirthDate AS PatientDOB
+	, o.orderdate AS OrderDate
+	, oi.Orderid AS OrderNum
+	, i.ItemNum AS ExamCode
+	, i.id AS ItemID
+	, 'V72.0' AS DiagCode
+	, ins.DoctorID AS ProviderID
+	, substring(e.FirstName, 1, 1) + ',' + e.LastName AS ProviderName
+	, "
+dbo,V_MonthlyProductionReport,2016-03-09 00:02:23.687,2025-01-01 07:56:00.997,2665,"CREATE VIEW [dbo].[V_MonthlyProductionReport]
+AS
+SELECT CASE WHEN LEN(LTRIM(RTRIM(emp.ProfessionalSignature))) > 0  THEN emp.ProfessionalSignature 
+            WHEN LEN(LTRIM(RTRIM(emp.ProfessionalSignature))) = 0 and emp.FirstName is not null and emp.LastName is not null THEN emp.FirstName + ' ' + emp.LastName
+			WHEN emp.ProfessionalSignature is NULL THEN 'Unassigned' 
+			END as DrName,
+COALESCE(employee,1) as employee,
+pt.TransactionTypeID, 
+pt.TransactionDate, 
+pt.OfficeNum, 
+o.OfficeName,  "
+dbo,V_COSAnalysis,2014-03-10 00:07:59.173,2025-01-01 07:56:00.990,3157,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+CREATE VIEW [dbo].[V_COSAnalysis]
+AS
+WITH 
+COSAnalysisInvoice_CTE (ID,TransactionID,ItemType,ItemID,ItemNum,Amount,Tax,Quantity,Discount,LineDisc,PackageDisc,PromotionDiscount,Officenum,OfficeName
+,Allowance,Copay,Receivable,InsuranceDiscount,TransactionDate,RetailSalesPrice,Retail,InvoiceId,ItemName,Cost,TransactionTypeID,PatientID,EmployeeID,CompanyID,FinancialGroupID,FinancialGroup)
+AS
+(SELECT
+Row_num"
+dbo,V_COSAnalysisInvoice,2014-03-10 00:07:59.163,2025-01-01 07:56:00.983,1513,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+CREATE VIEW [dbo].[V_COSAnalysisInvoice]
+AS
+SELECT invs.TransactionID AS transnum, invs.ItemType, invs.ItemID, i.ItemNum, SUM(invs.CustomerPay) AS Amount, SUM(invs.Quantity) AS Quantity, SUM(invs.Tax) AS Tax, 
+                  SUM(invs.Discount) AS Discount, SUM(invs.LineDisc) AS LineDisc, SUM(invs.PackageDisc) AS PackageDisc,SUM(invs.PromotionDiscount) AS PromotionDiscount, i.ItemStatusID, SUM(ISNULL(i"
+dbo,V_InventoryOnOrderReport,2009-12-08 12:18:39.600,2025-01-01 07:56:00.967,1258,"
+
+
+
+
+
+
+CREATE VIEW [dbo].[V_InventoryOnOrderReport]
+AS
+
+select convert(varchar,Row_number() over(order by so.StockOrderNum))+ '-' + so.officeNum  as ID,
+	so.*,i.itemNum as ItemNum, i.ItemName as ItemName,o.OfficeName, e.FirstName + ' , ' + e.LastName as  EmployeeName, 
+	sod.Quantity  as Quantity, ib.OnHand as OnHandQuantity, ib.TransitIn as TransitInQuantity,
+	 i.ItemStatusID as ItemStatusID, clu.Value as ItemStaus, clu1.Value as TransferReasonDisplay
+	, ib.OnOrder as OnOrderQuanti"
+dbo,FramesFilters,2021-09-13 14:33:00.763,2025-01-01 07:56:00.963,1580,"CREATE VIEW [dbo].[FramesFilters]
+	AS 
+	SELECT DISTINCT 
+           ISNULL(fst.FrameCategoryID, - 1) AS CategoryID
+         , ISNULL(catelcat.Value, 'None') AS Category
+         , ISNULL(fst.AgeGroupID, - 1) AS AgeGroupID
+         , ISNULL(catelage.Value, 'None') AS AgeGroup
+         , ISNULL(fst.GenderTypeID, - 1) AS GenderTypeID
+         , ISNULL(catelgen.Value, 'None') AS GenderType
+         , ISNULL(itm.ItemStatusID, - 1) AS StatusID
+         , ISNULL(catelstat.Value, 'None') AS Status
+     "
+dbo,FramesCollections,2021-09-13 14:33:00.757,2025-01-01 07:56:00.960,553,"CREATE VIEW [dbo].[FramesCollections]
+	AS 
+SELECT DISTINCT fs.CollectionDescription AS Collection, fs.CollectionID
+FROM            dbo.FrameSearch AS fs WITH (nolock) INNER JOIN
+                         dbo.Item AS itm WITH (nolock) ON fs.ID = itm.ID AND itm.Active = 1 INNER JOIN
+                         dbo.ItemCompanyMapping AS icm WITH (nolock) ON icm.ItemID = fs.ID INNER JOIN
+                         dbo.CompanyInfo AS ci ON ci.ID = icm.CompanyID
+WHERE        (fs.DataSourceId = 1) OR
+       "
+dbo,V_LookupEGLensItem,2021-09-13 14:33:00.803,2025-01-01 07:56:00.953,1734,"CREATE VIEW [dbo].[V_LookupEGLensItem]
+AS
+SELECT        
+      itm.ID AS ItemID
+    , icm.ReceiptDescription
+    , egl.CoatItemID
+    , egl.ColorItemID
+    , egl.MaterialItemID
+    , egl.StyleItemID
+    , egl.TypeItemID
+    , itegt.Description AS Type
+    , itmat.Description AS Material
+    , itegs.Description AS Style
+    , itcol.Description AS Color
+    , itct.Description AS Coating
+    , ISNULL(catelu.Value, '') AS Status
+    , egl.Customizable
+    , egl.SphereMin
+    , egl.SphereMax
+    , eg"
+dbo,V_LookupContactLenses,2021-09-13 14:33:00.777,2025-01-01 07:56:00.940,2253,"CREATE VIEW [dbo].[V_LookupContactLenses]
+	AS 
+select  distinct
+		itmcl.ItemID
+		, itm.itemNum as ItemNumber
+		, s.Description as Supplier
+		, clm.VendName as Manufacturer
+		, cls.Style
+		, clc.Description as Color
+		, clp.Base as Base
+		, clp.Diameter as Diameter
+		, (select Min(clp1.Base) from CLPower clp1 where clp1.CLStyleID = cls.CLStyleId) as BaseMin
+		, (select Max(clp1.Base) from CLPower clp1 where clp1.CLStyleID = cls.CLStyleId) as BaseMax
+		, (select Min(clp1.Diameter) from CLPower clp"
+dbo,CL_ItemContactLensLookup,2009-05-14 21:40:57.467,2025-01-01 07:56:00.933,1693,"
+
+CREATE VIEW [dbo].[CL_ItemContactLensLookup]
+AS
+
+SELECT     dbo.Item.ItemNum AS ItemNumber, dbo.CLManufacturer.VendName AS Manufacturer, cs.Style, cp.Base, cp.Diameter, 
+           dbo.CLColor.Description AS Color, i1.sphere, i1.Cylinder, i1.Addpower, i1.axis, cs.IsHard AS hardLenses, 
+			cs.SupplyQty AS SupplyQty, cs.SupplyPeriod AS SupplyPeriod, cs.IsDiagnostic AS IsDiagnostic, cs.IsCustom AS IsCustom, cs.UnitPerBox AS UnitPerBox,
+			dbo.CLColor.CLColorCode AS ColorID,dbo.CLManufactu"
+dbo,LOGI_CptCodes,2023-11-29 07:53:56.613,2025-01-01 07:56:00.933,189,"Create view [dbo].[LOGI_CptCodes] as
+select i.ID, i.ItemName, im.CompanyID as CompanyID from item i 
+inner join ItemCompanyMapping im on im.ItemID = i.id and i.ItemType = 6 and i.Active = 1"
+dbo,V_FrameAccessoriesSales,2009-06-04 21:34:04.520,2025-01-01 07:56:00.927,1645,"CREATE VIEW [dbo].[V_FrameAccessoriesSales]
+AS
+
+SELECT     invD.ItemType, invD.ItemID, invD.ItemNum, sum(invd.Amount) as Amount,sum(invD.Quantity) as Quantity, sum(invd.Tax) As Tax, 
+sum(invD.Discount) as Discount, sum(invD.LineDisc) as LineDisc,
+                  sum(invD.PackageDisc) as PackageDisc, pt.Officenum, o.officename,
+                      ISNULL(iom.ItemStatusID,ISNULL(icm.ItemStatusID,item.ItemStatusID)) as ItemStatusID, sum(isnull(invd.Allowance,0)) as Allowance, sum(isnull(invd.Co"
+dbo,V_LookupEGLenses,2021-09-13 14:33:00.797,2025-01-01 07:56:00.920,1525,"CREATE VIEW [dbo].[V_LookupEGLenses]
+AS
+select  
+	    itm.ID as ItemID
+	  , itm.ItemNum as ItemNumber
+	  , itegt.Description as Type
+	  , itegs.Description as Style
+	  , itmat.Description as Material
+	  , itcol.Description as Color
+	  , itct.Description as Coating
+	  , egl.SphereMin
+	  , egl.SphereMax
+	  , egl.CylinderMin
+	  , egl.CylinderMax
+	  , egl.AddMin
+	  , egl.AddMax
+	  , egl.MinSegHeight as SegHeightMin
+	  , egl.MaxSegHeight as SegHeightMax
+	  , ISNULL(itm.ItemNum, '') + isnull(itegs.des"
+dbo,CL_ContactLensLookup,2014-03-10 00:07:51.183,2025-01-01 07:56:00.913,2116,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+
+Create VIEW [dbo].[CL_ContactLensLookup]
+AS
+SELECT     dbo.Item.ItemNum AS ItemNumber, dbo.CLManufacturer.VendName AS Manufacturer, dbo.CLStyle.Style, dbo.CLPower.Base, dbo.CLPower.Diameter, 
+                      dbo.CLColor.Description AS Color, dbo.CLStyle.SphereMin, dbo.CLStyle.SphereMax,dbo.CLStyle.SphereStep, dbo.CLStyle.CylinderMin, dbo.CLStyle.CylinderMax, 
+                      dbo.CLS"
+dbo,V_LookupContactLensItem,2021-09-13 14:33:00.790,2025-01-01 07:56:00.907,3466,"CREATE VIEW [dbo].[V_LookupContactLensItem]
+	AS 
+select 
+			itmcl.ItemID
+			, isnull(icm.CompanyItemName,'') as ReceiptDescription
+			, Retail = CASE WHEN o.officenum is not null THEN
+							dbo.fn_GetLookupItemPrice(o.officeNum, itmcl.ItemID)
+				ELSE 0 END
+			, clm.VendName as Manufacturer
+			, cls.Style
+			, isnull(cls.IsHard,0) as IsHard
+			, isnull(catelu.Value,'') as WearType
+			, cls.UnitPerBox
+			, cls.SupplyPeriod
+			, itmcl.YearSupply
+			, cls.IsDiagnostic
+			, isnull(clp.Base,0) as Ba"
+dbo,V_LookupAccessories,2021-09-13 14:33:00.770,2025-01-01 07:56:00.903,891,"CREATE VIEW [dbo].[V_LookupAccessories]
+AS
+SELECT        
+        itm.ID AS ItemID
+      , itm.ItemNum AS ItemNumber
+      , itm.UPCCode
+      , itm.ItemName
+      , ISNULL(ip.Price, 0.00) AS Retail
+      , 0 as OnHand
+      , icm.CompanyID, icm.CompanyItemName
+      , opl.OfficeNum
+      , ISNULL(itm.ItemNum, '') + ISNULL(itm.ItemName, '') + ISNULL(icm.CompanyItemName, '') as SearchString
+FROM  dbo.Item AS itm WITH (nolock) 
+      INNER JOIN dbo.ItemCompanyMapping AS icm WITH (nolock) ON icm.It"
+dbo,V_InventoryTransitIn,2014-03-10 00:08:54.443,2025-01-01 07:56:00.897,1828,"CREATE VIEW [V_InventoryTransitIn]
+ 
+AS
+select  distinct newid() as id ,ia.officeNum  as OfficeNum,o.OfficeName as OfficeName, ia.ItemID as ItemID, i.ItemType as ItemType,
+        i.ItemNum as ItemNum, i.ItemName as ItemName, ia.referrenceNum as ReferenceNum,sum(isnull(ia.Quantity,0)) as Quantity,
+        max(ia.Transactiondate) as  TransactionDate, sum(isnull(ia.TransitInQuantity,0)) as TransitInQuantity,
+        sr.ReceiptDate as ReceiptDate, sr.FromOffice as FromOffice, FromO.OfficeName as Fr"
+dbo,V_FrameStockReplenishmentOrder,2014-03-10 00:08:06.680,2025-01-01 07:56:00.887,2623,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/ 
+
+CREATE VIEW [dbo].[V_FrameStockReplenishmentOrder]
+AS
+SELECT     sod.ID, so.StockOrderNum, so.OfficeNum, o.OfficeName, so.OrderDate, so.ItemType, so.OrderStatus, so.IsTransfer, so.StockOrderType, sod.Quantity, 
+                      i.ItemNum, i.ItemName, i.UPCCode, ISNULL(iom.ItemStatusID,ISNULL(icm.ItemStatusID, i.ItemStatusID)) as ItemStatusID , ISNULL(cliOff.Value, ISNULL(clu.Value, cluAux.Value)) AS "
+dbo,V_ProductMovementDetails,2014-03-10 00:08:06.753,2024-11-15 07:55:39.570,2580,"
+
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+CREATE VIEW [dbo].[V_ProductMovementDetails]
+AS
+select distinct convert(varchar,Row_number() over(order by sd.ID))+ '-' +  convert(varchar,s.ID) as ID 
+, sd.ID as ReferenceNum, s.OfficeNum, isnull(sp.ID,0) as PickListID, sp.PickBy, Sp.Status as PickListStatus, 0 as StockOrderNum,convert(varchar,getdate(), 101) as StockOrderDate
+, sd.ItemID,sp.ItemType, i.ItemName,i.ItemNum, i.UPCCode
+, isnull(sd.Quanity"
+dbo,V_GetBillingPayments,2014-07-01 23:33:53.777,2024-11-15 07:55:39.540,1312,"CREATE VIEW [dbo].[V_GetBillingPayments]
+	AS 
+	
+	select distinct o.OrderNum,-Amount as Amount, GB.InsDeltaAR as InsReceivable, GB.PatDeltaAR as PatReceivable,
+isum.DoctorID as DoctorID,E.FirstName + ' ' + E.LastName as Doctor,
+ --'C' as ordertype,
+ 
+  Case when  (o.OrderType = 'E' or o.OrderType = 'M' or o.OrderType = 'X'  ) then 'E'
+when  (o.OrderType = 'S') then 'C'
+when  (o.OrderType = 'H') then 'C'
+Else '' End as ordertype,
+ GB.officenum,Convert(datetime,convert(varchar, Transacti"
+dbo,V_VisionStarCancel,2008-08-19 15:05:33.220,2024-11-15 07:55:39.503,1639,"
+CREATE VIEW [dbo].[V_VisionStarCancel]
+AS
+SELECT     TOP (100) PERCENT dbo.Orders.OrderNum, dbo.Employee.LastName, dbo.Employee.FirstName
+FROM         dbo.Employee INNER JOIN
+                          (SELECT     MAX(Employee_1.Employee) AS Employee
+                            FROM          dbo.Employee AS Employee_1 INNER JOIN
+                                                   dbo.Users ON Employee_1.UserID = dbo.Users.Id
+                            GROUP BY Employee_1.UserID) AS deriv"
+dbo,V_EDIBilledClaimStatistics,2011-12-28 22:43:13.887,2024-11-15 07:55:39.500,537,"
+CREATE VIEW [dbo].[V_EDIBilledClaimStatistics]
+AS
+SELECT     e.FirstName + ' ' + e.LastName AS EmployeeName, I.CarrierName, ec.ClaimsCount AS TotalClaims, REVERSE(LEFT(REVERSE(ec.FileName), CHARINDEX('\', 
+                      REVERSE(ec.FileName)) - 1)) AS FileName, ec.CarrierID, ec.BilledDate, ec.EmployeeID, ec.Status, ec.CompanyID
+FROM         dbo.EDIControl AS ec INNER JOIN
+                      dbo.Employee AS e ON ec.EmployeeID = e.UserID INNER JOIN
+                      dbo.InsCa"
+dbo,V_ItemSalesByItemNumber,2009-04-20 12:17:47.413,2024-11-15 07:55:39.490,1265,"CREATE VIEW [dbo].[V_ItemSalesByItemNumber]
+AS
+SELECT     pt.OfficeNum,invoicesum.doctorid , (e.firstname + ' ' + e.lastname) as DoctorName,i.itemnum , SUM(cid.quantity) AS Units,
+           SUM(ISNULL(cid.Price, 0)) - SUM(ISNULL(cid.PackageDisc, 0)) AS Retail, SUM(ISNULL(cid.Tax, 0)) AS Tax, 
+           SUM(ISNULL(cid.Discount, 0)) + SUM(ISNULL(cid.LineDisc, 0)) + SUM(ISNULL(iid.InsuranceDiscount, 0)) AS Discount, 
+		   SUM(ISNULL(cid.Amount, 0)) AS CustomerAmount, SUM(ISNULL(iid.Allowance"
+dbo,LOGI_SalesByProviderAndStaff,2023-11-29 07:53:56.650,2024-11-15 07:55:39.453,3890,"Create view [dbo].[LOGI_SalesByProviderAndStaff] as
+SELECT DISTINCT id.invoiceid AS ""InvoiceID""
+	,id.id AS ""InvoiceDetailId""
+	,id.quantity AS ""InvDetQty""
+	,id.tax AS ""InvDetTax""
+	,id.amount AS ""InvDetAmount""
+	,Sum(Isnull(id.amount, 0) + Isnull(iid.receivable, 0) - Isnull(id.tax, 0)) AS ""NetSales""
+	,Sum(Isnull(iid.receivable, 0)) AS ""Receivable""
+	,Isnull(ins.doctorid, ins1.doctorid) AS ""DoctorID""
+	,Isnull(Isnull(empDr.firstname + ' ' + empDr.lastname, empDr1.firstname + ' ' + empDr1.lastname), 'O"
+dbo,V_StockPickListDetails,2014-03-10 00:08:06.773,2024-11-15 07:55:39.430,4382,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/ 
+
+CREATE VIEW [dbo].[V_StockPickListDetails]
+AS
+SELECT DISTINCT CONVERT(varchar, Row_number() OVER (ORDER BY sd.ID)) + '-' + CONVERT(varchar, so.StockOrderNum) AS ID, sd.ID AS ReferenceNum, so.OfficeNum, 
+isnull(sp.ID, 0) AS PickListID, sp.PickBy, Sp.Status AS PickListStatus, so.StockOrderNum AS StockOrderNum, CONVERT(varchar, so.OrderDate, 101) AS StockOrderDate, 
+sd.ItemID, so.ItemType, i.ItemName, i.Item"
+dbo,GB_BillingTransactionByLineItem,2011-12-06 13:02:16.687,2024-11-15 07:55:39.407,3886,"CREATE VIEW [dbo].[GB_BillingTransactionByLineItem]    
+AS    
+SELECT     bt.TransId, bt.OrderId, bt.TransactionDate,     
+(case when bt.TransTypeID=8 then bt.writeoffreasonid else bt.AdjustmentReasonID end) as AdjustmentReasonID,    
+(case when bt.TransTypeID=8 then bw.Description else ba.Description end) as AdjustmentReason,    
+isnull(bp.DepositDate, '01/01/99') as DepositDate, bcd.PatientFirstName, bcd.PatientLastName    
+, bcl.ClaimID,bcd.OfficeNum,     
+ (CASE WHEN bt.TransTypeID = "
+dbo,V_GetMailCheckReturns,2014-07-01 23:33:53.797,2024-11-15 07:55:39.397,2030,"CREATE View [dbo].[V_GetMailCheckReturns]
+
+AS
+
+select distinct  (cast((pd.Amount* (ISNULL(PT.Amount,0)/ppt.Amount)) as decimal(9,2))) as amount, transactiondate,pt.OrderID
+from PosTransaction PT 
+inner join orders o on o.OrderNum = PT.OrderID
+inner join InvoiceSum isum on isum.OrderNum = pt.orderid
+inner join PosPayment ppt   on ppt.PaymentID = PT.PaymentID
+inner join PosPaymentDetail pd on PT.PaymentID = pd.PaymentID  
+inner join Employee E on E.employee = isum.DoctorID
+inner join Users user1 o"
+dbo,V_NetSaleByDoctor,2010-09-20 11:14:19.573,2024-11-15 07:55:39.387,996,"
+CREATE VIEW [dbo].[V_NetSaleByDoctor]
+AS
+SELECT     TOP (100) PERCENT newid() as ID,pt.OrderID, dbo.DateOnly(pt.TransactionDate) AS TransactionDate, ISNULL(SUM(ind.Amount), 0) - ISNULL(SUM(ind.Tax), 0) 
+                      + ISNULL(SUM(iid.Receivable), 0) AS NetSale, e.LastName + ' ,' + e.FirstName AS EmployeeName,o.CompanyID
+                      ,isnull(sum(ind.Price),0) as Retail,e.Employee as EmployeeID
+FROM         dbo.PosTransaction AS pt inner join office o on pt.Officenum=o.Offi"
+dbo,V_StockOrderReport,2009-12-08 12:18:32.010,2024-11-15 07:55:39.357,855,"
+CREATE VIEW [dbo].[V_StockOrderReport]
+AS
+
+
+select convert(varchar,Row_number() over(order by so.StockOrderNum))+ '-' + so.officeNum  as ID,
+	so.*,i.itemNum as ItemNum, i.ItemName as ItemName,o.OfficeName, e.FirstName + ' , ' + e.LastName as  EmployeeName, 
+	sod.Quantity, i.ItemStatusID as ItemStatusID, clu.Value as ItemStaus, clu1.Value as TransferReasonDisplay,
+	sr.ReceiptStatus as ReceiptStatus
+from stockOrderDetail sod 
+	inner join stockOrder so on so.stockordernUm = sod.stockorde"
+dbo,V_StockPickListDetailsOnBackorder,2023-11-16 07:52:59.700,2024-11-08 07:55:40.247,1643,"/**************************/   
+/****** CREATE VIEW ******/
+/**************************/ 
+
+Create VIEW [dbo].[V_StockPickListDetailsOnBackorder]
+AS
+SELECT 
+	  DISTINCT 
+	  CONVERT(varchar, Row_number() OVER (ORDER BY sd.ID)) + '-' + CONVERT(varchar, so.StockOrderNum) AS ID
+	, sd.ID AS ReferenceNum
+	, so.OfficeNum
+	, so.StockOrderNum AS StockOrderNum
+	, CONVERT(varchar, so.OrderDate, 101) AS StockOrderDate
+	, sd.ItemID
+	, so.ItemType
+	, i.ItemName
+	, i.ItemNum
+	, i.UPCCode
+	, isnull(spd.QuanityOr"
+dbo,V_CLStockOrder,2009-05-14 21:40:57.343,2024-10-08 07:56:51.930,1068,"CREATE VIEW [dbo].[V_CLStockOrder]
+AS
+SELECT     distinct cast(invD.InvoiceID as varchar) + '-' + cast(pt.EYE as varchar) as ID, invD.InvoiceID, invd.linenum,invD.ItemType, cl.ItemID, invD.Quantity as Quantity, 
+                o.OrderNum, o.OrderDate, o.OfficeNum, o.Associate, o.CustomerID, pt.CLStockItemID,
+                           ism.SupplierItemNum, ism.supplierId,invd.id as InvoiceDetID
+FROM         dbo.InvoiceDet AS invD INNER JOIN
+                      dbo.Orders AS o ON invD.Ord"
+dbo,V_FrameAccessoriesInvoice,2009-06-04 21:34:04.487,2024-10-03 07:56:25.947,2267,"
+
+
+CREATE view [dbo].[V_FrameAccessoriesInvoice]
+as
+
+SELECT		invs.transnum, invD.ItemType, invD.ItemID,i.ItemNum,
+			sum(isnull(invd.Amount,0)) as Amount,
+			sum(isnull(invD.Quantity,0)) as Quantity,
+			sum(isnull(invd.Tax,0)) As Tax ,
+			sum(isnull(invD.Discount,0)) as Discount,
+			sum(isnull(invD.LineDisc,0)) as LineDisc,
+			sum(isnull(invD.PackageDisc,0)) as PackageDisc, --o.OfficeNum, 
+			i.ItemStatusID,
+			(sum(isnull(iid.Allowance,0)) + sum(isnull(iid1.Allowance,0))) as Allowance, 
+			(sum"
+dbo,V_EDI835ClaimDetailInfo,2017-09-20 08:27:07.340,2024-09-18 17:18:43.027,4595,"CREATE VIEW [dbo].[V_EDI835ClaimDetailInfo]
+AS
+    WITH LineItemAR AS
+    (
+        SELECT  li.LineItemId,
+                li.ClaimId,
+                ISNULL(InsAR + PatAR, 0) AS AR
+        FROM    BillingClaimLineItem li
+        JOIN    BillingLineItemCurrentAR car ON car.LineItemId = li.LineItemId
+    ),
+    ClaimReceivables AS
+    (
+        SELECT  ClaimId,
+                SUM(AR) AS OutstandingReceivables
+        FROM    LineItemAR
+        GROUP BY ClaimId
+    )
+    SELECT      eci.ID,
+     "
+dbo,v_TransmissionInfo,2024-01-31 15:03:30.943,2024-08-20 22:17:22.377,840,"
+CREATE VIEW [dbo].[v_TransmissionInfo]
+AS
+WITH TransmissionInfoCte 
+    AS (SELECT 1 AS SortOrder, o.OfficeNum, o.GatewayEDISiteID, t.Password, t.Host
+        FROM    dbo.TransmissionInfo AS t INNER JOIN
+                dbo.Office AS o ON t.CompanyId = o.CompanyID
+        WHERE (t.IsPreferredEdiPartner = 1) AND (t.Category = 2) AND (t.IsActive = 1)
+        UNION ALL
+        SELECT 2 AS SortOrder, dbo.Office.OfficeNum, dbo.Office.GatewayEDISiteID, ti.Password, ti.Host
+        FROM   dbo.Office I"
+dbo,LOGI_BillingClaimStates,2023-11-29 07:53:56.610,2024-07-02 17:21:02.233,2060,"Create view [dbo].[LOGI_BillingClaimStates] as
+SELECT o.OfficeName,
+       bcd.ClaimDataId,
+       bcd.ClaimId,                   
+       bco.OrderNum,                   
+       bcd.OfficeNum,                  
+       bcd.PatientFirstName,          
+       bcd.PatientLastName,           
+       bcd.InsuredFirstName,           
+       bcd.InsuredLastName,          
+       bcd.InsuredId,                           
+       bcd.PlanName,                          
+       bt.Amount,   
+	   bt.Transacti"
+dbo,GB_PatientBalanceAging,2008-10-08 21:04:33.000,2024-06-12 07:55:24.013,1368,"CREATE view [dbo].[GB_PatientBalanceAging] as
+select
+	a.OfficeNumber As OfficeNumber
+	, a.PatientId As PatientId
+	, a.PatientFirstName as PatientFirstName
+	, a.PatientLastName as PatientLastName
+	, a.CarrierId As CarrierId
+	, a.PlanId As PlanId
+	, a.ClaimId As ClaimId
+	, a.BillingDate As BillingDate,
+	a.CompanyID
+	, TotalBalance =
+		case a.AccountTypeId
+			when  224 then a.TotalBalance
+			else -1 * a.TotalBalance
+		end
+	, CurrentBalance = 
+		case a.AccountTypeId
+			when  224 th"
+dbo,GB_InsuranceBalanceAging,2008-10-08 21:04:32.983,2024-06-12 07:55:24.010,1402,"
+CREATE view [dbo].[GB_InsuranceBalanceAging] as
+select
+	a.OfficeNumber As OfficeNumber
+	, a.PatientId As PatientId
+	, a.PatientFirstName as PatientFirstName
+	, a.PatientLastName as PatientLastName
+	, a.CarrierId As CarrierId
+	, a.CarrierName As CarrierName
+	, a.PlanId As PlanId
+	, a.ClaimId As ClaimId
+	, a.BillingDate As BillingDate
+	, TotalBalance =
+		case a.AccountTypeId
+			when  222 then a.TotalBalance
+			else -1 * a.TotalBalance
+		end
+	, CurrentBalance = 
+		case a.AccountT"
+dbo,GB_ClaimBalanceAging,2008-10-06 09:42:08.097,2024-06-12 07:55:24.007,951,"
+CREATE view GB_ClaimBalanceAging as
+select
+	a.OfficeNumber As OfficeNumber
+	, a.PatientId As PatientId
+	, a.PatientFirstName as PatientFirstName
+	, a.PatientLastName as PatientLastName
+	, a.CarrierId As CarrierId
+	, a.CarrierName As CarrierName
+	, a.PlanId As PlanId
+	, a.ClaimId As ClaimId
+	, (stuff((select ', ' + cast(co.OrderNum as varchar(50)) from BillingClaimOrders co where co.ClaimId = a.ClaimId for xml path('')), 1, 2, '')) as OrderNumbers
+	, a.BillingDate As BillingDate
+	, "
+dbo,GB_InsuranceOutstandingBalance,2008-10-08 21:04:33.000,2024-06-12 07:55:24.003,1203,"
+CREATE view dbo.GB_InsuranceOutstandingBalance as
+select distinct
+	b.ClaimId as ClaimId
+	, li.CurrentState as ClaimStatus
+	, b.PatientId as PatientId
+    , b.PatientFirstName as PatientFirstName
+    , b.PatientLastName as PatientLastName
+	, (stuff((select ', ' + cast(co.OrderNum as varchar(50)) from BillingClaimOrders co where co.ClaimId = b.ClaimId for xml path('')), 1, 2, '')) as OrderNumbers
+    , TotalBalance =
+		sum(
+			case b.AccountTypeId
+				when 222 then b.TotalBalance
+			"
+dbo,V_BillingClaimsStatistic,2009-07-16 17:43:52.287,2024-06-12 07:55:24.000,596,"CREATE VIEW [dbo].[V_BillingClaimsStatistic]
+AS
+SELECT     CarrierId, CarrierName,
+ (SELECT     COUNT(*) AS Expr1 FROM dbo.V_BillingClaims AS v1 WHERE (CarrierId = v.CarrierId)) AS TotalCount,
+ (SELECT     COUNT(*) AS Expr1 FROM dbo.V_BillingClaims AS v1 WHERE (CarrierId = v.CarrierId) AND (ReadytoBill = 0) and BillingDate is not null) AS BilledClaims,
+ (SELECT     COUNT(*) AS Expr1 FROM dbo.V_BillingClaims AS v1 WHERE (CarrierId = v.CarrierId) AND ((ReadytoBill <> 0) or BillingDate is null"
+dbo,V_TransactionInoviceCombine,2009-07-16 17:43:52.347,2024-06-12 07:55:23.993,3007,"CREATE VIEW [dbo].[V_TransactionInoviceCombine]
+AS
+SELECT    pTrans.officenum + ' - '+ cast(pTrans.transactionid as varchar(15)) as ID, pTrans.TransactionDate, pTrans.OfficeNum,
+ pTrans.TransactionID, pTrans.TransactionTypeID, pTrans.EmployeeId, 
+                     isnull(pTrans.PatientID,0) as PatientID, 
+                      pTrans.Amount AS InvoiceTotalAmount, SUM(ISNULL(idet.Price, 0)) AS Retail, SUM(ISNULL(idet.Discount, 0)) + SUM(ISNULL(idet.LineDisc, 0)) 
+                      + "
+dbo,V_BillingVSPosReceivables,2009-08-25 11:00:03.653,2024-06-12 07:55:23.987,919,"CREATE VIEW [dbo].[V_BillingVSPosReceivables]
+AS
+select VP.OfficeNum,vp.Receivable,vp.InsCarrierCode,vp.OrderID,vp.InsPlanID,vp.CarrierName,vp.PlanName,vb.NetReceivable,vp.TransactionDate,vb.ServiceDate from V_POSOrderReceivable vp inner join V_BillingOrderReceivable vb
+on vp.orderid=vb.ordernum and vp.Receivable <> vb.NetReceivable
+union
+select VP.OfficeNum,vp.Receivable,vp.InsCarrierCode,vp.OrderID,vp.InsPlanID,vp.CarrierName,vp.PlanName,null as NetReceivable,vp.TransactionDate, null as S"
+dbo,V_GLBillingPaymentTransaction,2009-08-25 10:59:59.780,2024-06-12 07:55:23.983,1819,"CREATE VIEW [dbo].[V_GLBillingPaymentTransaction]    
+AS    
+--Payment date was used before but it was changed to deposit date     
+SELECT b.TransId, b.TransactionDate, b.TransTypeId,   
+CASE WHEN b.transtypeid in(2) THEN -B.INSDELTAAR   
+   WHEN B.transtypeid in (3) THEN -B.PATDELTAAR  
+   WHEN B.transtypeid in (14) THEN B.INSDELTAAR   
+   WHEN B.transtypeid in (11) THEN -(B.INSDELTAAR  + B.PATDELTAAR)  
+    END AS Amount, 
+      Case when   B.TRANSTYPEID IN (2,14) THEN  1 
+      WHEN"
+dbo,V_DashboardBillingAging,2017-09-20 08:27:06.933,2024-06-12 07:55:23.980,1626,"/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+CREATE VIEW [dbo].[V_DashboardBillingAging]
+AS
+
+
+select 
+MAX(b.ActivityId) as AccountId
+	, '1' as AccountTypeId
+	, '1' as GLReceivableId
+	, '1' as GLPaybleId
+    , '01/01/2001' as BalanceDate
+    , '01/01/2001'  as ClaimDate
+    , '01/01/2001' as BillingDate
+	,cd.ClaimId as ClaimId
+	, c.PatientId as PatientId
+	, cd.OfficeNum as OfficeNum
+	, c.ServiceDate
+    , cd.CarrierId as CarrierId"
+dbo,V_GLBillingTransactionDetail,2009-07-16 17:43:52.347,2024-06-12 07:55:23.973,1592,"CREATE VIEW [dbo].[V_GLBillingTransactionDetail]  
+AS  
+SELECT b.TransId, b.TransactionDate, case when  (B.TRANSTYPEID = 1 and b.patdeltaar <> 0)  THEN 6 else 
+b.TransTypeId end as TRANSTYPEID, 
+CASE WHEN B.TRANSTYPEID IN (14,17,19) THEN B.INSDELTAAR
+     WHEN B.TRANSTYPEID IN (6,1) THEN B.PATDELTAAR     
+     WHEN B.TRANSTYPEID IN (4,5,18,11,16) THEN (B.PATDELTAAR + INSDELTAAR)
+     WHEN B.TRANSTYPEID IN (7,3) THEN -B.PATDELTAAR
+     WHEN B.TRANSTYPEID IN (8,2) THEN -B.INSDELTAAR
+     "
+dbo,GB_BillingTransaction,2013-02-20 00:00:51.723,2024-06-12 07:55:23.967,3819,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+CREATE VIEW [dbo].[GB_BillingTransaction]
+AS
+SELECT     bt.TransId, bt.OrderId, bt.TransactionDate, (CASE WHEN bt.TransTypeID = 8 THEN bt.writeoffreasonid ELSE bt.AdjustmentReasonID END) AS AdjustmentReasonID, 
+                      (CASE WHEN bt.TransTypeID = 8 THEN bw.Description ELSE ba.Description END) AS AdjustmentReason, ISNULL(bp.DepositDate, '01/01/99') AS DepositDate, 
+                      bcd."
+dbo,V_POSOrderInsReceivable,2014-03-10 00:08:09.157,2024-06-12 07:55:23.960,1128,"
+
+CREATE VIEW [dbo].[V_POSOrderInsReceivable]
+AS
+
+
+
+SELECT     TOP (100) PERCENT pt.OfficeNum, pt.OrderID as OrderID, SUM(iid.Receivable) AS Receivable, oi.InsCarrierCode, 
+oi.InsPlanID, oi.CarrierName, oi.PlanName
+,pt.TransactionDate,oi.PatientFirstName + ' ' + oi.PatientLastName as PatientName,o.OfficeName,ord.OrderDate,o.CompanyID ,c.IsPrepaidCarrier as IsPrepaidCarrier
+FROM invoicedet ind inner join invoiceinsurancedet iid on ind.id=iid.invoicedetailid
+	inner join 		postransaction"
+dbo,V_InsPrepaidandReceivables,2012-04-09 23:13:17.597,2024-06-12 07:55:23.957,1331,"
+CREATE VIEW [dbo].[V_InsPrepaidandReceivables]
+AS
+SELECT     SUM(prepaid) AS PrePaid, SUM(Receivable) AS Receivable, SUM(prepaid) + SUM(Receivable) AS TotalReceivable, OfficeNum, TransactionDate
+FROM         (SELECT     (CASE WHEN ic.IsPrepaidCarrier = 1 THEN SUM(iid.Receivable) ELSE 0 END) AS prepaid, (CASE WHEN ic.IsPrepaidCarrier = 0 THEN SUM(iid.Receivable) 
+                                              ELSE 0 END) AS Receivable, pt.OfficeNum, dbo.DateOnly(pt.TransactionDate) AS Transa"
+dbo,GB_CarrierClaimStatus,2008-10-08 21:04:32.983,2024-06-12 07:55:23.943,926,"CREATE VIEW dbo.GB_CarrierClaimStatus
+AS
+SELECT DISTINCT 
+                      c.ClaimId, li.CurrentState, cd.CarrierId, ic.CarrierName, c.ServiceDate, c.ClaimDate, c.BillingDate, 
+                      receivable.Balance - payable.Balance AS NetReceivable
+FROM         dbo.BillingClaim AS c INNER JOIN
+                      dbo.BillingClaimData AS cd ON c.ClaimId = cd.ClaimId AND cd.IsCurrent = 1 INNER JOIN
+                      dbo.BillingClaimLineItem AS li ON li.ClaimId = c.ClaimId INN"
+dbo,LOGI_BillingClaimAging,2023-11-29 07:53:56.607,2024-06-12 07:55:23.940,1483,"Create View [dbo].[LOGI_BillingClaimAging] as
+select 
+MAX(b.ActivityId) as AccountId
+	, '1' as AccountTypeId
+	, '1' as GLReceivableId
+	, '1' as GLPaybleId
+    , '01/01/2001' as BalanceDate
+    , '01/01/2001'  as ClaimDate
+    , '01/01/2001' as BillingDate
+	,cd.ClaimId as ClaimId
+	, c.PatientId as PatientId
+	, cd.OfficeNum as OfficeNum
+	, c.ServiceDate
+    , cd.CarrierId as CarrierId
+	, ic.CarrierName as CarrierName
+    , cd.PlanId as PlanId
+	, ip.PlanName as PlanName
+    , cd.PatientFirstName as"
+dbo,V_InsReceivable,2009-07-16 17:43:52.347,2024-06-12 07:55:23.930,523,"create VIEW [dbo].[V_InsReceivable]
+AS
+SELECT     id.InvoiceID, SUM(iid.Receivable) AS INSReceivable
+FROM         dbo.InvoiceInsuranceDet AS iid INNER JOIN
+                      dbo.OrderInsurance AS oi ON iid.OrderInsuranceId = oi.ID INNER JOIN
+                      dbo.InsCarrier AS inc ON oi.InsCarrierCode = inc.ID AND (inc.IsPrepaidCarrier = 0 OR
+                      inc.IsPrepaidCarrier IS NULL) INNER JOIN
+                      dbo.InvoiceDet AS id ON iid.InvoiceDetailID = id.ID
+GR"
+dbo,GB_CarrierHoldClaims,2009-06-10 17:35:40.230,2024-06-12 07:55:23.923,816,"create VIEW [dbo].[GB_CarrierHoldClaims]
+AS
+SELECT  
+                      c.ClaimId, li.CurrentState, cd.CarrierId, ic.CarrierName, c.ServiceDate, c.ClaimDate, c.BillingDate, 
+                      sum(bld.receivable) AS NetReceivable
+FROM         dbo.BillingClaim AS c INNER JOIN
+                      dbo.BillingClaimData AS cd ON c.ClaimId = cd.ClaimId AND cd.IsCurrent = 1 INNER JOIN
+                      dbo.BillingClaimLineItem AS li ON li.ClaimId = c.ClaimId INNER JOIN
+             "
+dbo,InsuranceBillingClaimTransaction,2009-07-16 17:43:52.223,2024-06-12 07:55:23.917,2981,"
+CREATE view [dbo].[InsuranceBillingClaimTransaction] as
+select 
+ b.OrderId As OrderNumbers
+	,cd.ClaimId as ClaimId
+	, c.PatientId as PatientId
+    , cd.PatientFirstName as PatientFirstName
+    , cd.PatientLastName as PatientLastName
+    , TotalBalance = 
+sum( dbo.SignByTransactionType(b.transtypeid)* b.amount)
+
+, CurrentBalance = 
+	sum(	case
+			when cast(b.transactiondate as date) between dateadd(d, -30, b.transactiondate) and dateadd(d, 0, b.transactiondate) then 
+( dbo.SignByTra"
+dbo,GB_CarrierOnHoldClaimStatusStatistics,2014-03-10 00:07:51.203,2024-06-12 07:55:23.913,1310,"
+
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/  
+
+CREATE VIEW [dbo].[GB_CarrierOnHoldClaimStatusStatistics]
+ AS
+SELECT c.ClaimId, li.CurrentState, cd.CarrierId, ic.CarrierName, c.ServiceDate, c.ClaimDate, c.BillingDate, SUM(bt.INSAR) AS NetReceivable, cd.OfficeNum AS OfficeNumber, o.OfficeName, 
+cd.PatientLastName, cd.PatientFirstName, cd.PlanName, cn.Notes, c.CompanyID
+FROM dbo.BillingClaim AS c INNER JOIN
+dbo.BillingClaimData AS cd ON c.Cl"
+dbo,GB_AccountBalanceAging,2008-10-08 21:04:32.983,2024-06-12 07:55:23.907,2013,"
+CREATE view [dbo].[GB_AccountBalanceAging] as
+select
+	a.AccountId as AccountId
+	, a.AccountTypeId as AccountTypeId
+	, a.ClaimId as ClaimId
+	, a.GLReceivableId as GLReceivableId
+	, a.GLPayableId as GLPaybleId
+	, c.PatientId as PatientId
+	, cd.OfficeNum as OfficeNumber
+	, a.BalanceDate as BalanceDate
+	, c.ServiceDate as ServiceDate
+	, c.ClaimDate as ClaimDate
+	, c.BillingDate as BillingDate
+	, cd.CarrierId as CarrierId
+	, ic.CarrierName as CarrierName
+	, cd.PlanId as PlanId
+	, ip"
+dbo,GB_ClaimCollection,2014-03-10 00:08:06.640,2024-06-12 07:55:23.903,1707,"
+
+CREATE View GB_ClaimCollection
+AS
+
+
+SELECT DISTINCT 
+                      c.ClaimId, li.CurrentState, cd.CarrierId, ic.CarrierName, c.ServiceDate, c.ClaimDate, c.BillingDate, 
+                      receivable.Balance - payable.Balance AS NetReceivable,li.OrderNum,O.OrderDate,BT.TransactionDate,
+					  c.PatientID,cd.PatientLastName + ', ' + cd.PatientFirstName as PatientName,(BT.PatDeltaAR * -1) as Amount,BT.ActivityId,
+					  Cast(Note as varchar) as Note, Office.CompanyID
+FROM   "
+dbo,V_BillingClaims,2009-07-16 17:43:52.270,2024-06-12 07:55:23.897,835,"
+
+
+CREATE VIEW [dbo].[V_BillingClaims]
+AS
+SELECT ch.BillingDate, ch.ServiceDate, cd.CarrierId, ic.CarrierName, ch.ClaimId,
+                          (SELECT     COUNT(*) AS Expr1
+                            FROM          dbo.BillingClaimLineItem AS b1
+                            WHERE      (ClaimId = ch.ClaimId) AND (CurrentState = 'Ready to Bill' or CurrentState = 'On Hold')) AS ReadytoBill                          
+, ch.CompanyID, cd.OfficeNum
+FROM         dbo.BillingClaim AS ch INNE"
+dbo,v_PrePaidAmount,2009-07-16 17:43:52.347,2024-06-12 07:55:23.893,460,"create VIEW [dbo].[v_PrePaidAmount]
+AS
+SELECT     id.InvoiceID, SUM(iid.Receivable) AS PrePaid
+FROM         dbo.InvoiceInsuranceDet AS iid INNER JOIN
+                      dbo.OrderInsurance AS oi ON iid.OrderInsuranceId = oi.ID INNER JOIN
+                      dbo.InsCarrier AS inc ON oi.InsCarrierCode = inc.ID AND inc.IsPrepaidCarrier = 1 INNER JOIN
+                      dbo.InvoiceDet AS id ON iid.InvoiceDetailID = id.ID
+GROUP BY id.InvoiceID
+
+"
+dbo,GB_DailySummaryExpanded,2008-09-19 09:37:05.010,2024-06-12 07:55:23.890,476,"
+CREATE view [dbo].[GB_DailySummaryExpanded] as
+select s.*, c.CarrierName, p.PlanName, o.OfficeName, cd.PatientFirstName, cd.PatientLastName,o.CompanyID
+from
+	dbo.GB_DailySummary s
+	inner join InsCarrier c on s.CarrierId = c.ID
+	inner join InsPlan p on s.planId = p.ID
+	inner join Office o on s.OfficeNumber = o.OfficeNum
+	inner join BillingClaimData cd
+		on cd.ClaimId = (select max(ClaimID) from BillingClaim where PatientId = s.patientId)
+		And cd.IsCurrent = 1
+"
+dbo,V_BillingOrderReceivable,2009-08-25 11:00:02.437,2024-06-12 07:55:23.887,1349,"CREATE VIEW [dbo].[V_BillingOrderReceivable]
+AS
+SELECT     cd.CarrierId, SUM(bld.Receivable) AS NetReceivable, c.ServiceDate, bo.OrderNum,cd.CarrierName,cd.PlanID,cd.Planname,cd.OfficeNum
+,cd.PatientFirstName + ' ' + cd.PatientLastName as PatientName,o.OfficeName,c.CompanyID
+FROM         dbo.BillingClaim AS c INNER JOIN
+                      dbo.BillingClaimData AS cd ON c.ClaimId = cd.ClaimId AND cd.IsCurrent = 1 INNER JOIN
+                      dbo.BillingClaimLineItem AS li ON li.ClaimI"
+dbo,V_POSOrderReceivable,2009-08-25 11:00:03.513,2024-06-12 07:55:23.863,1982,"
+
+
+CREATE VIEW [dbo].[V_POSOrderReceivable]
+AS
+
+--SELECT     TOP (100) PERCENT pt.OfficeNum, v.OrderNum as OrderID, SUM(v.Receivable) AS Receivable, oi.InsCarrierCode, 
+--oi.InsPlanID, oi.CarrierName, oi.PlanName
+--,pt.TransactionDate,oi.PatientFirstName + ' ' + oi.PatientLastName as PatientName,o.OfficeName,V.OrderDate,o.CompanyID
+--FROM         V_CombinedInvoiceDetailWithInvoiceOrder AS v INNER JOIN
+--				postransaction pt on v.invoiceid=pt.invoicesummaryid inner join
+--            "
+dbo,GB_ClaimBillingSummary,2008-10-17 09:34:40.320,2024-06-12 07:55:23.857,1431,"
+CREATE view [dbo].[GB_ClaimBillingSummary] as
+select
+	c.ClaimId
+	, dbo.DateOnly(c.ServiceDate) as ServiceDate
+	, dbo.DateOnly(c.ClaimDate) as ClaimDate
+	, dbo.DateOnly(c.BillingDate) as BillingDate
+	, cd.OfficeNum
+	, cd.CarrierId
+	, ic.CarrierName
+	, cd.PlanId
+	, ip.PlanName
+	, c.PatientId
+	, patientData.PatientFirstName
+	, patientData.PatientLastName
+	, bt.Allowance - bt.Receivable as ContractualExpense
+	, bt.Receivable - pt.TransactionAmount as RejectedAmount
+	, ct.Transactio"
+dbo,V_EDI835HeaderValidationInfo,2011-03-24 22:28:14.250,2024-06-12 07:55:23.850,2229,"CREATE VIEW [dbo].[V_EDI835HeaderValidationInfo]
+AS
+    WITH AppliedClaimAmount AS
+    (
+        SELECT  EDI835HeaderInfoID, SUM(ISNULL(ClaimPaymentAmt,0)) AS AppliedClaimAmount 
+        FROM    EDI835ClaimInfo 
+        WHERE   isReadytoPost = 1 
+        AND     isExternalClaim = 0
+	    GROUP BY EDI835HeaderInfoID
+    ), 
+    ExternalClaimAmount AS
+    (
+        SELECT  EDI835HeaderInfoID, SUM(Amount) AS Amount
+        FROM    EDI835ExternalClaim 
+        GROUP BY EDI835HeaderInfoID
+    )
+    SE"
+dbo,V_EGFrameWithSize,2008-12-06 10:08:11.757,2024-05-16 08:11:06.230,960,"CREATE VIEW dbo.V_EGFrameWithSize
+AS
+SELECT     dbo.EGFrame.FrameStatus, dbo.EGFrame.ItemNum, dbo.EGFrame.FrameName, dbo.EGFrame.FrameColor, dbo.EGFrame.FrameSize, 
+                      dbo.EGFrame.AMeas, dbo.EGFrame.BMeas, dbo.EGFrame.EDMeas, dbo.EGFrame.DBLMeas, dbo.EGFrame.Temple, dbo.EGFrame.Bridge, 
+                      dbo.EGFrame.Frameshape, dbo.EGFrame.FramePartCode, dbo.FrameShape.Description, dbo.ItemFrame.Eye, dbo.EGFrame.OrderNum, 
+                      CASE WHEN dbo.FrameStyl"
+dbo,V_FrameStockOrder,2009-05-14 21:40:57.343,2024-05-16 08:11:06.223,605,"CREATE VIEW [dbo].[V_FrameStockOrder]
+AS
+SELECT     Row_number() over(order by invD.InvoiceID) as ID, invD.InvoiceID,invD.ItemType, invD.ItemID,
+ invD.Quantity, o.OrderNum, o.OrderDate, o.OfficeNum, o.Associate, o.CustomerID,invd.id as InvoiceDetID
+FROM         dbo.InvoiceDet AS invD INNER JOIN
+                      dbo.Orders AS o ON invD.OrderNum = o.OrderNum INNER JOIN
+                      dbo.EGFrame AS e ON o.OrderNum = e.OrderNum
+WHERE     (e.FrameStatus = 2) AND (invD.StockOrderNu"
+dbo,V_BillingOrderFirstReceivable,2010-01-29 21:48:05.837,2024-04-26 16:34:44.250,1705,"
+Create VIEW [dbo].[V_BillingOrderFirstReceivable]
+AS
+
+select  bcd.Officenum,bcd.CarrierName,bcd.CarrierID,bt.orderid,bc.servicedate,bc.Claimid,bcd.PatientLastname+ ' ,'+bcd.PatientFirstName as PatientName,
+ sum(case when transtypeid=4 then bt.amount*-1 else bt.amount end) as NetReceivable, bc.CompanyID,o.OfficeName as OfficeName
+from billingclaim bc 
+inner join billingclaimlineitem bcl on bc.claimid=bcl.claimid  and bcl.currentstate <>'Cancelled'
+inner join billingtransaction bt on bcl."
+dbo,GB_PatientsFromClaimData,2008-09-27 16:39:16.653,2024-04-26 16:34:44.210,273,"CREATE view [dbo].[GB_PatientsFromClaimData] as
+select distinct c.PatientId, cd.PatientLastName as PatientLastName, cd.PatientFirstName as PatientFirstName,c.CompanyID
+from BillingClaimData cd
+inner join BillingClaim c on c.ClaimId = cd.ClaimId
+where cd.isCurrent = 1
+"
+dbo,V_LineItemInsAR,2011-02-24 23:15:13.750,2024-04-26 16:34:44.193,1087,"
+
+
+
+CREATE VIEW [dbo].[V_LineItemInsAR]
+AS
+SELECT     NEWID() AS ID, cd.ClaimId, bld.ProcedureCode, SUM(dbo.SignByTransactionType(b.TransTypeId) * b.Amount) AS OutstandingReceivables, 
+                      bld.ProcedureCodeDescription, bld.Quantity, bld.LineItemId,bcl.InsItemTypeId as ItemTypeID,
+                      dbo.Dateonly(bld.DateOfService) as ServiceDate
+FROM         dbo.BillingTransaction AS b INNER JOIN
+                      dbo.BillingLineDetails AS bld ON bld.LineItemId "
+dbo,GB_BillingAdjustments,2009-08-25 11:00:02.200,2024-04-26 16:34:44.190,1085,"
+CREATE VIEW [dbo].[GB_BillingAdjustments]
+AS
+SELECT Row_Number() OVER (ORDER BY patientlastname,  patientfirstname) as ID, patientlastname as LastName , patientfirstname as FirstName, bcd.CarrierId as InsCarrierCode , 
+       bcd.CarrierName as CarrierName,dbo.dateonly(bc.servicedate) as ServiceDate ,bc.claimid as ClaimId, dbo.dateonly(bt.transactiondate)  as TransactionDate ,
+       bat.AdjustmentType as AdjustmentType ,bat.description as AdjustmentDesc,(bt.InsDeltaAR + bt.PatDeltaAR) * -1 as "
+dbo,GB_MonthlyRevenueReport,2008-09-24 19:20:27.153,2024-04-26 16:34:44.180,1512,"
+CREATE view GB_MonthlyRevenueReport as
+select
+	sum(quantity) as Quantity
+	, sum(retail) as Retail
+	, sum(retaildiscount) as RetailDiscount
+	, sum(retail - retaildiscount) as NetRetailSales
+	, sum(receivable + copay) as GrossReceivable
+	, sum(copay) as CoPay
+	, sum(receivable) as NetInsuranceReceivable
+	, sum(allowance - receivable + copay) as ContractualExpense
+	, sum(retail - retaildiscount - allowance + copay) as GrossPatientPaid
+	, sum(insurancediscount) as InsuranceDiscount
+	, "
+dbo,V_DashboardBillingClaimAging,2017-07-18 00:13:10.473,2024-04-26 16:34:44.123,1270,"CREATE VIEW [dbo].[V_DashboardBillingClaimAging]
+AS
+SELECT * FROM
+	(  
+		SELECT bt.TransTypeId , 
+			bt.transId, 
+			bt.LineItemId,
+			bt.PaymentId,
+			bt.Amount, 
+			bt.TransactionDate,
+			bt.InsAr,
+			bt.InsDeltaAR,
+			bt.PatAR,
+			bt.PatDeltaAR,
+			bcli.CurrentState,
+			bcli.PaidAmount,
+			bcd.OfficeNum,
+			bcd.CarrierId,
+			bcd.CarrierName,
+			bcd.IsCurrent,
+			bcd.PlanId,
+			bcd.PlanName,
+			bc.ServiceDate,
+			bc.ClaimId,
+			bp.DepositDate,
+			bc.CompanyID,
+			bco.OrderNum,
+			bcd.PatientLa"
+dbo,GB_PatientRefund,2009-03-17 16:20:51.117,2024-04-26 16:34:44.120,1290,"CREATE VIEW [dbo].[GB_PatientRefund]
+AS
+SELECT     t.TransId AS TransactionId, t.TransactionDate, (t.InsDeltaAR + t.PatDeltaAR) AS PatientRefundAmount, c.PatientID, cd.CarrierId, cd.CarrierName, 
+                      patientData.PatientFirstName, patientData.PatientLastName, patientData.PatientAddress, patientData.PatientCity, patientData.PatientState, 
+                      patientData.PatientZip, dbo.Office.OfficeNum as OfficeNum, dbo.Office.OfficeName as OfficeName,c.ClaimId,c.CompanyID"
+dbo,GB_BillingRefunds,2008-10-02 21:32:03.467,2024-04-26 16:34:44.110,802,"
+CREATE view dbo.GB_BillingRefunds as 
+select
+	t.transid As TransactionId
+	, t.TransactionDate As TransactionDate
+	, li.Copay As PatientRefund
+	, t.Amount As CarrierRefund
+	, c.patientId As PatientId
+	, cd.CarrierId As CarrierId
+	, cd.CarrierName As CarrierName
+	, patientData.PatientFirstName As PatientFirstName
+	, patientData.PatientLastName As PatientLastName
+from
+	BillingTransaction t
+	inner join BillingClaimLineItem li on t.LineItemId = li.LineItemId
+	inner join BillingClaim c"
+dbo,GB_PatientBalance,2008-10-02 21:32:03.450,2024-04-26 16:34:44.100,848,"
+CREATE view GB_PatientBalance as
+select
+	cd.OfficeLocation As OfficeNumber
+	, a.PatientId As PatientId
+	, patientData.PatientFirstName as PatientFirstName
+	, patientData.PatientLastName as PatientLastName
+	, cd.CarrierId As CarrierId
+	, cd.PlanId As PlanId
+	, a.ClaimId As ClaimId
+	, c.BillingDate As BillingDate
+	, Balance =
+		case a.AccountTypeId
+			when  224 then a.Balance
+			else -1 * a.Balance
+		end
+from
+	BillingAccount a
+	inner join BillingClaim c on a.ClaimId = c.ClaimId"
+dbo,GB_DetailedPatientLedger,2008-09-30 11:38:12.447,2024-04-26 16:34:44.097,1171,"
+create view dbo.GB_DetailedPatientLedger as
+select
+	dbo.DateOnly(c.ServiceDate) As ServiceDate
+	, dbo.DateOnly(c.ClaimDate) As TransactionDate
+	, ld.ProcedureCode As ProcedureCode
+	, sum(li.Retail - li.RetailDiscount - li.InsuranceDiscount) As GrossRevenue
+	, sum(li.Allowance - ld.Receivable + li.Copay) As ContractualExpense
+	, sum(ld.Receivable + li.CoPay) As ExpectedReimbursement
+	, cd.CarrierId As CarrierId
+	, c.PatientId As PatientId
+	, patientData.PatientFirstName As PatientFirs"
+dbo,V_DiscountAnalysis,2009-04-16 16:13:07.407,2024-03-28 07:56:06.693,1477,"
+CREATE VIEW [dbo].[V_DiscountAnalysis]
+AS
+SELECT     pt.TransactionTypeID, pt.TransactionDate, pt.OfficeNum, dbo.Orders.Associate, dbo.ItemType.ItemType AS ItemTypeId, 
+                      dbo.ItemType.Description AS ProductType, SUM(ISNULL(cid.Price, 0)) - SUM(ISNULL(cid.PackageDisc, 0)) AS Retail, SUM(ISNULL(cid.Tax, 0)) AS Tax, 
+                      SUM(ISNULL(cid.Discount, 0)) + SUM(ISNULL(cid.LineDisc, 0)) + SUM(ISNULL(cid.InsuranceDiscount, 0)) + SUM(ISNULL(cid.PromotionDiscount, 0)) A"
+dbo,v_OrderAging,2008-09-27 16:39:16.607,2024-03-25 16:42:51.650,1648,"
+CREATE VIEW [dbo].[v_OrderAging]
+AS
+SELECT     OrderDate, OfficeNum, OrderNum, SUM(OrderAmount) AS OrderAmount, SUM(PaidAmount) AS PaidAmount, SUM(OrderAmount) + SUM(PaidAmount) 
+                      AS Balance, CustomerID, MAX(LastPaymentDate) AS LastPaymentDate
+FROM         (SELECT     o.OrderDate, o.OfficeNum, o.OrderNum, pt.Amount AS OrderAmount, 0 AS PaidAmount, o.CustomerID, NULL AS LastPaymentDate
+                       FROM          dbo.Orders AS o INNER JOIN
+                   "
+dbo,V_PosPaymentDifferentLocation,2018-08-23 15:34:08.833,2024-03-25 16:42:51.633,927,"create VIEW [dbo].[V_PosPaymentDifferentLocation]
+AS
+select distinct NEWID() AS ID, pt.OfficeNum AS PaymentOfficeNum, 
+sum( Cast((pd.Amount* (ISNULL(PT.Amount,0)/(case when ppt.Amount=0 then 1 else ppt.amount end))) as decimal(9,2))  )AS PaymentAmount, 
+ pts.OfficeNum AS OriginalOfficeNum,convert(Date,pt.TransactionDate) TransactionDate,office.CompanyID,pd.PaymentTypeID,pt.OrderID,pt.PaymentID
+from PosTransaction PT inner join orders o on o.OrderNum = PT.OrderID
+inner join PosPayment ppt   on pp"
+dbo,V_NotInsuredPlan,2011-12-28 22:43:14.727,2024-03-25 16:42:51.590,784,"
+CREATE VIEW [dbo].[V_NotInsuredPlan]
+AS
+SELECT     TOP (100) PERCENT o.OrderDate, oi.OrderID, oi.PatientFirstName, oi.PatientLastName, oi.PatientDOB, oi.ContactInformation, oi.PlanName, oi.PhoneNumber, 
+                      oi.FaxNumber, oi.EmployerName, oi.CarrierAddress1, oi.CarrierAddress2, oi.CarrierCity, oi.CarrierState, oi.CarrierZip, office.CompanyID
+FROM         dbo.OrderInsurance AS oi INNER JOIN
+                      dbo.InsPlan AS p ON p.ID = oi.InsPlanID AND p.IsListed = 0 IN"
+dbo,V_ItemTypeSaleByItemID,2010-01-01 14:21:09.440,2024-03-25 16:42:51.483,812,"
+CREATE VIEW [dbo].[V_ItemTypeSaleByItemID]
+AS
+SELECT     TOP (100) PERCENT Row_Number() OVER (ORDER BY v.OfficeNum) AS ID, dbo.DateOnly(TransactionDate) 
+AS TransactionDate, itemType, ItemID, 
+v.OfficeNum, SUM(isnull(Quantity,0)) AS Quantity, SUM(ISNULL(customerpay, 0)) - SUM(ISNULL(Tax, 0)) + SUM(ISNULL(Receivable, 0)) AS Amount, SUM(ISNULL(Discount, 0)) 
++ SUM(ISNULL(LineDisc, 0)) + SUM(ISNULL(PackageDisc, 0)) + SUM(ISNULL(InsuranceDiscount, 0)) AS Discount, SUM(ISNULL(retail, 0)) AS Retail, "
+dbo,V_CouponAnalysis,2014-03-10 00:07:51.263,2024-03-25 16:42:51.433,1166,"
+CREATE VIEW [dbo].V_CouponAnalysis
+as
+   select sum(idet.Discount) + sum(idet.LineDisc)+ isnull(sum(idet.PackageDisc),0.00)+ sum(idet.InsuranceDiscount) as Discount,sum(idet.Amount) AS CustomerPay,
+                           SUM(idet.Allowance) as Allowance,sum(idet.Price) AS Retail,pTrans.OfficeNum,pTrans.TransactionDate, 
+                           CASE WHEN idet.CouponNum is not null THEN idet.CouponNum 
+                            ELSE  (select top 1 couponnum from invoicesum where Co"
+dbo,V_DailyCouponSummary,2010-04-29 21:33:24.140,2024-03-25 16:42:51.427,876,"
+
+
+CREATE VIEW [dbo].[V_DailyCouponSummary]
+AS
+SELECT     newID() as ID, dbo.Dateonly(pTrans.TransactionDate) as TransactionDate, 
+pTrans.OfficeNum, sum(idet.Price) AS Retail, sum(idet.Discount) + sum(idet.LineDisc)+ sum(idet.PackageDisc)+ sum(idet.InsuranceDiscount) as Discount
+,sum(idet.Amount) AS CustomerPay, sum(idet.Receivable) Receivable , Sum(idet.Tax) as Tax,o.CompanyID as CompanyID,idet.CouponNum
+,count(pTrans.TransactionID) as Quantity
+FROM         dbo.PosTransaction AS pTrans"
+dbo,V_POSINSGLSummary,2009-05-14 21:40:57.343,2024-03-25 16:42:51.423,677,"CREATE VIEW [dbo].[V_POSINSGLSummary]
+AS
+SELECT    Row_number() over(order by  p.TransactionTypeID) as ID, p.TransactionTypeID, SUM(p.Amount) AS Amount, p.OfficeNum, MONTH(p.TransactionDate) AS MonthNum, YEAR(p.TransactionDate) AS YearNum, 
+                      SUM(ISNULL(v.Amount, 0)) AS InvAmount, SUM(ISNULL(v.Allowance, 0)) AS Allowance, SUM(ISNULL(v.Tax, 0)) AS Tax, SUM(ISNULL(v.Receivable, 0)) 
+                      AS Receivable
+FROM         dbo.PosTransaction AS p LEFT OUTER JOIN
+ "
+dbo,V_TransactionDetail_NEW,2020-10-02 19:54:05.540,2024-03-25 16:42:51.417,1253,"
+CREATE VIEW [dbo].[V_TransactionDetail_NEW]
+AS
+SELECT Row_number() OVER (ORDER BY pTrans.TransactionDate) AS ID, pTrans.TransactionDate, pTrans.OfficeNum, pTrans.TransactionID, pTrans.TransactionTypeID, 
+pTrans.EmployeeId, pTrans.PatientID, pTrans.Amount AS InvoiceTotalAmount, idet.ItemType, idet.ItemID, idet.Quantity, idet.Price AS Retail, idet.Discount, idet.Tax, 
+idet.LineDisc, idet.PackageDisc, idet.Amount AS CustomerPay, idet.DiscountTypeID, idet.InvoiceID, idet.Allowance, idet.Copay, idet"
+dbo,V_TransactionDetail,2009-03-23 14:23:21.397,2024-03-25 16:42:51.410,1269,"
+CREATE VIEW [dbo].[V_TransactionDetail]
+AS
+SELECT Row_number() OVER (ORDER BY pTrans.TransactionDate) AS ID, pTrans.TransactionDate, pTrans.OfficeNum, pTrans.TransactionID, pTrans.TransactionTypeID, 
+pTrans.EmployeeId, pTrans.PatientID, pTrans.Amount AS InvoiceTotalAmount, idet.ItemType, idet.ItemID, idet.Quantity, idet.Price AS Retail, idet.Discount, idet.Tax, 
+idet.LineDisc, idet.PackageDisc, idet.PromotionDiscount, idet.Amount AS CustomerPay, idet.DiscountTypeID, idet.InvoiceID, idet.Allowan"
+dbo,RP_FlashSales,2008-11-20 17:05:19.720,2024-03-25 16:42:51.397,2217,"
+CREATE VIEW [dbo].[RP_FlashSales] 
+AS 
+	SELECT pt.TransactionTypeID,
+		pt.TransactionDate,
+		pt.OfficeNum,
+		ISNULL(cid.Associate, Orders.Associate) AS TransactionAssociate,
+		ISNULL(Orders.Associate, cid.Associate) AS Associate,
+		ISNULL(cid.Associate, Orders.Associate) AS OriginalAssociate,
+		dbo.ItemType.ItemType AS ItemTypeId,
+		dbo.ItemType.Description AS ProductType,
+		SUM(ISNULL(cid.Price, 0)) AS Retail,
+		SUM(ISNULL(cid.Tax, 0)) AS Tax,
+		SUM(ISNULL(cid.Discount, 0)) + SUM(ISNULL(cid.Li"
+dbo,v_SalesByHour,2008-10-08 21:04:32.983,2024-03-25 16:42:51.393,772,"CREATE VIEW dbo.v_SalesByHour
+AS
+SELECT     TOP (100) PERCENT SUM(ISNULL(cid.Amount, 0) - ISNULL(cid.Tax, 0) + ISNULL(cid.Receivable, 0)) AS SalesTotal, { fn HOUR(dbo.PosTransaction.TransactionDate) 
+                      } AS Hour, CAST(FLOOR(CAST(dbo.PosTransaction.TransactionDate AS FLOAT)) AS DATETIME) AS TransDate, dbo.PosTransaction.OfficeNum
+FROM         dbo.PosTransaction INNER JOIN
+                      dbo.V_CombinedInvoiceDetail AS cid ON dbo.PosTransaction.InvoiceSummaryID = cid"
+dbo,RP_FlashSalesNew,2009-02-05 11:52:32.593,2024-03-25 16:42:51.373,2515,"
+ 
+CREATE VIEW [dbo].[RP_FlashSalesNew]
+AS
+SELECT     pt.TransactionTypeID, pt.TransactionDate, pt.OfficeNum, o.OfficeName,  isnull(cid.Associate,Orders.Associate) as  TransactionAssociate,
+ isnull(cid.Associate,Orders.Associate) as Associate ,  isnull(cid.Associate,Orders.Associate) as OriginalAssociate ,
+ dbo.ItemType.ItemType AS ItemTypeId, 
+                      dbo.ItemType.Description AS ProductType, SUM(ISNULL(cid.Price, 0)) AS Retail, SUM(ISNULL(cid.Tax, 0)) AS Tax, SUM(ISNULL(cid"
+dbo,RP_FlashSalesNew2,2016-12-20 00:01:31.667,2024-03-25 16:42:51.357,1628,"CREATE VIEW [dbo].[RP_FlashSalesNew2]
+AS
+SELECT     pt.TransactionTypeID, pt.TransactionDate, pt.OfficeNum, o.OfficeName, cid.Associate,Orders.Associate AS ordersassociate,
+		   dbo.ItemType.ItemType AS ItemTypeId,dbo.ItemType.Description AS ProductType, cid.Price ,cid.Tax AS Tax,cid.Discount, 
+           cid.LineDisc,cid.PackageDisc,cid.InsuranceDiscount,cid.PromotionDiscount,cid.Amount,cid.Allowance,cid.Receivable,cid.Copay,cid.ItemGroup,pt.DayCloseId,
+           (SELECT Value FROM dbo.CatElem"
+dbo,V_CombinedInvoiceDetailWithInvoiceOrder,2009-08-25 11:00:02.577,2024-03-25 16:42:51.290,989,"CREATE VIEW [dbo].[V_CombinedInvoiceDetailWithInvoiceOrder]
+AS
+SELECT     id.ID AS InvoiceDetailId, id.InvoiceID, invs.OrderNum, id.ItemType, id.ItemID, id.Quantity, id.Price, id.DiscountTypeID, id.Tax, id.Discount, id.LineDisc, 
+                      id.PackageDisc, id.Amount, SUM(ISNULL(iid.Allowance, 0)) AS Allowance, SUM(ISNULL(iid.Copay, 0)) AS Copay, SUM(ISNULL(iid.Receivable, 0)) 
+                      AS Receivable, SUM(ISNULL(iid.InsuranceDiscount, 0)) AS InsuranceDiscount,dbo.DateO"
+dbo,V_InvoiceDetailInsuranceorCash,2011-06-21 15:34:20.070,2024-03-25 16:42:51.283,1394,"CREATE VIEW [dbo].[V_InvoiceDetailInsuranceorCash]
+AS
+
+SELECT   id.ID AS InvoiceDetailId, id.InvoiceID, pt.OrderID, id.ItemType, id.ItemID, isnull(id.Quantity,0) as Quantity, id.Price, 
+(case when (iid.isprimary =0 )then 0 else id.Tax end) as Tax,
+(case when (iid.isprimary =0 and sum(iid.Receivable) is not null )then 0 else id.Amount end) as Amount
+ ,SUM(ISNULL(iid.Receivable, 0)) AS Receivable
+,o.OrderType,pt.TransactionDate,o.OrderDate,pt.OfficeNum, isnull(iid.isPrimary,0) as isPrimary"
+dbo,V_DistinctOrderInsurance,2009-04-17 11:32:00.703,2024-03-25 16:42:51.280,485,"CREATE VIEW [dbo].[V_DistinctOrderInsurance]
+AS
+select distinct OrderID, isnull(AuthNumber,'') as AuthNumber , PlanName, InsCarrierCode, CarrierName from
+dbo.OrderInsurance o
+inner join invoicesum i1 on i1.ordernum = o.orderid
+inner join invoicedet i2 on i1.invoiceid = i2.invoiceid
+inner join dbo.InvoiceInsuranceDet i3 on i3.invoicedetailid = i2.id and i3.isprimary = 1 
+inner join patientinsurance pi1 on pi1.id = i3.patientinsuranceid and pi1.insuranceplanid = o.insplanid
+"
+dbo,V_InvoiceDetailByCoupon,2010-04-29 21:33:23.740,2024-03-25 16:42:51.270,832,"
+Create VIEW [dbo].V_InvoiceDetailByCoupon
+AS
+SELECT     id.ID AS InvoiceDetailId, id.InvoiceID, id.OrderNum, id.ItemType, id.ItemID, id.Quantity, id.Price, id.DiscountTypeID, id.Tax, id.Discount, id.LineDisc, 
+                      id.PackageDisc, id.Amount, SUM(ISNULL(iid.Allowance, 0)) AS Allowance, SUM(ISNULL(iid.Copay, 0)) AS Copay, SUM(ISNULL(iid.Receivable, 0)) 
+                      AS Receivable, SUM(ISNULL(iid.InsuranceDiscount, 0)) AS InsuranceDiscount,id.CouponNum
+FROM         "
+dbo,v_POSGLSummaryINS,2009-05-14 21:40:57.343,2024-03-25 16:42:51.263,472,"CREATE VIEW [dbo].[v_POSGLSummaryINS]
+AS
+select  Row_number() over(order by i.Transnum) as ID, i.Transnum, isnull(sum(iv.amount),0)as Amount ,
+isnull(sum(iv.Tax),0) as Tax,
+isnull(sum(iid.allowance),0) as Allowance ,
+isnull(sum(iid.receivable),0) as Receivable from invoicesum i
+inner join invoicedet iv on i.invoiceid = iv.invoiceid
+left outer join dbo.InvoiceInsuranceDet iid on iv.id = iid.invoicedetailid
+group by i.Transnum 
+having i.transnum is not null
+
+"
+dbo,V_CombinedInvoiceDetail_NEW,2020-10-02 19:54:05.537,2024-03-25 16:42:51.260,1030,"CREATE VIEW [dbo].[V_CombinedInvoiceDetail_NEW]
+AS
+SELECT id.ID AS InvoiceDetailId, id.InvoiceID, id.OrderNum, id.ItemType, id.ItemID, id.Quantity, id.Price, id.DiscountTypeID, id.Tax, id.Discount, id.LineDisc, id.PackageDisc, 
+               id.Amount, SUM(ISNULL(iid.Allowance, 0)) AS Allowance, SUM(ISNULL(iid.Copay, 0)) AS Copay, SUM(ISNULL(iid.Receivable, 0)) AS Receivable, 
+               SUM(ISNULL(iid.InsuranceDiscount, 0)) AS InsuranceDiscount, ins.Associate, id.ValuationCost
+FROM  dbo.In"
+dbo,V_CombinedInvoiceDetail,2008-11-20 17:05:19.547,2024-03-25 16:42:51.237,944,"
+CREATE VIEW [dbo].[V_CombinedInvoiceDetail]
+AS
+	SELECT
+		id.ID AS InvoiceDetailId,
+		id.InvoiceID,
+		id.OrderNum,
+		id.ItemType,
+		id.ItemID,
+		id.Quantity,
+		id.Price,
+		id.DiscountTypeID,
+		id.Tax,
+		id.Discount,
+		id.PromotionDiscount,
+		id.LineDisc,
+		id.PackageDisc,
+		id.Amount,
+		SUM(ISNULL(iid.Allowance, 0)) AS Allowance,
+		SUM(ISNULL(iid.Copay, 0)) AS Copay,
+		SUM(ISNULL(iid.Receivable, 0)) AS Receivable,
+		SUM(ISNULL(iid.InsuranceDiscount, 0)) AS InsuranceDiscount,
+		ins.Associate,
+		i"
+dbo,V_CombinedInvoiceDetailNew,2009-02-05 11:51:28.337,2024-03-25 16:42:51.213,1139,"CREATE VIEW [dbo].[V_CombinedInvoiceDetailNew]
+AS
+SELECT     id.ID AS InvoiceDetailId, id.InvoiceID, id.OrderNum, id.ItemType, id.ItemID, id.Quantity, id.Price, id.DiscountTypeID, id.Tax, id.Discount, id.LineDisc, 
+                      id.PackageDisc, id.PromotionDiscount, id.Amount, SUM(ISNULL(iid.Allowance, 0)) AS Allowance, SUM(ISNULL(iid.Copay, 0)) AS Copay, SUM(ISNULL(iid.Receivable, 0)) 
+                      AS Receivable, SUM(ISNULL(iid.InsuranceDiscount, 0)) AS InsuranceDiscount, (CASE"
+dbo,V_VendorOrderStatusReport,2015-06-30 23:21:03.543,2023-12-20 15:13:18.543,1327,"CREATE VIEW [dbo].[V_VendorOrderStatusReport]
+AS
+select  newid() as ID,VOD.VendorOrderNum ,VR.receiptnumber, VR.VendorReceiptNumber as VendorRefNumber, isnull(VO.OrderDate,VR.ReceiptDate) as orderdate,
+VR.ReceiptDate, VR.InvoiceDate,isnull(VO.OrderStatus,'') as OrderStatus,VRD.ReceiptQuantity as quantity, VRD.ItemID,I.ItemName, I.itemnum as ItemNum,           
+(case when VOD.OrderForOffice is null or VOD.OrderForOffice = '' then VR.OfficeNum else VOD.OrderForOffice end) as OrderForOffice,
+V.Vend"
+dbo,LOGI_FrameCollestions,2023-11-29 07:53:56.623,2023-11-29 07:53:56.623,171,"Create view [dbo].[LOGI_FrameCollestions] as
+select f.ID, f.Description, c.CompanyID from FrameCollection f 
+inner join CompanyCollectionMapping c on f.ID = c.CollectionID"
+dbo,LOGI_DiagCodes,2023-11-29 07:53:56.620,2023-11-29 07:53:56.620,3149,"Create view [dbo].[LOGI_DiagCodes] as 
+select 
+DISTINCT oed.OrderNum AS ""OrderNum""
+,oed.ItemID
+,ins.InvoiceID AS ""InvoiceID""
+,ISNULL(oed.DiagCode1, 0) AS ""ExamDiagCodeID1""
+	,ISNULL(oed.DiagCode2, 0) AS ""ExamDiagCodeID2""
+	,ISNULL(oed.DiagCode3, 0) AS ""ExamDiagCodeID3""
+	,ISNULL(oed.DiagCode4, 0) AS ""ExamDiagCodeID4""
+	,ISNULL(oed.DiagCode5, 0) AS ""ExamDiagCodeID5""
+	,ISNULL(oed.DiagCode6, 0) AS ""ExamDiagCodeID6""
+	,ISNULL(oed.DiagCode7, 0) AS ""ExamDiagCodeID7""
+	,ISNULL(oed.DiagCode8, 0) AS ""ExamDiagC"
+dbo,V_InventoryPhysicalCount,2009-11-24 21:05:51.577,2023-10-30 18:50:48.820,1054,"
+
+CREATE VIEW [dbo].[V_InventoryPhysicalCount]
+AS
+select convert(varchar,Row_number() over(order by i.ItemName))+ '-' + ip.officeNum  as ID,ip.id as PhysicalID,i.ItemNum as ItemNum,i.UpcCode as UPCCode, 
+		i.ItemName as ItemName, i.id as ItemID , isnull(clu.value, 'None') as ItemStatus, 
+		i.ItemType as ItemType, isnull(ipd.count,0) as count, isnull(ipf.onhand,0) as OnHand, isnull(ipf.Cost,0) as Cost,
+		ipd.sheetnum as SheetNum, ip.Date as Date,
+		ip.officeNum as OfficeNum, o.OfficeName "
+dbo,V_GLDetailReport,2009-07-16 17:43:52.347,2023-10-30 18:50:48.813,404,"
+CREATE VIEW [dbo].[V_GLDetailReport]
+AS
+SELECT     gd.ID, gd.TransactionID, gd.AccountNum, gd.Amount as PaidAmount, gd.GLCenter, gd.Source, gd.OfficeNum, gd.TransactionDate, gd.CloseID,ga.Description,o.OfficeName
+FROM       dbo.GLDetail AS gd INNER JOIN
+			dbo.GLAccount AS ga ON gd.AccountNum = ga.AccountNum
+			left outer join Office o on gd.officenum = o.officenum
+			where o.CompanyID = Ga.CompanyID"
+dbo,V_GLDetailBilling,2009-08-25 10:59:57.933,2023-10-30 18:50:48.797,1126,"CREATE VIEW [dbo].[V_GLDetailBilling]
+AS
+SELECT     gd.ID, gd.TransactionID, gd.AccountNum, gd.Amount AS PaidAmount, gd.GLCenter, gd.Source, gd.OfficeNum, dbo.DateOnly(gd.TransactionDate) 
+                      AS TransactionDate, gd.CloseID, ga.Description, o.OfficeName,
+                          (SELECT     PatientFirstName + ' ' + PatientLastName AS Expr1
+                            FROM          dbo.BillingClaimData
+                            WHERE      (IsCurrent = 1) AND (ClaimId = "
+dbo,v_AllCarriersAndPlansWithClaimsByCompany,2016-03-09 00:02:23.670,2023-10-30 18:50:48.713,204,"CREATE VIEW [dbo].[v_AllCarriersAndPlansWithClaimsByCompany]
+AS
+	SELECT	DISTINCT
+			CarrierId,
+			PlanId,
+			o.CompanyID
+	FROM	BillingClaimData bcd
+	JOIN	Office o
+	ON		o.OfficeNum = bcd.OfficeNum;"
+dbo,V_FrameSaleCollectionStyle,2013-02-20 00:00:52.773,2023-10-30 18:50:48.537,2000,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+CREATE VIEW [dbo].[V_FrameSaleCollectionStyle]
+AS
+select  cast(its.Yearno as varchar) +'-' + cast(its.Itemid as varchar) +'-' +its.OfficeNum as ID
+ ,its.YearNo,its.PeriodType, its.ItemType,its.Itemid,i.ItemNum,i.ItemName,its.OfficeNum,
+sum((case when its.period=1 then its.Quantity else 0 end)) as JanQty
+,sum((case when its.period=2 then its.Quantity else 0 end)) as FebQty
+,sum((case when its.pe"
+dbo,V_GetCCCashRefunds,2014-07-01 23:33:53.787,2023-10-30 18:50:48.497,767,"CREATE View V_GetCCCashRefunds
+
+as
+
+
+
+select distinct  Sum(cast((pd.Amount* (ISNULL(PT.Amount,0)/ppt.Amount)) as decimal(9,2))) as Amount,TransactionDate,PT.PaymentID
+from PosTransaction PT 
+inner join PosPayment ppt   on ppt.PaymentID = PT.PaymentID
+inner join PosPaymentDetail pd on PT.PaymentID = pd.PaymentID
+inner join PosCustomerCreditPaymentDetail PCC on PCC.PaymentDetailID = pd.PaymentDetailID
+inner join Office O on O.OfficeNum = PT.OfficeNum
+where 
+PT.PaymentID is not null
+a"
+dbo,v_AllCompaniesAndPlans,2016-03-09 00:02:23.677,2023-09-26 07:53:51.010,1004,"CREATE VIEW [dbo].[v_AllCompaniesAndPlans]
+--------------------------------------------------------------------------------
+-- This view shows the mapping status of every company to every insurance
+-- plan. It doesn't care about which schedule version (it can be any) but it 
+-- does take into account mapping start/termination dates.
+--------------------------------------------------------------------------------
+AS
+	WITH MappedPlans AS
+	(
+		SELECT	DISTINCT
+				CompanyID AS CompanyId,
+"
+dbo,V_CLRXWithLabCodes,2009-08-25 11:00:01.543,2023-05-12 16:16:43.253,849,"CREATE VIEW dbo.V_CLRXWithLabCodes
+AS
+SELECT     dbo.CLSoftRX.OrderNum, dbo.CLSoftRX.Eye, dbo.CLSoftRX.Base, dbo.CLSoftRX.Diameter, dbo.CLSoftRX.Sphere, dbo.CLSoftRX.Cylinder, 
+                      dbo.CLSoftRX.Axis, dbo.CLSoftRX.add1, dbo.CLSoftRX.LensQty, dbo.CLSoftRX.RXDate, dbo.CLSoftRX.Doctor, dbo.ItemCL.CLColorCode AS Expr2, 
+                      dbo.CLColor.Description AS Expr4, dbo.CLColor.CLColorCode AS Expr6, dbo.CLStyle.MfgNum AS Expr5, dbo.CLStyle.Style AS Expr7, 
+            "
+dbo,GB_ClaimNotes,2009-08-25 10:59:58.670,2023-03-19 07:58:52.527,1127,"CREATE VIEW [dbo].[GB_ClaimNotes]
+ 
+AS
+
+SELECT we1.AssociatedEntityID AS ClaimId
+	,stuff((
+			SELECT (
+					CASE 
+						WHEN convert(VARCHAR(max), isnull(we2.note, '')) IS NULL
+							OR convert(VARCHAR(max), isnull(we2.note, '')) = ''
+							THEN ''
+						ELSE convert(VARCHAR(12), dbo.dateonly(we2.TIMESTAMP)) + ':'
+						END
+					) + convert(VARCHAR(max), isnull(we2.note, '')) + (
+					CASE 
+						WHEN convert(VARCHAR(max), isnull(we2.note, '')) IS NULL
+							OR convert(VARCHAR"
+dbo,V_POSGLSummary,2009-05-14 21:40:57.140,2023-03-19 07:58:52.523,351,"CREATE VIEW [dbo].[V_POSGLSummary]
+AS
+SELECT      Row_number() over(order by TransactionTypeID) as ID, TransactionTypeID, SUM(Amount) AS Amount, OfficeNum,
+ Month(TransactionDate) as MonthNum, Year(TransactionDate) as YearNum
+FROM         dbo.PosTransaction
+GROUP BY TransactionTypeID, OfficeNum, month(TransactionDate) ,Year(TransactionDate)
+
+"
+dbo,V_PatientPayment,2011-11-16 15:19:33.270,2023-03-19 07:58:52.520,467,"CREATE VIEW dbo.V_PatientPayment
+AS
+SELECT     pt.PatientID, pt.TransactionDate, pt.OrderID, pt.PaymentID, pt.Amount AS TransactionAmount, v.TotalPayment, v.isCustCredit, v.CreditPayment, v.CashPayment, 
+                      v.CustomerCreditPayment
+FROM         dbo.PosTransaction AS pt INNER JOIN
+                      dbo.V_PaymentDetail AS v ON pt.PaymentID = v.PaymentID AND pt.PaymentID IS NOT NULL AND pt.OrderID IS NOT NULL AND pt.PatientID IS NOT NULL
+"
+dbo,V_PaymentDetail,2009-07-16 17:43:52.177,2023-03-19 07:58:52.513,1191,"
+CREATE VIEW [dbo].[V_PaymentDetail]
+AS
+SELECT     p.PaymentID, SUM(p.Amount) AS PaidAmount,(Select Sum(p1.Amount) from dbo.POSPaymentDetail p1 where p1.PaymentID = p.PaymentID) as TotalPayment,
+(Select case when count(p1.Amount)>=1 then 1 else 0 end as expr1 from dbo.POSPaymentDetail p1 where p1.PaymentID = p.PaymentID and 
+((p1.PaymentTypeID = 7) or (p1.PaymentTypeID = 10))) as isCustCredit
+,(Select case when Sum(p1.Amount) is null then 0 else Sum(p1.Amount) end from dbo.POSPaymentDetail"
+dbo,V_POSMiscGLSummary,2009-05-14 21:40:57.267,2023-03-19 07:58:52.510,470,"CREATE VIEW [dbo].[V_POSMiscGLSummary]
+AS
+SELECT      Row_number() over(order by TransactionTypeID) as ID , TransactionTypeID, sum(Amount) AS Amount, OfficeNum,
+ Month(TransactionDate) as MonthNum, Year(TransactionDate) as YearNum,pm.MiscPaymentTypeID
+FROM         dbo.PosTransaction p
+inner join posmiscpayment pm on p.transactionid = pm.transactionid
+GROUP BY TransactionTypeID, OfficeNum, month(TransactionDate) ,Year(TransactionDate),pm.MiscPaymentTypeID
+
+
+"
+dbo,V_PatientPhones,2008-12-06 10:08:12.430,2023-03-19 07:58:52.507,282,"
+CREATE VIEW [dbo].[V_PatientPhones]
+AS
+
+SELECT distinct  dbo.Phone.PhoneNumber, dbo.Phone.IsPrimary, dbo.PatientPhone.PatientID
+FROM         dbo.PatientPhone INNER JOIN
+                      dbo.Phone ON dbo.PatientPhone.PhoneID = dbo.Phone.ID AND dbo.Phone.IsPrimary = 1
+
+"
+dbo,X_KPICommissions,2009-01-24 22:41:50.030,2023-03-19 07:58:52.477,561,"CREATE VIEW dbo.X_KPICommissions
+AS
+SELECT     dbo.KPI.ID, dbo.KPI.Company, dbo.KPI.Description, dbo.KPI.ISKPI, dbo.KPI.CommRate, dbo.KPISchedule.ItemValue, dbo.KPISchedule.Amount2, 
+                      dbo.KPISchedule.ItemType, dbo.KPIMethod.Description AS Tye, dbo.KPISchedule.Amount1
+FROM         dbo.KPI INNER JOIN
+                      dbo.KPISchedule ON dbo.KPI.ID = dbo.KPISchedule.KPIID INNER JOIN
+                      dbo.KPIMethod ON dbo.KPISchedule.KPIMethodID = dbo.KPIMethod.ID"
+dbo,V_KPIProductivity,2009-05-14 21:40:57.280,2023-03-19 07:58:52.473,2703,"CREATE VIEW dbo.V_KPIProductivity
+AS
+SELECT     ks.KPIID, ks.Employee, ks.Quantity, ks.QuantityPercentage, ks.OfficeNum,
+                          (SELECT     SUM(Quantity) AS Expr1
+                            FROM          dbo.KPISummary AS ks1
+                            WHERE      (KPIID = ks.KPIID) AND (Period = ks.Period) AND (PeriodType = ks.PeriodType) AND (Employee = ks.Employee) AND 
+                                                   (OfficeNum = ks.OfficeNum) AND (YearNo = ks.Yea"
+dbo,V_KPI,2009-01-28 15:58:51.590,2023-03-19 07:58:52.470,605,"CREATE VIEW dbo.V_KPI
+AS
+SELECT     TOP (100) PERCENT KPI_1.ID AS KPIID, dbo.KPISchedule.ID AS SchedID, KPI_1.Description, dbo.KPIMethod.Description AS Expr1, 
+                      dbo.KPISchedule.ItemValue, dbo.KPISchedule.Amount1, dbo.KPISchedule.Amount2, KPI_1.ISKPI, KPI_1.ISComms, KPI_1.IsActive, KPI_1.ViewOrder, 
+                      KPI_1.Company
+FROM         dbo.KPISchedule INNER JOIN
+                      dbo.KPIMethod ON dbo.KPIMethod.ID = dbo.KPISchedule.KPIMethodID INNER JOIN"
+dbo,V_ItemRetailPrice,2009-12-08 12:18:31.790,2023-03-19 07:58:52.463,448,"CREATE VIEW [dbo].[V_ItemRetailPrice]
+ 
+AS
+ select convert(varchar,Row_number() over(order by ip.ItemID))+ '-' + opl.OfficeNum as ID,
+	ip.ItemID as ItemID,pl.ItemType as ItemTypeID,  ip.price as ItemPrice,ip.priceTypeID as PriceTypeID,
+	pl.CompanyID as CompanyID, opl.OfficeNum as OfficeNum
+ from ItemPrice ip 
+	inner join priceList pl on pl.priceListID = ip.priceListID
+	inner join officepricelist opl on opl.pricelistid = ip.pricelistid
+"
+dbo,V_DailyClosingCoupon,2008-12-06 10:08:12.787,2023-03-19 07:58:52.367,1062,"CREATE VIEW dbo.V_DailyClosingCoupon
+AS
+SELECT     ISNULL(SUM(dbo.InvoiceDet.Discount), 0) AS amount, COUNT(DISTINCT dbo.InvoiceSum.InvoiceID) AS coupcount, 
+                      dbo.PosTransaction.DayCloseId
+FROM         dbo.InvoiceSum INNER JOIN
+                      dbo.InvoiceDet ON dbo.InvoiceSum.InvoiceID = dbo.InvoiceDet.InvoiceID INNER JOIN
+                      dbo.PosTransaction ON dbo.InvoiceSum.InvoiceID = dbo.PosTransaction.InvoiceSummaryID
+WHERE     (dbo.PosTransaction.Tran"
+dbo,V_InsuranceScheduleDisplay,2021-12-16 13:32:41.347,2023-03-19 07:58:52.350,1058,"CREATE VIEW [dbo].[V_InsuranceScheduleDisplay]
+AS
+SELECT sch.InsScheduleId,
+       sch.PlanId,
+       sch.VersionId,
+       sch.ItemType,
+       COALESCE(item.ItemName, groupItem.ItemName, 
+       (CASE WHEN insProdGroup.GroupName is not null THEN '*' + insProdGroup.GroupName ELSE null END ), '') as ItemName,
+       baseLensItem.ItemName as BaseLens,
+       sch.MethodId,
+       insSchMethod.Description as MethodName,
+       sch.MinLimit,
+       sch.MaxLimit,
+       sch.ModifiedBy,
+       sch.Mod"
+dbo,V_GLSummaryAccount,2010-03-14 19:42:28.107,2023-03-19 07:58:52.283,739,"
+CREATE VIEW [dbo].[V_GLSummaryAccount]
+AS
+SELECT     TOP (100) PERCENT MAX(gs.ID) AS ID, gs.YearNum, gs.MonthNum, gs.OfficeNum, c.CompanyID AS companyID,
+                      (CASE WHEN Source = 1 THEN 'POS' WHEN Source = 2 THEN 'CASH' WHEN Source = 3 THEN 'BILLING' WHEN Source = 4 THEN 'INVENTORY' END) AS Source, gs.AccountNum, 
+                      ga.Description AS 'AccountName', SUM(gs.Amount) AS Amount
+FROM         dbo.GLSummary AS gs LEFT OUTER JOIN
+                      dbo.GLAccount A"
+dbo,V_GLMapping,2009-05-21 22:22:58.630,2023-03-19 07:58:52.280,2240,"
+
+
+CREATE VIEW [dbo].[V_GLMapping]
+AS
+SELECT     g.id, g.companyid, 'POS' AS Source, p.Description, g.sourcetypeid, g.SourceSubType, g.DebitCredit,
+ g.AccountType, ga.AccountNum, ISNULL
+                          ((SELECT     CASE WHEN sourcesubtype = 0 THEN 'OldSystemBalance' WHEN sourcesubtype = 1 
+                          THEN 'RejectedInsuranceClaim' WHEN sourcesubtype = 2 THEN 'CollectionPayment'
+                                                     WHEN sourcesubtype = 3 THEN 'NSFC"
+dbo,V_EGRXWithLabCodes,2008-12-06 10:08:11.930,2023-03-19 07:58:52.167,1251,"CREATE VIEW dbo.V_EGRXWithLabCodes
+AS
+SELECT     dbo.EGRX.ID, dbo.EGRX.OrderNum, dbo.EGRX.Eye, dbo.EGRX.ItemID, dbo.EGRX.FPD, dbo.EGRX.NPD, dbo.EGRX.Sphere, dbo.EGRX.Cylinder, dbo.EGRX.Axis, 
+                      dbo.EGRX.Prism1, dbo.EGRX.PrismDir1, dbo.EGRX.Dir1, dbo.EGRX.Prism2, dbo.EGRX.PrismDir2, dbo.EGRX.Dir2, dbo.EGRX.ResultPrism, dbo.EGRX.ResultAngle, 
+                      dbo.EGRX.Base, dbo.EGRX.OcHeight, dbo.EGRX.AddPower1, dbo.EGRX.AddPower2, dbo.EGRX.SegHeight, dbo.EGRX.Thick, d"
+dbo,V_EGRXWithLabCodesIDPA,2012-04-09 23:13:17.180,2023-03-19 07:58:52.163,1485,"
+
+CREATE VIEW [dbo].[V_EGRXWithLabCodesIDPA]
+AS
+SELECT     dbo.EGRX.ID, dbo.EGRX.OrderNum, dbo.EGRX.Eye, dbo.EGRX.ItemID, dbo.EGRX.FPD, dbo.EGRX.NPD, dbo.EGRX.Sphere, dbo.EGRX.Cylinder, dbo.EGRX.Axis, 
+                      dbo.EGRX.Prism1, dbo.EGRX.PrismDir1, dbo.EGRX.Dir1, dbo.EGRX.Prism2, dbo.EGRX.PrismDir2, dbo.EGRX.Dir2, dbo.EGRX.ResultPrism, dbo.EGRX.ResultAngle, 
+                      dbo.EGRX.Base, dbo.EGRX.OcHeight, dbo.EGRX.AddPower1, dbo.EGRX.AddPower2, dbo.EGRX.SegHeight, dbo.E"
+dbo,V_ExtraItemLabCodes,2008-08-26 13:20:02.750,2023-03-19 07:58:52.157,573,"CREATE VIEW dbo.V_ExtraItemLabCodes
+AS
+SELECT DISTINCT orderNum, (Stuff
+                          ((SELECT     '| ' + LabCode1
+                              FROM         v_ExtraLabCodes Ex2
+                              WHERE     Ex1.OrderNum = Ex2.OrderNum FOR XML PATH('')), 1, 2, '')) AS LabCodes1, (Stuff
+                          ((SELECT     '| ' + LabCode2
+                              FROM         v_ExtraLabCodes Ex3
+                              WHERE     Ex1.OrderNum = Ex3.OrderN"
+dbo,V_EGExtraTint,2008-12-06 10:08:12.273,2023-03-19 07:58:52.153,420,"CREATE VIEW dbo.V_EGExtraTint
+AS
+SELECT     dbo.EGExtra.OrderNum, dbo.EGExtra.ItemType, dbo.EGExtra.ItemID, dbo.EGExtra.WhichLens, dbo.ItemTint.LabCode1, dbo.ItemTint.LabCode2, 
+                      dbo.Item.ItemGroup
+FROM         dbo.EGExtra INNER JOIN
+                      dbo.ItemTint ON dbo.EGExtra.ItemID = dbo.ItemTint.ItemID INNER JOIN
+                      dbo.Item ON dbo.ItemTint.ItemID = dbo.Item.ID
+"
+dbo,v_ExtraLabCodes,2008-08-26 13:20:02.733,2023-03-19 07:58:52.150,590,"CREATE VIEW dbo.v_ExtraLabCodes
+AS
+SELECT     e.OrderNum, e.ItemID, e.ItemType, ilc.LabCode1, ilc.LabCode2
+FROM         (SELECT     ItemID, LabCode1, LabCode2
+                       FROM          dbo.ItemCoat
+                       UNION ALL
+                       SELECT     ItemID, LabCode1, LabCode2
+                       FROM         dbo.ItemMisc
+                       UNION ALL
+                       SELECT     ItemID, LabCode1, LabCode2
+                       FROM         dbo.Item"
+dbo,V_Slaboff,2008-12-06 10:08:11.290,2023-03-19 07:58:52.147,256,"CREATE VIEW dbo.V_Slaboff
+AS
+SELECT     1 AS SlabOff, dbo.EGExtra.OrderNum
+FROM         dbo.EGExtra INNER JOIN
+                      dbo.Item ON dbo.EGExtra.ItemID = dbo.Item.ID
+WHERE     (dbo.Item.ItemType = 16) AND (dbo.Item.ItemName = 'SLAB OFF')
+"
+dbo,V_EGExtraEdge,2008-12-06 10:08:12.100,2023-03-19 07:58:52.143,289,"CREATE VIEW dbo.V_EGExtraEdge
+AS
+SELECT     dbo.ItemEdge.LabCode1, dbo.EGExtra.OrderNum, dbo.EGExtra.ItemType, dbo.EGExtra.ItemID, dbo.EGExtra.ID, dbo.ItemEdge.LabCode2
+FROM         dbo.EGExtra INNER JOIN
+                      dbo.ItemEdge ON dbo.EGExtra.ItemID = dbo.ItemEdge.ItemID
+"
+dbo,V_ExportContactLens,2008-12-17 17:57:25.273,2023-03-19 07:58:52.077,906,"CREATE VIEW dbo.V_ExportContactLens
+AS
+SELECT     dbo.CLManufacturer.VendName, dbo.CLStyle.Style, dbo.CLStyle.LensMaterial, dbo.Item.ItemName, dbo.CLColor.Description, dbo.CLStyle.SphereMin, 
+                      dbo.CLStyle.SphereMax, dbo.CLStyle.SphereStep, dbo.CLStyle.CylinderMin, dbo.CLStyle.CylinderMax, dbo.CLStyle.CylinderStep, dbo.CLStyle.AxisMin, 
+                      dbo.CLStyle.AxisMax, dbo.CLStyle.AxisStep, dbo.CLStyle.AddMin, dbo.CLStyle.AddMax, dbo.CLStyle.AddStep, dbo.ItemCL."
+dbo,V_SecondaryPatientPhones,2012-04-09 23:13:18.117,2023-03-19 07:58:52.013,877,"
+
+
+
+CREATE VIEW [dbo].[V_SecondaryPatientPhones]
+AS
+SELECT DISTINCT dbo.PatientPhone.PatientID, dbo.Phone.IsPrimary, 
+CASE WHEN LEN(COALESCE (PhoneNumber, '')) < 10 THEN '' ELSE SUBSTRING(PhoneNumber, 1, 3) + '-' + SUBSTRING(PhoneNumber, 4, 3) 
+    + '-' + SUBSTRING(PhoneNumber, 7, 4) + ' ' + CASE WHEN LEN(COALESCE (PhoneExtension, '')) 
+    < 1 THEN '' ELSE '* ' + PhoneExtension END END AS SecondaryPhoneNumber, CE_PhoneType.Value AS SecPhoneType,CE_CallTime.Value AS SecWhenToCall
+FROM"
+dbo,GB_ProviderExpenseReport,2011-02-24 23:15:13.220,2023-03-19 07:58:51.953,1708,"
+
+
+
+
+CREATE VIEW [dbo].[GB_ProviderExpenseReport]
+AS
+
+SELECT   Row_number() over(order by t.LineItemId) as ID, 1 as AccountId, 222 as AccountTypeId, l1.ClaimId, 
+       t.OrderId, t.LineItemId, t.TransTypeId, 
+	   t.PaymentId, sum(t.Amount) AS TransactionAmount, p.CarrierId,p.CustomerId, p.PaymentTypeId, 
+       sum(p.Amount) AS PaymentAmount, p.PaymentNumber, p.PaymentDate, p.DepositDate, p.NumberOfSections, 
+	   sum(p.OutstandingAmount) as OutstandingAmount, p.CompanyID, max(isnull"
+dbo,V_COllectionOrderPayment,2014-03-10 00:08:06.660,2023-03-19 07:58:51.947,455,"
+CREATE View V_COllectionOrderPayment
+as
+select      CASE WHEN BT.TransTypeID = 2  OR (BT.TransTypeID = 11 AND BT.paymentid IS NOT NULL) THEN (BT.insdeltaar * -1) 
+				 WHEN BT.TransTypeID = 14 THEN (BT.insar)
+				 ELSE 0 END AS InsPayment,
+            CASE WHEN BT.transtypeID = 3 THEN (BT.patdeltaar * -1) ELSE 0 END AS PtPayment,ClaimId 
+            from BillingTransaction BT inner join BillingClaimLineItem  LI on BT.LineItemId = LI.LineItemId"
+dbo,GB_ClaimAdjustments,2008-10-14 09:52:44.203,2023-03-19 07:58:51.943,759,"
+CREATE view [dbo].[GB_ClaimAdjustments] as
+
+--
+--select * from
+-- BillingTransaction t 
+-- inner join dbo.BillingClaimLineItem b on t.LineItemId =  b.LineItemId 
+--where 
+--t.transtypeid = 11 and 
+--t.paymentid is null
+
+
+
+select
+	 t.OrderId
+	, t.LineItemId
+	, t.TransTypeId
+    ,sum((InsDeltaAR+PatDeltaAR)*-1) as TransactionAmount
+--	, t.ActivityId
+--	, t.PaymentId
+--	, t.Amount as TransactionAmount
+--	, t.TransactionDate
+--	, t.IsVoid
+--	, t.WriteoffReasonID
+   , b.claim"
+dbo,GB_ClaimCarrierPayments,2008-10-14 09:52:44.203,2023-03-19 07:58:51.940,1073,"
+
+
+
+CREATE VIEW [dbo].[GB_ClaimCarrierPayments]
+AS
+
+SELECT   Row_number() over(order by t.LineItemId) as ID, 1 as AccountId, 222 as AccountTypeId, l1.ClaimId, 
+       t.OrderId, t.LineItemId, t.TransTypeId, 
+t.PaymentId, case when t.TransTypeId = 14 then sum(t.InsDeltaAR) 
+else -sum(InsDeltaAR+PatDeltaAR) end AS TransactionAmount , 
+p.CarrierId,p.CustomerId, p.PaymentTypeId, 
+                      sum(p.Amount) AS PaymentAmount, p.PaymentNumber, p.PaymentDate, p.DepositDate, p.Number"
+dbo,GB_ClaimBillingTotals,2008-10-17 09:34:40.287,2023-03-19 07:58:51.937,499,"
+create view dbo.GB_ClaimBillingTotals as
+select
+	li.ClaimId
+	, sum(li.Allowance) as Allowance
+	, sum(li.Copay) as Copay
+	, sum(li.InsuranceDiscount) as InsuranceDiscount
+	, sum(li.Retail) as Retail
+	, sum(li.PaidAmount) as PaidAmount
+	, sum(li.RetailDiscount) as RetailDiscount
+	, sum(ld.Charge) as Charge
+	, sum(ld.Receivable) as Receivable
+from
+	BillingClaimLineItem li
+	inner join BillingLineDetails ld on li.LineItemId = ld.LineItemId and ld.IsCurrent = 1
+group by
+	li.ClaimId
+"
+dbo,GB_ClaimWriteOffs,2008-10-14 09:52:44.203,2023-03-19 07:58:51.933,1337,"
+CREATE view [dbo].[GB_ClaimWriteOffs] as
+
+--select
+--	a.AccountId
+--	, a.AccountTypeId
+--	, a.ClaimId 
+--	, e.EntryId
+--	, e.TransId
+--	, e.Amount as AccountEntryAmount
+--	, e.EntryDate
+--	, t.OrderId
+--	, t.LineItemId
+--	, t.TransTypeId
+--	, t.ActivityId
+--	, t.PaymentId
+--	, t.Amount as TransactionAmount
+--	, t.TransactionDate
+--	, t.IsVoid
+--	, t.WriteoffReasonID
+--	, r.ReasonCode
+--	, IsNull(r.ReportGrouping, 'OtherAdjustment') as ReportGrouping
+--from
+--	BillingAccou"
+dbo,V_GLBillingTransaction,2009-05-14 21:40:57.343,2023-03-19 07:58:51.930,545,"CREATE VIEW [dbo].[V_GLBillingTransaction]
+AS
+select cast(b.transtypeid as varchar(15)) + ' - ' + bd.officenum as ID,  month(b.transactiondate) as MonthNum,
+year(b.transactiondate) as YearNum,b.transtypeid as TransTypeID,sum(b.Amount) as Amount ,bd.OfficeNum,b.AdjustmentReasonID
+from  billingtransaction b inner join BillingClaimLineItem bc on b.lineitemid=bc.lineitemid
+inner join billingclaimdata bd on bc.claimid = bd.claimid
+group by b.transtypeid,month(b.transactiondate) ,year(b.transact"
+dbo,GB_ClaimCarrierPaymentTotals,2008-10-17 09:34:40.287,2023-03-19 07:58:51.763,409,"
+CREATE view dbo.GB_ClaimCarrierPaymentTotals as
+select
+	a.ClaimId
+	, sum(e.Amount) as AccountEntryAmount
+	, sum(t.InsDeltaAR) * -1 as TransactionAmount
+from
+	BillingAccount a
+	inner join BillingAccountEntry e on a.AccountId = e.AccountId
+	inner join BillingTransaction t on e.TransId = t.TransId and t.TransTypeId = 2    --- Carrier payment recvd
+where
+	a.AccountTypeId = 221
+group by
+	a.ClaimId"
+dbo,GB_ClaimCollectionTotals,2008-10-17 09:34:40.287,2023-03-19 07:58:51.750,405,"
+CREATE view dbo.GB_ClaimCollectionTotals as
+select
+	a.ClaimId
+	, sum(e.Amount) as AccountEntryAmount
+	, sum(t.PatDeltaAR) * -1 as TransactionAmount
+from
+	BillingAccount a
+	inner join BillingAccountEntry e on a.AccountId = e.AccountId
+	inner join BillingTransaction t on e.TransId = t.TransId and t.TransTypeId = 7 -- Claim sent to collections
+where
+	a.AccountTypeId = 227
+group by
+	a.ClaimId"
+dbo,GB_ClaimWriteOffTotals,2008-10-17 09:34:40.287,2023-03-19 07:58:51.733,1379,"
+CREATE view dbo.GB_ClaimWriteOffTotals as
+select
+	a.ClaimId
+	, sum(e.Amount) as AccountEntryAmount
+	, Adjustment1 =
+		case
+			when r.ReportGrouping = 'Adjustment1' then sum(t.INSDELTAAR)    -- Here we are considering only Insurance delta not patient delta 
+			else 0
+		end
+	, Adjustment2 =
+		case
+			when r.ReportGrouping = 'Adjustment2' then sum(t.INSDELTAAR)
+			else 0
+		end
+	, Adjustment3 =
+		case
+			when r.ReportGrouping = 'Adjustment3' then sum(t.INSDELTAAR)
+			else 0
+		end"
+dbo,V_itemAttribute,2009-08-29 12:35:55.940,2023-03-19 07:58:51.720,309,"CREATE VIEW dbo.V_itemAttribute
+AS
+SELECT     dbo.AttributeValues.*, dbo.AttributeDefinitions.name, dbo.AttributeDefinitions.defaultValue
+FROM         dbo.AttributeDefinitions INNER JOIN
+                      dbo.AttributeValues ON dbo.AttributeDefinitions.id = dbo.AttributeValues.attributeDefinitionId
+"
+dbo,V_GLItemByAttributeValues,2014-03-10 00:07:59.290,2023-03-19 07:58:51.717,1068,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+CREATE VIEW [dbo].[V_GLItemByAttributeValues]
+AS
+SELECT     NEWID() AS ID, i.ID AS ItemID, av.id AS AttributeValueID, ad.id AS AttributeDefinationID, ad.attributeCategoryId, ad.name, av.enumerationOptionValue, i.ItemNum, 
+                      i.ItemType, i.ItemGroup, eao.optionDescription
+FROM         dbo.ItemAttributeValues AS ia INNER JOIN
+                      dbo.AttributeValues AS av ON ia"
+dbo,V_AppointmentScheduleStat,2011-02-24 23:15:14.040,2023-03-19 07:58:51.707,746,"
+CREATE VIEW [dbo].[V_AppointmentScheduleStat]
+AS 
+select distinct  
+substring(convert(varchar(1000),params),CHARINDEX('UserId=',convert(varchar(1000),params))+7, CHARINDEX('ð',convert(varchar(1000),params),(CHARINDEX('UserId=',convert(varchar(1000),params))+7))-(CHARINDEX('UserId=',convert(varchar(1000),params))+8))   as UserID, Date, 1 as Total
+
+from Appointment A
+inner  join  WFActivity wf on   wf.WFInstanceId = A.WorkflowInstanceId  and
+	 wf.StateId = (select top 1 StateId from WFAct"
+dbo,V_AppointmentScheduleStatDetails,2011-02-24 23:15:14.137,2023-03-19 07:58:51.703,773," CREATE VIEW [dbo].[V_AppointmentScheduleStatDetails]
+AS 
+
+select substring(convert(varchar(1000),params),CHARINDEX('UserId=',convert(varchar(1000),params))+7, CHARINDEX('ð',convert(varchar(1000),params),(CHARINDEX('UserId=',convert(varchar(1000),params))+7))-(CHARINDEX('UserId=',convert(varchar(1000),params))+8))  as UserID ,
+ Date, 1 as Total, A.appttypeid, CE.value
+ from Appointment A
+  inner  join  WFActivity wf on   wf.WFInstanceId = A.WorkflowInstanceId  and
+wf.StateId = (select top"
+dbo,V_PatientAddresses,2017-09-20 08:27:07.500,2023-03-19 07:58:51.630,295,"
+CREATE VIEW [dbo].[V_PatientAddresses] with schemabinding
+AS
+SELECT     
+	a.Address1, 
+	a.Address2, 
+	a.City, 
+	a.State, 
+	a.ZipCode, 
+	a.AddressTypeID, 
+    a.IsPrimary, 
+    a.CountryId, 
+    p.PatientID,
+    a.ID
+FROM
+	dbo.Address a
+		INNER JOIN
+			dbo.PatientAddress p ON a.ID = p.AddressID"
+dbo,V_MiscPatientPaymentReport,2016-10-26 00:03:32.427,2017-07-07 00:01:43.183,1217,"CREATE VIEW [dbo].[V_MiscPatientPaymentReport]
+AS
+SELECT  pt.TransactionID,
+        o.OfficeNum,
+        pt.TransactionDate,
+        pt.Amount * -1 AS TransactionAmount,
+        pp.Amount * -1 AS PaymentAmount,
+        p.LastName + ', ' + p.FirstName AS PatientName,
+        e.LastName + ', ' + e.FirstName AS EmployeeName,
+        pt.OrderID AS 'OriginalOrderNumber',
+        pt.OfficeNum AS OriginalStoreNumber,
+        mpr.Description AS Value,
+        o.OfficeName,
+        mpr.ID AS"
+dbo,V_ExampleView,2014-03-10 00:09:07.670,2014-03-10 00:09:07.670,206,"
+/**************************/   
+/****** CREATE VIEW ******/
+/**************************/   
+CREATE VIEW V_ExampleView  AS
+SELECT
+	p.ID as patient_id,
+	p.CompanyID as company_id
+FROM dbo.patient p
+"
+dbo,V_AppointmentInsuranceNew,2014-03-10 00:07:51.247,2014-03-10 00:07:51.247,2840,"
+
+CREATE VIEW [V_AppointmentInsuranceNew]
+AS
+SELECT     a.appt_no AS ID, a.appt_date AS ApptDate, a.appt_show_ind AS ApptStatus, 
+                      dbo.V_PatientDemographics.PatientID, dbo.V_PatientDemographics.PatientFullName, 
+                      dbo.V_PatientDemographics.PhoneNumber, dbo.V_PatientDemographics.DateOfBirth, dbo.V_PatientDemographics.CompanyID, dbo.InsPlan.PlanName, 
+                      dbo.InsPlan.PlanTypeID, dbo.InsCarrier.CarrierName, dbo.InsCarrier.ID AS Carri"
+dbo,EGOrder_test,2014-01-13 15:47:45.687,2014-01-13 15:53:52.490,8728,"CREATE VIEW dbo.EGOrder_test
+AS
+SELECT     dbo.Orders.OrderNum, UPPER(dbo.Office.LabAccount) AS OfficeNum, dbo.Orders.ShipToType, dbo.Orders.OrderDate, dbo.Orders.ExpectDate, dbo.Orders.StatusCode, 
+                      dbo.Orders.OrderType, dbo.Orders.LabOrderWorkflowID, REPLACE(REPLACE(REPLACE(dbo.Orders.LabInstructions, CHAR(10) + CHAR(13), ' '), CHAR(10), ' '), CHAR(13), 
+                      ' ') AS LabInstructions, CASE WHEN egorder.uncut IS NULL THEN 0 ELSE egorder.uncut END AS Uncu"
+dbo,GB_ClaimCarrierPaymentsNew,2009-10-21 22:11:33.020,2011-04-07 21:58:01.673,1602,"create VIEW [dbo].[GB_ClaimCarrierPaymentsNew]
+AS
+
+--SELECT   Row_number() over(order by a.AccountId) as ID, a.AccountId, a.AccountTypeId, a.ClaimId, 
+--       t.OrderId, t.LineItemId, t.TransTypeId, 
+----                      t.ActivityId, 
+--t.PaymentId, sum(t.Amount) AS TransactionAmount, t.TransactionDate, t.IsVoid, t.WriteoffReasonID, p.CarrierId, p.CustomerId, p.PaymentTypeId, 
+--                      p.Amount AS PaymentAmount, p.PaymentNumber, p.PaymentDate, p.DepositDate, p.Number"
+dbo,v_OrderAging_Old,2010-02-26 13:44:57.630,2011-02-24 23:15:13.320,1969,"
+
+
+create VIEW [dbo].[v_OrderAging_Old]
+AS
+SELECT     OrderDate, OfficeNum, OrderNum, SUM(OrderAmount) AS OrderAmount, SUM(PaidAmount) AS PaidAmount, SUM(OrderAmount) + SUM(PaidAmount) 
+                      AS Balance, CustomerID, MAX(LastPaymentDate) AS LastPaymentDate
+FROM         (SELECT     o.OrderDate, o.OfficeNum, o.OrderNum, pt.Amount AS OrderAmount, 0 AS PaidAmount, o.CustomerID, NULL AS LastPaymentDate
+                       FROM          dbo.Orders AS o INNER JOIN
+           "
+dbo,v_OrderAging_1,2010-02-26 13:38:33.890,2011-02-24 23:15:13.117,2090,"
+--select * from Office
+
+create VIEW [dbo].[v_OrderAging_1]
+AS
+
+SELECT     OrderDate, OfficeNum, OrderNum, SUM(OrderAmount) AS OrderAmount, SUM(PaidAmount) AS PaidAmount, SUM(OrderAmount) + SUM(PaidAmount) 
+                      AS Balance, CustomerID, MAX(LastPaymentDate) AS LastPaymentDate
+FROM         (SELECT     o.OrderDate, pt.OfficeNum, o.OrderNum, pt.Amount AS OrderAmount, 0 AS PaidAmount, o.CustomerID, NULL AS LastPaymentDate
+                       FROM          dbo.Orders AS o "
+dbo,V_CLStockOrder_old,2009-05-14 21:40:57.420,2011-02-24 23:15:09.540,1157,"create VIEW [dbo].[V_CLStockOrder_old]
+AS
+SELECT     distinct cast(invD.InvoiceID as varchar) + '-' + cast(LineNum as varchar) as ID, invD.InvoiceID, invd.linenum,invD.ItemType, cl.ItemID, invD.Quantity as Quantity, 
+                o.OrderNum, o.OrderDate, o.OfficeNum, o.Associate, o.CustomerID, pt.CLStockItemID,
+                          (SELECT     SupplierItemNum
+                            FROM          dbo.ItemSupplierMapping
+                            WHERE      (ItemNum = i.ItemNu"

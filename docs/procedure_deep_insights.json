@@ -1,0 +1,85 @@
+{
+  "metadata": {
+    "analysis_date": "2025-08-08T08:09:24.251348"
+  },
+  "procedure_inventory": {
+    "total_procedures": 1,
+    "with_source_code": 1,
+    "without_source_code": 0,
+    "creation_timeline": {
+      "2025": 1
+    },
+    "modification_timeline": {
+      "2025": 1
+    },
+    "schemas": {
+      "dbo": 1
+    },
+    "avg_definition_length": 569.0,
+    "complexity_distribution": {
+      "simple": 1,
+      "medium": 0,
+      "complex": 0
+    }
+  },
+  "naming_patterns": {
+    "prefixes": {
+      "sp": 1
+    },
+    "suffixes": {
+      "startup": 1
+    },
+    "business_domains": {},
+    "action_verbs": {},
+    "domain_procedures": {}
+  },
+  "parameter_analysis": {
+    "status": "no_parameters_found"
+  },
+  "business_domains": {},
+  "complexity_analysis": {},
+  "dependency_networks": {},
+  "execution_insights": {},
+  "business_intelligence": {
+    "patient_analytics": {
+      "description": "Patient lifecycle and outcome analytics",
+      "procedures": [],
+      "potential_kpis": [
+        "Patient satisfaction",
+        "Treatment outcomes",
+        "Visit frequency",
+        "Revenue per patient"
+      ]
+    },
+    "financial_analytics": {
+      "description": "Revenue cycle and financial performance",
+      "procedures": [],
+      "potential_kpis": [
+        "Revenue trends",
+        "Payment cycles",
+        "Outstanding AR",
+        "Profitability by service"
+      ]
+    },
+    "operational_analytics": {
+      "description": "Operational efficiency and resource utilization",
+      "procedures": [],
+      "potential_kpis": [
+        "Appointment utilization",
+        "Staff productivity",
+        "Resource allocation",
+        "Wait times"
+      ]
+    },
+    "inventory_analytics": {
+      "description": "Inventory management and product performance",
+      "procedures": [],
+      "potential_kpis": [
+        "Inventory turnover",
+        "Product profitability",
+        "Stock levels",
+        "Supplier performance"
+      ]
+    }
+  }
+}

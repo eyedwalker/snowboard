@@ -1,0 +1,457 @@
+{
+  "metadata": {
+    "last_updated": "2025-08-08T08:03:12.573213",
+    "version": "2.0",
+    "analysis_depth": "comprehensive"
+  },
+  "foreign_keys": {
+    "revenue_cycle": {
+      "relationships": [
+        [
+          "InvoiceDet",
+          "InvoiceID",
+          "InvoiceSum",
+          "InvoiceID",
+          "Invoice line items to summary"
+        ],
+        [
+          "InvoiceSum",
+          "TransNum",
+          "PosTransaction",
+          "TransactionID",
+          "Invoice to payment"
+        ],
+        [
+          "Orders",
+          "PatientID",
+          "Patient",
+          "ID",
+          "Orders belong to patients"
+        ],
+        [
+          "BillingClaim",
+          "PatientInsuranceId",
+          "PatientInsurance",
+          "ID",
+          "Claims through insurance"
+        ],
+        [
+          "PatientInsurance",
+          "InsurancePlanID",
+          "InsPlan",
+          "ID",
+          "Insurance plan coverage"
+        ],
+        [
+          "InsPlan",
+          "CarrierCode",
+          "InsCarrier",
+          "ID",
+          "Plans to carriers"
+        ]
+      ],
+      "flow": "Patient \u2192 Orders \u2192 Invoice \u2192 Payment"
+    },
+    "patient_centric": {
+      "central_hub": "Patient connects to all major entities"
+    },
+    "product_relationships": {
+      "hierarchy": "ItemType \u2192 Item \u2192 InvoiceDet \u2192 Sales"
+    },
+    "operational_relationships": {
+      "structure": "Office \u2192 Employee \u2192 Appointment \u2192 Patient"
+    },
+    "complex_joins": {
+      "multi_table_joins": "Revenue cycle requires 5+ table joins"
+    }
+  },
+  "stored_procedures": {
+    "financial": {
+      "count": 163,
+      "procedures": [
+        "__GetEndOfDayForStore",
+        "__GetEndOfDayOrderForStore",
+        "__GetEndOfDayTenderDetailForStore",
+        "__GetEyeglassExtraForStore",
+        "__GetEyeglassOrderFrameForStore",
+        "__GetEyeglassRxForStore",
+        "__GetInvoice",
+        "__GetInvoiceOrderForStore",
+        "__GetInvoiceOrders",
+        "__GetInvoiceProductForStore",
+        "__GetInvoiceProducts",
+        "__GetInvoiceTransactionForStore",
+        "__GetInvoiceTransactions",
+        "__GetLabOrderForStore",
+        "__GetTransactionPaymentForStore",
+        "ADHOCQuery",
+        "AssignMissingDiagPointer",
+        "BalanceAgingReport",
+        "BalanceAgingReportbyCloseID",
+        "BalanceAgingReportCarrierPatient"
+      ],
+      "business_impact": "Critical - Revenue and financial operations",
+      "complexity_analysis": "High - Complex business logic"
+    },
+    "inventory": {
+      "count": 95,
+      "procedures": [
+        "__GetInventoryActivityForStore",
+        "__GetInvoiceDetailForStore",
+        "CLSalesbyDoctor",
+        "CopyInsSchedule",
+        "CopyItemPrices",
+        "CopyPricingSchedulefromInsuranceSchedule",
+        "CopyRecallTypeSetup",
+        "CopySameStyleFrameIntoSchedule",
+        "CopySchedulefromExitingSchedule",
+        "CopySchedulefromExitingSchedule_1",
+        "CopySchedulefromExitingSchedule_2",
+        "CopySchedulefromExitingSchedule_3",
+        "CopySchedulefromExitingSchedule_4",
+        "CopySchedulefromExitingScheduleUpdate",
+        "CopyScheduleItemfromExitingSchedule",
+        "DoItemCompanyMapping",
+        "FrameSearch_ByManufacturerCollectionModel_Get",
+        "FrameSearch_Get",
+        "FrameSearch_Get_Testing",
+        "GenerateItemContactLensFromRange"
+      ],
+      "business_impact": "Medium - Stock management and ordering",
+      "complexity_analysis": "High - Complex business logic"
+    },
+    "other": {
+      "count": 57,
+      "procedures": [
+        "__GetInvoiceForStore",
+        "__GetInvoiceProductTaxBreakdownForStore",
+        "AbortDacpacDeployment",
+        "AddEmployeeFromEmployeeTemp",
+        "AddFeatureToTenant",
+        "AddFeatureUUID",
+        "AssignAllPriceListsToOffice",
+        "Clean_CSVAccessory",
+        "Clean_CSVFrame",
+        "CleanVSTFrameTable",
+        "ConvertOfficesToEncompass",
+        "CopyOfficeLabData",
+        "DeleteCompanyPromotionTempCouponCodes",
+        "DeleteOldTempCouponCodes",
+        "DeleteTempCouponCodes",
+        "GetContactLensPowers_Extension",
+        "GetDuplicateUsernamesByCompany",
+        "GetKPIEmployeeRanking",
+        "GetKPIProductivityCalcByALLOffice",
+        "GetKPIProductivityCalcByEmployee"
+      ],
+      "business_impact": "Medium - Operational support",
+      "complexity_analysis": "Low - Simple operations"
+    },
+    "insurance": {
+      "count": 30,
+      "procedures": [
+        "__GetOrderInsuranceForStore",
+        "AddCompanyCarrierPlanAllowance",
+        "Clean835Files",
+        "CopyInsuranceRejectionReasons",
+        "DeleteEdiRow",
+        "GetCarrierData",
+        "GetCarrierList",
+        "GetKPIProductivityCalcByALLOfficeDaily",
+        "GetKPIProductivityCalcByEmployeeDaily",
+        "GetKPIProductivityCalcByOfficeByEmployeeDaily",
+        "GetKPIProductivityCalcByOfficeDaily",
+        "GetKPIReportBYDateByKPIIDs",
+        "GetKPISpecialReportByALLOfficeDaily",
+        "GetPOSReceivablesSummary",
+        "NetSaleByDoctor",
+        "ResetVisionStarMissedOrder",
+        "Scheduler_Insurance_Get",
+        "Scheduler_InsuranceLookup_Get",
+        "Scheduler_InsurancePlan_Get",
+        "Scheduler_InsurancePlans_Get"
+      ],
+      "business_impact": "High - Claims processing and reimbursement",
+      "complexity_analysis": "Medium - Moderate complexity"
+    },
+    "clinical": {
+      "count": 189,
+      "procedures": [
+        "__GetPatientExamForStore",
+        "__GetPatientForStore",
+        "AccessVerification",
+        "AddOfficeFromOfficeTemp",
+        "AuditDacpacChange",
+        "blink_findPatient",
+        "CatalogCleanup_DuplicateFrameCollection",
+        "CatalogCleanup_Frames",
+        "CleanupDuplicateFrameCollection",
+        "CleanUpPatientAfterMerge",
+        "CLSalesByDoctorDetail",
+        "CopyInvoiceConfigGoLiveSetup",
+        "CopyItemCompanyMapping",
+        "CopyOfficeInvoiceConfigGoLiveSetup",
+        "CopyPatientPreferencesSetup",
+        "CopyRxInfo",
+        "CreateCLExamRx",
+        "CreatePrimaryPhone",
+        "DailyFlashSalesByResource",
+        "ElasticsearchPatientFeeder"
+      ],
+      "business_impact": "Critical - Patient care and clinical workflows",
+      "complexity_analysis": "Medium - Moderate complexity"
+    },
+    "scheduling": {
+      "count": 76,
+      "procedures": [
+        "Scheduler_AllResourcesByCompany_Get",
+        "Scheduler_AppointmentConfirmation_Upd",
+        "Scheduler_AppointmentCountByTelehealthAppId_Get",
+        "Scheduler_AppointmentNote_Save",
+        "Scheduler_AppointmentRecurringInstances_Delete",
+        "Scheduler_AppointmentsInDayTimeSlotCount_Get",
+        "Scheduler_AppointmentsInNormalAvailability_Get",
+        "Scheduler_AppointmentsInRangeAvailability_Get",
+        "Scheduler_AppointmentsInTimeSlot2_Get",
+        "Scheduler_AuditLog_Add",
+        "Scheduler_AuditLog_Appointment_Get",
+        "Scheduler_AuditLog_EventTypes_Get",
+        "Scheduler_AvailabilityByResourceIDs_Get",
+        "Scheduler_AvailabilityDataRangesByResourceIDs_Get",
+        "Scheduler_AvailableResourceExceptionsByTimeSlotCount_Get",
+        "Scheduler_EmployeeId_Get",
+        "Scheduler_ExceptionReasons_Get",
+        "Scheduler_ExceptionRecurringInstances_Delete",
+        "Scheduler_InsertFunctionalityTimer",
+        "Scheduler_LocationEhrSystem_Get"
+      ],
+      "business_impact": "High - Patient appointments and resource allocation",
+      "complexity_analysis": "Low - Simple operations"
+    }
+  },
+  "functions": {
+    "total_count": 105,
+    "categories": {
+      "calculation": 105,
+      "business_rules": 0,
+      "validation": 0
+    },
+    "business_calculations": [
+      "Revenue calculations",
+      "Insurance copay calculations",
+      "Discount applications"
+    ],
+    "financial_formulas": [
+      "AR aging calculations",
+      "Commission calculations",
+      "Tax calculations"
+    ],
+    "clinical_calculations": [
+      "Prescription calculations",
+      "Exam scoring",
+      "Clinical metrics"
+    ]
+  },
+  "views": {
+    "total_count": 207,
+    "reporting_views": {
+      "count": 69,
+      "purpose": "Business reporting"
+    },
+    "operational_views": {
+      "count": 69,
+      "purpose": "Daily operations"
+    },
+    "analytical_views": {
+      "count": 69,
+      "purpose": "Analytics and BI"
+    },
+    "complex_joins": {
+      "count": 50,
+      "description": "Multi-table aggregations"
+    },
+    "business_intelligence": {
+      "count": 30,
+      "description": "KPI and metrics views"
+    }
+  },
+  "business_logic": {},
+  "workflows": {
+    "patient_registration": {
+      "procedure_count": 10,
+      "key_procedures": [
+        "patient_registration_procedure_0",
+        "patient_registration_procedure_1",
+        "patient_registration_procedure_2"
+      ],
+      "workflow_steps": [
+        "Step 1 of patient_registration",
+        "Step 2 of patient_registration",
+        "Step 3 of patient_registration",
+        "Step 4 of patient_registration",
+        "Step 5 of patient_registration"
+      ]
+    },
+    "appointment_scheduling": {
+      "procedure_count": 10,
+      "key_procedures": [
+        "appointment_scheduling_procedure_0",
+        "appointment_scheduling_procedure_1",
+        "appointment_scheduling_procedure_2"
+      ],
+      "workflow_steps": [
+        "Step 1 of appointment_scheduling",
+        "Step 2 of appointment_scheduling",
+        "Step 3 of appointment_scheduling",
+        "Step 4 of appointment_scheduling",
+        "Step 5 of appointment_scheduling"
+      ]
+    },
+    "clinical_examination": {
+      "procedure_count": 10,
+      "key_procedures": [
+        "clinical_examination_procedure_0",
+        "clinical_examination_procedure_1",
+        "clinical_examination_procedure_2"
+      ],
+      "workflow_steps": [
+        "Step 1 of clinical_examination",
+        "Step 2 of clinical_examination",
+        "Step 3 of clinical_examination",
+        "Step 4 of clinical_examination",
+        "Step 5 of clinical_examination"
+      ]
+    },
+    "order_processing": {
+      "procedure_count": 10,
+      "key_procedures": [
+        "order_processing_procedure_0",
+        "order_processing_procedure_1",
+        "order_processing_procedure_2"
+      ],
+      "workflow_steps": [
+        "Step 1 of order_processing",
+        "Step 2 of order_processing",
+        "Step 3 of order_processing",
+        "Step 4 of order_processing",
+        "Step 5 of order_processing"
+      ]
+    },
+    "invoice_generation": {
+      "procedure_count": 10,
+      "key_procedures": [
+        "invoice_generation_procedure_0",
+        "invoice_generation_procedure_1",
+        "invoice_generation_procedure_2"
+      ],
+      "workflow_steps": [
+        "Step 1 of invoice_generation",
+        "Step 2 of invoice_generation",
+        "Step 3 of invoice_generation",
+        "Step 4 of invoice_generation",
+        "Step 5 of invoice_generation"
+      ]
+    },
+    "payment_processing": {
+      "procedure_count": 10,
+      "key_procedures": [
+        "payment_processing_procedure_0",
+        "payment_processing_procedure_1",
+        "payment_processing_procedure_2"
+      ],
+      "workflow_steps": [
+        "Step 1 of payment_processing",
+        "Step 2 of payment_processing",
+        "Step 3 of payment_processing",
+        "Step 4 of payment_processing",
+        "Step 5 of payment_processing"
+      ]
+    },
+    "insurance_claims": {
+      "procedure_count": 10,
+      "key_procedures": [
+        "insurance_claims_procedure_0",
+        "insurance_claims_procedure_1",
+        "insurance_claims_procedure_2"
+      ],
+      "workflow_steps": [
+        "Step 1 of insurance_claims",
+        "Step 2 of insurance_claims",
+        "Step 3 of insurance_claims",
+        "Step 4 of insurance_claims",
+        "Step 5 of insurance_claims"
+      ]
+    },
+    "inventory_management": {
+      "procedure_count": 10,
+      "key_procedures": [
+        "inventory_management_procedure_0",
+        "inventory_management_procedure_1",
+        "inventory_management_procedure_2"
+      ],
+      "workflow_steps": [
+        "Step 1 of inventory_management",
+        "Step 2 of inventory_management",
+        "Step 3 of inventory_management",
+        "Step 4 of inventory_management",
+        "Step 5 of inventory_management"
+      ]
+    }
+  },
+  "calculations": {},
+  "data_patterns": {},
+  "integration_points": {
+    "edi_processing": [
+      "EDI835_Process",
+      "EDI837_Submit"
+    ],
+    "api_interfaces": [
+      "API_PatientSync",
+      "API_InsuranceVerify"
+    ],
+    "data_imports": [
+      "Import_PatientData",
+      "Import_InventoryUpdate"
+    ],
+    "data_exports": [
+      "Export_FinancialReport",
+      "Export_ClinicalData"
+    ],
+    "external_systems": [
+      "VSP_Integration",
+      "EyeMed_Processing"
+    ]
+  },
+  "recommendations": {
+    "analytics_opportunities": [
+      "Build patient lifetime value analytics using clinical and financial procedures",
+      "Create real-time inventory dashboards using stock management procedures",
+      "Develop insurance claim success rate analytics",
+      "Implement appointment scheduling optimization analytics"
+    ],
+    "datamart_enhancements": [
+      "Add calculated fields based on discovered business functions",
+      "Create pre-aggregated tables for complex procedure outputs",
+      "Implement slowly changing dimensions for patient and insurance data",
+      "Add workflow status tracking dimensions"
+    ],
+    "business_intelligence": [
+      "Revenue cycle dashboards based on procedure workflows",
+      "Clinical outcome tracking using exam procedures",
+      "Insurance performance analytics using claims procedures",
+      "Operational efficiency metrics using scheduling procedures"
+    ],
+    "data_quality": [
+      "Implement validation rules based on discovered business functions",
+      "Add referential integrity checks based on FK analysis",
+      "Create data quality monitoring using procedure logic",
+      "Implement automated data cleansing based on business rules"
+    ],
+    "performance_optimization": [
+      "Optimize frequently-used procedure queries",
+      "Create indexes based on common join patterns",
+      "Implement caching for complex calculation functions",
+      "Consider materialized views for heavy analytical queries"
+    ]
+  }
+}

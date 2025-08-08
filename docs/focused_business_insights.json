@@ -1,0 +1,803 @@
+{
+  "invoice_logic": {
+    "total_procedures": 482,
+    "key_procedures": [
+      {
+        "name": "GetMonthlyAppliedPaymentSummary",
+        "definition_length": 3994,
+        "preview": "CREATE PROCEDURE [dbo].[GetMonthlyAppliedPaymentSummary]\n@fromDate as datetime,\n@toDate as datetime,\n@officeNum varchar(max),\n@doctorIds varchar(max),\n@companyId varchar(20),\n@IncludeOldSystemCredit as bit\n\nAS\nBEGIN\n   SET NOCOUNT ON;\n   SELECT ID as OfficeID INTO #OfficeList from GetOfficeNumber(@officeNum);\n\n  SELECT * FROM \n   (         \n\t\tSELECT  newId() AS ID, \n\t\t    ISNULL(e.employee, 1) AS DoctorId,\n            CASE WHEN LEN(LTRIM(RTRIM(e.ProfessionalSignature))) > 0  THEN e.ProfessionalS",
+        "business_logic": "payment_processing"
+      },
+      {
+        "name": "GetTrizettoIntegration",
+        "definition_length": 2918,
+        "preview": "/****** Object:  StoredProcedure [AdvancedMetric].[GetTrizettoIntegration]    Script Date: 12/04/2024 3:40:12 PM ******/\r\n-- =============================================\r\n-- Author:\t\tAnton\r\n-- Create date: 12/04/2024\r\n-- Description: Gets executed by Advanced Metric system to collect data from the enterprise client\r\n-- This sp is to protect against potential violations via changing query string parameters \r\n-- =============================================\r\nCREATE PROCEDURE [AdvancedMetric].[Get",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "GenerateBillingAR",
+        "definition_length": 12133,
+        "preview": "CREATE PROCEDURE [dbo].[GenerateBillingAR]    \n@FromSerivceDate as datetime,  \n@ToServiceDate as datetime,  \n@FromTransDate as datetime,  \n@ToTransDate as datetime,  \n@LastDepositDate as datetime,  \n@CompanyID as varchar(10),  \n@Officenum as varchar(max)  \nAS  \nBEGIN  \n      -- SET NOCOUNT ON added to prevent extra result sets from  \n      -- interfering with SELECT statements.  \n      SET NOCOUNT ON;  \ndeclare @CloseID as int  \ndeclare @PreviousCloseID as int  \ndeclare @monthClosedDate as date ",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "GetWorldPayIntegration",
+        "definition_length": 2010,
+        "preview": "/****** Object:  StoredProcedure [AdvancedMetric].[GetWorldPayIntegration]    Script Date: 12/04/2024 3:20:33 PM ******/\r\n-- =============================================\r\n-- Author:\t\tAnton\r\n-- Create date: 12/04/2024\r\n-- Description: Gets executed by Advanced Metric system to collect data from the enterprise client\r\n-- This sp is to protect against potential violations via changing query string parameters\r\n-- =============================================\r\nCREATE PROCEDURE [AdvancedMetric].[GetW",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "GetPackageLite",
+        "definition_length": 3938,
+        "preview": "CREATE PROCEDURE [dbo].[GetPackageLite] \n\t@officeNum VARCHAR(8), \n\t@description VARCHAR(50) = NULL,\n\t@packageID int = NULL,\n\t@isVSPIOF bit = 0\nAS\nBEGIN\n\n\tSET NOCOUNT ON;\n\n\tSET @description = CASE WHEN @description IS NULL OR @description = '' THEN '%'\n\t\t\t\t\t   ELSE '%' + @description + '%'\n\tEND\n\n\tIF @packageID = 0 \n\t\tSET @packageID = NULL \n\n\tIF OBJECT_ID('tempdb..#TempPackSchedule') IS NOT NULL\n\t\tDROP TABLE #TempPackSchedule\n\n\tCREATE TABLE #TempPackSchedule \n\t( \n\t    Itemvalue VARCHAR(15), \n\t    ",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "CopyOfficeInvoiceConfigGoLiveSetup",
+        "definition_length": 2193,
+        "preview": "CREATE PROCEDURE [dbo].[CopyOfficeInvoiceConfigGoLiveSetup]\n\t@FromOfficeNum\tvarchar(8),\n\t@ToOfficeNum\tvarchar(8),\n\t@WithOverlay\t\tint = 0\t\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\n    MERGE OfficeInvoiceConfig AS T \n\tUSING(\n\t\tSELECT @ToOfficeNum AS OfficeNum\n\t\t    ,CompanyId\n\t\t\t,DisplayTaxID\n\t\t\t,DisplayPatientMRN\n\t\t\t,DisplayDiagnosisCodes\n\t\t\t,DisplayNextAppointmentDate\n\t\t\t,DisplayNPIOption\n\t\t\t,DisplayPatientAddress\n\t\t\t,DisplayCCSignatureCapture\n\t\t\t,DisplayPromiseDate\n\t\t\t,DisplayFrameItemNum\n\t\t\t,DisplayCPTCodes",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "CopyOfficeData",
+        "definition_length": 39099,
+        "preview": "-- IF EXISTS ( SELECT * FROM sysobjects WHERE  id = object_id(N'[dbo].[CopyOfficeData]') and OBJECTPROPERTY(id, N'IsProcedure') = 1 ) BEGIN DROP PROCEDURE [dbo].[CopyOfficeData] END\nCREATE PROCEDURE [dbo].[CopyOfficeData]\n@FromOfficeNum VARCHAR (100),\n@ToOfficeNum VARCHAR (100),\n@WithOverlay BIT\nAS\nBEGIN\n\t-- Internal variables BEGIN ---------------------------------------------------------------------------------\n\tDECLARE @totalChange int = 0;\n\tDECLARE @officenumber VARCHAR (100) = @FromOfficeNu",
+        "business_logic": "summation_calculations"
+      },
+      {
+        "name": "spLoadPearleCustomer",
+        "definition_length": 5424,
+        "preview": "CREATE PROCEDURE [dbo].[spLoadPearleCustomer]\n(\n\t-- Patient\n\t @homeOffice\t\t\tVARCHAR(8) = NULL\n\t,@lastName\t\t\t\tVARCHAR(30)\n\t,@firstName\t\t\t\tVARCHAR(30)\n\t,@middleName\t\t\tVARCHAR(1) = NULL\n\t,@title\t\t\t\t\tINT = NULL\n\t,@sex\t\t\t\t\tVARCHAR(1) = NULL\n\t,@birthDate\t\t\t\tDATETIME = NULL\n\t,@email\t\t\t\t\tVARCHAR(MAX) = NULL\n\t,@emailFlag\t\t\t\tBIT = NULL\n\t,@isBadEmail\t\t\tBIT = 0\n\t,@oldCustomerRecord\t\tINT = NULL\n\t,@originOfficeNumber \tINT = NULL\n\t,@originPatientId\t\tINT = NULL\n\t,@conversionOrigin\t\tNVARCHAR(255) = NULL\n\t,@lastE",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "WorkFlowPurge",
+        "definition_length": 2638,
+        "preview": "\r\n-- =============================================\r\n-- Author:\t\tSam Callejo and Kris Jornlin\r\n-- Create date: 01/30/2013\r\n-- Description:\tGets only providers for listbox.\r\n-- =============================================\r\n\r\nCREATE PROCEDURE [dbo].[WorkFlowPurge]  \r\n\t@ProcessDate datetime,\r\n\t@ProcessToPurge varchar(50)\r\nAS  \r\nBEGIN  \r\n\t \r\n\t declare @ErrorCode int\r\n\t \r\n\t BEGIN TRY \r\n\t\tBEGIN TRANSACTION\r\n\t\t \r\n\t\t if (@ProcessToPurge = 'appointments')\r\n\t\t begin\r\n\t\t\texec WorkFlowPurge_Appointments @Pr",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "GetPatientLite",
+        "definition_length": 3127,
+        "preview": "\nCREATE PROCEDURE [dbo].[GetPatientLite]\n@CompanyID as varchar(20) ,\n@PatientID as int ,\n@FirstName as varchar(30) ,\n@LastName as varchar(30) ,\n@BirthDate as varchar(100) ,\n@PhoneNumber as varchar(50) ,\n@InActive as varchar(10) ,\n@MaxResults as int = 100,\n@FirstResult as int = 0,\n@TodaysPatient as varchar(10) ,\n@OfficeNum as varchar(8)\n\nAS\nBEGIN\n    SET NOCOUNT ON;\n    declare @InActiveValue as bit\n    declare @TodaysPatientValue as bit\n    declare @MaxResultValue as int\n    declare @IsPatientSh",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "SP_PatientSearch_Extension",
+        "definition_length": 987,
+        "preview": "\nCREATE PROCEDURE [SP_PatientSearch_Extension]\n\t@CompanyID   VARCHAR(20)  = NULL,\n    @FirstName   VARCHAR(30)  = NULL,\n    @LastName    VARCHAR(30)  = NULL,\n    @PhoneNumber VARCHAR(50)  = NULL,\n    @DateOfBirth VARCHAR(100) = NULL\n\nAS\n\nBEGIN\n\tSET NOCOUNT ON\n\t\n\tSELECT  CompanyId,\n            HomeOffice,\n            PatientId,\n            FirstName,\n            LastName,\n            DateOfBirth,\n            PhoneNumber,\n            Address1,\n            Address2,\n            City,\n            St",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "MarkVisionStarOrderReadyToBeSent",
+        "definition_length": 868,
+        "preview": "\r\nCREATE PROCEDURE [dbo].[MarkVisionStarOrderReadyToBeSent] \r\n\t@XifDataBatchId int,\r\n\t@HasRecordsToProcess int out \r\nAS\r\nBEGIN\r\n\r\n\r\nif exists(select * from VisionStarOrderSent where XifDataBatchId = @XifDataBatchId)\r\nBegin\r\n\t--we may clear the data before proceeding with the insert\r\n\t--do not want to create the duplicate records for the same order\r\n\t--in same batch\r\n\tdelete from VisionStarOrderSent where XifDataBatchId = @XifDataBatchId \r\nEnd\r\n\r\ninsert into VisionStarOrderSent (XifDataBatchId, O",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "CLSalesbyDoctor",
+        "definition_length": 981,
+        "preview": "CREATE PROCEDURE [dbo].[CLSalesbyDoctor]\r\n\r\n@fromdate datetime,\r\n@todate  datetime,\r\n@CompanyID varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\ndeclare @iCnt as int\r\nselect @iCnt=count(*)  from sysobjects where xtype='U' and name = '#V_InvoiceDetailBYItemType'\r\nif(@iCnt <>0) \r\nBegin\r\ndrop table #V_InvoiceDetailBYItemType\r\nend\r\n\r\n\r\nSelect * into  #V_InvoiceDetailBYItemType from  V_InvoiceDetailBYItemType where Transactiondate >=@fromDate and\r\n TransactionDate <dateadd(d,1,@todate) and Itemtype=17\r\n a",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "CLSalesByDoctorDetail",
+        "definition_length": 1233,
+        "preview": "CREATE PROCEDURE [dbo].[CLSalesByDoctorDetail]\r\n\r\n@fromdate datetime,\r\n@todate  datetime,\r\n@CompanyID varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\n\r\n\r\nselect \r\n\tNEWID() as ID, \r\n\tv.DoctorId, \r\n\te.FirstName, \r\n\te.LastName, \r\n\tv.OfficeNum, \r\n\tv.PatientId as PatientId,  \r\n\tv.PatientName as PatientName, \r\n\tcs.CLStyleID, \r\n\tcs.Style,\r\n\tv.Quantity as Quantity, \r\n\tv.TransactionDate as DateOfSale, \r\n\tv.OrderNum as OrderNum,  \r\n\tv.NetSales as NetSale \r\n from \r\n\t(SELECT \r\n\t\tID\r\n\t\t,InvoiceDetailId\r\n\t\t,Invoi",
+        "business_logic": "general_invoice_logic"
+      },
+      {
+        "name": "GetPatientStatementReport",
+        "definition_length": 7551,
+        "preview": "CREATE PROCEDURE [dbo].[GetPatientStatementReport]\n@cutOffDate datetime,\n@OfficeNumber varchar(30),\n@orderid varchar(10)\nAS\nBEGIN\n\n SET NOCOUNT ON;\n DECLARE @listOrderId VARCHAR(Max)\n\n if (@orderid is null or @orderid  = '')\n begin\n     SELECT @listOrderId = COALESCE(@listOrderId+',' ,'') + cast(a.ordernum as varchar(10))\n     FROM (select * from GetPatientOrdersWithBalance(@cutOffDate, @officeNumber)) as a  \n end\n else\n begin\n    set @listOrderId  =  @orderid\n end\n\n\n;WITH \n    PatientPosTransac",
+        "business_logic": "balance_management"
+      }
+    ],
+    "business_patterns": {
+      "balance_calculations": [
+        "GetPatientStatementReport",
+        "LoadOldSystemBalanceByPatient",
+        "SP_OrderAgingFilterByOfficeIds",
+        "LoadOldSystemCustomerCreditByPatient",
+        "LoadPatientOldSystemBalance",
+        "Scheduler_PatientDetail_Get",
+        "BalanceAgingReportNew",
+        "BalanceAgingReportCarrierPatient",
+        "BalanceAgingReportbyCloseID",
+        "BalanceAgingReport",
+        "GetUnbilledBalanceAging",
+        "GetUnbilledAging",
+        "LoadInventoryPhysicalFile",
+        "CalcPOSTransactionSummaryByDayCloseDate",
+        "CalcPOSTransactionSummaryByDate",
+        "UpdateInventoryBalanceOnOrderAndTransitIn",
+        "UpdateInventoryBalanceOnHand",
+        "UpdateInventoryBalanceOnHand1",
+        "GetOutstandingBalance"
+      ],
+      "payment_processing": [
+        "GetMonthlyAppliedPaymentSummary",
+        "SalesPaymentByVisionPlan",
+        "GetPOSPaymentDetailforMiscandCredit",
+        "GetPOSPaymentDetailbyTransactionDateforMailCheckandCC",
+        "GetMemberPayments",
+        "CopyStatementConfigPaymentTypeGoLiveSetup",
+        "GetPatientOrderLedgerPaymentData",
+        "DeleteEra",
+        "CreateTestEraRemits",
+        "GB_RecordDailySummary",
+        "SetIsReadyToPostIsExternalClaim",
+        "GetPOSAR",
+        "CalcPOSTransactionSummaryByDayCloseDate",
+        "CalcPOSTransactionSummaryByDate",
+        "UndeliveredOrdersSummary",
+        "UpdateInsCheck",
+        "GetDayClose",
+        "DoesInsCheckModified",
+        "__GetInvoice",
+        "__GetInvoiceTransactionForStore",
+        "__GetLabOrderForStore",
+        "__GetTransactionPaymentForStore",
+        "ADHOCQuery"
+      ],
+      "ar_management": [],
+      "billing_workflows": [],
+      "financial_reporting": []
+    },
+    "key_formulas": [
+      "Balance = Charges - Payments",
+      "AR = Outstanding Balances",
+      "Revenue = Collected Amounts"
+    ],
+    "workflow_dependencies": [
+      "Patient",
+      "Orders",
+      "Items",
+      "Insurance",
+      "Payments"
+    ]
+  },
+  "item_logic": {
+    "total_procedures": 167,
+    "key_procedures": [
+      {
+        "name": "GetPackageLite",
+        "definition_length": 3938,
+        "preview": "CREATE PROCEDURE [dbo].[GetPackageLite] \n\t@officeNum VARCHAR(8), \n\t@description VARCHAR(50) = NULL,\n\t@packageID int = NULL,\n\t@isVSPIOF bit = 0\nAS\nBEGIN\n\n\tSET NOCOUNT ON;\n\n\tSET @description = CASE WHEN @description IS NULL OR @description = '' THEN '%'\n\t\t\t\t\t   ELSE '%' + @description + '%'\n\tEND\n\n\tIF @packageID = 0 \n\t\tSET @packageID = NULL \n\n\tIF OBJECT_ID('tempdb..#TempPackSchedule') IS NOT NULL\n\t\tDROP TABLE #TempPackSchedule\n\n\tCREATE TABLE #TempPackSchedule \n\t( \n\t    Itemvalue VARCHAR(15), \n\t    ",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "CopyOfficeInvoiceConfigGoLiveSetup",
+        "definition_length": 2193,
+        "preview": "CREATE PROCEDURE [dbo].[CopyOfficeInvoiceConfigGoLiveSetup]\n\t@FromOfficeNum\tvarchar(8),\n\t@ToOfficeNum\tvarchar(8),\n\t@WithOverlay\t\tint = 0\t\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\n    MERGE OfficeInvoiceConfig AS T \n\tUSING(\n\t\tSELECT @ToOfficeNum AS OfficeNum\n\t\t    ,CompanyId\n\t\t\t,DisplayTaxID\n\t\t\t,DisplayPatientMRN\n\t\t\t,DisplayDiagnosisCodes\n\t\t\t,DisplayNextAppointmentDate\n\t\t\t,DisplayNPIOption\n\t\t\t,DisplayPatientAddress\n\t\t\t,DisplayCCSignatureCapture\n\t\t\t,DisplayPromiseDate\n\t\t\t,DisplayFrameItemNum\n\t\t\t,DisplayCPTCodes",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "CLSalesbyDoctor",
+        "definition_length": 981,
+        "preview": "CREATE PROCEDURE [dbo].[CLSalesbyDoctor]\r\n\r\n@fromdate datetime,\r\n@todate  datetime,\r\n@CompanyID varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\ndeclare @iCnt as int\r\nselect @iCnt=count(*)  from sysobjects where xtype='U' and name = '#V_InvoiceDetailBYItemType'\r\nif(@iCnt <>0) \r\nBegin\r\ndrop table #V_InvoiceDetailBYItemType\r\nend\r\n\r\n\r\nSelect * into  #V_InvoiceDetailBYItemType from  V_InvoiceDetailBYItemType where Transactiondate >=@fromDate and\r\n TransactionDate <dateadd(d,1,@todate) and Itemtype=17\r\n a",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "GetSalesbyItemTypeandInsurance",
+        "definition_length": 1714,
+        "preview": "CREATE PROCEDURE [dbo].[GetSalesbyItemTypeandInsurance]\n@FromDate1 varchar(20),\n@ToDate1 varchar(20),\n@OfficeNum varchar(20),\n@CarrierCode varchar(100),\n@CompanyId varchar(20)\nAS\nBEGIN\n\tSET NOCOUNT ON;\ndeclare @iCnt as int\nselect @iCnt=count(*)  from sysobjects where xtype='U' and name = '#V_InvoiceDetailwithInsurance1'\nif(@iCnt <>0) \nBegin\ndrop table #V_InvoiceDetailwithInsurance1\nend\n\n\nselect dbo.GetItemNamefromItemtype(ItemType,ItemID) as ItemDescription,* into #V_InvoiceDetailwithInsurance1 ",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "GetWarrantyUsage",
+        "definition_length": 3838,
+        "preview": "\r\nCREATE PROCEDURE [dbo].[GetWarrantyUsage]\r\n@fromdate datetime,\r\n@todate datetime,\r\n@CompanyID varchar(20),\r\n@OfficeNum varchar(10)\r\n\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\t\r\n\t\r\ndeclare @iCnt as int\r\nselect @iCnt=count(*)  from sysobjects where xtype='U' and name = 'X_POSWarrantySale'\r\nif(@iCnt <>0) \r\nBegin\r\ndrop table X_POSWarrantySale\r\nend\r\n\r\n\r\nselect \r\npt1.TransactionID, pt1.PatientID,pt1.OrderID,\r\npt1.TransactionDate as UsedDate, \r\nsum(case when invd1.IsLensItem= 1 then invd1.Amount + isnull(iid1.R",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "Scheduler_AppointmentDetail_Get",
+        "definition_length": 3144,
+        "preview": "CREATE PROCEDURE [dbo].[Scheduler_AppointmentDetail_Get]\n\t@appt_no INT\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\n\tSELECT\n\t\tAPPT.[appt_no]\n\t\t,APPT.[LocationID]\n\t\t,LOC.OfficeName AS LocDisplayName\n\t\t,APPT.resourceId\n\t\t,PRO.FirstName AS provider_first_name\n\t\t,PRO.LastName AS provider_last_name\n\t\t,PRO.Employee AS provider_cd\n\t\t,APPT.[appointmentTypeId]\n\t\t,IE.ItemName AS [prd_desc] \n\t\t,APPT.[ins_no]\n\t\t,ic.CarrierName AS insurance_name\n\t\t,dbo.GetInsuranceNm(appt.MedicalPatientInsuranceID) AS med_insurance_name  \n\t\t,",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "GetPatientOrderInvoiceDataByOrder",
+        "definition_length": 3850,
+        "preview": "CREATE PROCEDURE [dbo].[GetPatientOrderInvoiceDataByOrder]\n\t@CutOffDate DATETIME,\n\t@CompanyId VARCHAR(20),\n\t@OrderId INT\nAS\nBEGIN\n\t\tSET NOCOUNT ON;\n\n\t\tWITH ProcedureDiagnosis AS (\n\t\t\tSELECT \n\t\t\t\tbcl.OrderNum,\n\t\t\t\tbcl.itemId,\n\t\t\t\tMin(bld.ProcedureCode) ProcedureCode\n\t\t\tFROM BillingClaimLineItem bcl\n\t\t\tLEFT JOIN BillingLineDetails bld ON bcl.lineitemid = bld.LineItemId \n\t\t\tGROUP BY bcl.OrderNum,\n\t\t\tbcl.itemId \n\t\t),\n\t\tPatientLedger AS (\n\t\t\tSELECT \n\t\t\t\tROW_NUMBER() OVER (ORDER BY o.ordernum, id.line",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "DailyFlashSalesByResource",
+        "definition_length": 5191,
+        "preview": "CREATE PROCEDURE [dbo].[DailyFlashSalesByResource]\n\n@fromdate datetime,\n@todate  datetime,\n@officeList varchar(max),\n@employeeID int,\n@companyID varchar(20)\nAS\nBEGIN\n\nSELECT Row_number() over(order by ItemTypeID) as ID,\npt.OfficeNum,\n              o.OfficeName,\n              Month(pt.TransactionDate) as Month,\n              Year(pt.TransactionDate) as Year,\n              pt.TransactionDate as DateOfSale,\n              pt.OrderID as OrderNum,\n              pt.PatientID,\n              p.LastName +",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "UndeliveredOrdersDetail",
+        "definition_length": 3730,
+        "preview": "CREATE PROCEDURE UndeliveredOrdersDetail\r\nAS\r\nBEGIN\r\n\r\nselect \r\n--pt.Officenum,\r\n--count(distinct pt.orderid) as OrderCount\r\npt.Officenum,pt.Orderid\r\n,tt.Description as TransactionType\r\n,p.Lastname + ' ,' + p.Firstname as PatientName,isnull(it.Description,'') as ItemType,\r\nisnull(i.ItemNum,'') as ItemNum,\r\nisnull(i.ItemName,'') as ItemName,sum(isnull(ind.Quantity,0)) as Quantity ,\r\nsum(isnull(ind.price,0)) as Retail,\r\nsum(isnull(ind.Discount,0)) as Discount,\r\nsum(isnull(ind.Tax,0)) as Tax,\r\nsum(",
+        "business_logic": "pricing_logic"
+      },
+      {
+        "name": "FrameOrdersforMarchonforAlloffices",
+        "definition_length": 3319,
+        "preview": "CREATE PROCEDURE [dbo].[FrameOrdersforMarchonforAlloffices]\n@Fromdate  date,             \n@todate  date,\n@Status int ,\n@CompanyId varchar(20),\n@VendorId int,\n@VendorOrderStatus int=null          \nas             \nBegin   \n \ndeclare                           \n@Format as int             \n,@PON as int   \n,@DC as char(10) \n,@OffBoard as char(1)  \n \nset @format=1             \nset @PON=1111               \nset @DC = 'DEFAULT' \nset @OffBoard = 'N'          \n \nselect newid() as ID\n, vr.ExternalVendorNumbe",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "PatientRecallByItemType",
+        "definition_length": 1868,
+        "preview": "\r\n\r\nCREATE PROCEDURE [dbo].[PatientRecallByItemType]\r\n@OfficeNum as varchar(12),\r\n@IsRecallItem as bit,\r\n@IsUpdateLastExamDate as bit\r\nAS\r\nBEGIN\r\n\r\nSELECT office.CompanyID as CompanyID,pt.OfficeNum, isnull(p.FirstName,'') + ' ' + isnull(p.LastName,'') as PatientName, p.ID as PatientID\r\n\t\t,  isnull(max(oi.InsCarrierCode),'') as InsCarrierCode,isnull(p.Email,'') as Email, p.DOB as DOB,sum(iid.Receivable) + sum(id.amount) - sum(id.tax) as NetSales\r\n\t\t, sum(id.Quantity) as Quantity,p.LastExamDate,\r\n",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "GetUndeliveredCashOrders",
+        "definition_length": 4836,
+        "preview": "CREATE PROCEDURE [dbo].[GetUndeliveredCashOrders]\r\n @CutoffDate as datetime,\r\n @CompanyID as nvarchar(10),\r\n @OfficeNum as nvarchar(100)\r\nAS\r\nBEGIN\r\ndeclare @merchandiseDropStatus varchar(2) = 'MD';\r\nset @CutoffDate = DATEADD(dd, 1, dbo.DateOnly(@CutoffDate))\r\nselect newid() as ID,\r\npt.Officenum,pt.OrderID\r\n,tt.Description as TransactionType\r\n,p.Lastname + ' ,' + p.Firstname as PatientName,isnull(it.Description,'') as ItemType,\r\nisnull(i.ItemNum,'') as ItemNum,\r\nisnull(i.ItemName,'') as ItemName",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "GetCLADHOC",
+        "definition_length": 2527,
+        "preview": "CREATE PROCEDURE [dbo].[GetCLADHOC]\r\n\r\n@fromdate datetime,\r\n@todate  datetime,\r\n@clstyleid  int,\r\n@CompanyID varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\nselect  newid() as id,sum(netsales) as NetSale,OrderNum, PatientName,pt.Email,a.Address1, a.City, a.State, a.ZipCode,ph.PhoneNumber\r\n,(Select sum(netsales) from V_InvoiceDetailBYItemType id2 where id2.OrderNum=id1.OrderNum and id2.ItemType=17) as CLMaterial\r\n,(Select sum(netsales) from V_InvoiceDetailBYItemType id2 where id2.OrderNum=id1.OrderNu",
+        "business_logic": "general_item_logic"
+      },
+      {
+        "name": "GetUndeliveredOrdersbyOrders",
+        "definition_length": 4803,
+        "preview": "\r\nCREATE PROCEDURE [dbo].[GetUndeliveredOrdersbyOrders]\r\n @CutoffDate as datetime,\r\n @CompanyID as nvarchar(10),\r\n @OfficeNum as nvarchar(300)\r\nAS\r\nBEGIN\r\ndeclare @merchandiseDropStatus varchar(2) = 'MD';\r\n\r\nset @CutoffDate = DATEADD(dd, 1, dbo.DateOnly(@CutoffDate))\r\nselect newid() as ID,\r\npt.Officenum,pt.OrderID\r\n,'' as TransactionType\r\n,p.Lastname + ' ,' + p.Firstname as PatientName,'' as ItemType,\r\n'' as ItemNum,\r\n'' as ItemName,sum(isnull(ind.Quantity,0)) as Quantity ,\r\nsum(isnull(ind.price",
+        "business_logic": "pricing_logic"
+      },
+      {
+        "name": "GetUndeliveredCashOrdersByOrder",
+        "definition_length": 5149,
+        "preview": "CREATE PROCEDURE [dbo].[GetUndeliveredCashOrdersByOrder]\r\n @CutoffDate as datetime,\r\n @CompanyID as nvarchar(10),\r\n @OfficeNum as nvarchar(300)\r\nAS\r\nBEGIN\r\ndeclare @merchandiseDropStatus varchar(2) = 'MD';\r\nset @CutoffDate = DATEADD(dd, 1, dbo.DateOnly(@CutoffDate))\r\nselect newid() as ID,\r\npt.Officenum,pt.OrderID\r\n,'' as TransactionType\r\n,p.Lastname + ' ,' + p.Firstname as PatientName,'' as ItemType,\r\n'' as ItemNum,\r\n'' as ItemName,sum(isnull(ind.Quantity,0)) as Quantity ,\r\nsum(isnull(ind.price,",
+        "business_logic": "pricing_logic"
+      }
+    ],
+    "business_patterns": {
+      "inventory_management": [
+        "GetInventoryStatus",
+        "InventoryValuationMethodChange",
+        "GetInventoryValuationItem",
+        "SP_ProductMovementDetails",
+        "SetCLStockItemID",
+        "LoadInventoryPhysicalFile",
+        "UpdateInventoryBalanceOnOrderAndTransitIn",
+        "GetInventoryValue",
+        "GetInventoryInTransit",
+        "UpdateInventoryBalanceOnHand",
+        "GetInventoryInTransitValue",
+        "UpdateInventoryBalanceOnHand1",
+        "__GetInventoryActivityForStore",
+        "HandleStockOrdersWithCLReturns"
+      ],
+      "pricing_logic": [],
+      "product_configuration": [],
+      "stock_operations": [],
+      "catalog_management": []
+    },
+    "key_formulas": [
+      "Inventory Value = Qty * Cost",
+      "Reorder Point = Lead Time * Usage",
+      "Markup = (Retail - Cost) / Cost"
+    ],
+    "workflow_dependencies": [
+      "Suppliers",
+      "Orders",
+      "Inventory",
+      "Pricing",
+      "Categories"
+    ]
+  },
+  "employee_logic": {
+    "total_procedures": 116,
+    "key_procedures": [
+      {
+        "name": "GetMonthlyAppliedPaymentSummary",
+        "definition_length": 3994,
+        "preview": "CREATE PROCEDURE [dbo].[GetMonthlyAppliedPaymentSummary]\n@fromDate as datetime,\n@toDate as datetime,\n@officeNum varchar(max),\n@doctorIds varchar(max),\n@companyId varchar(20),\n@IncludeOldSystemCredit as bit\n\nAS\nBEGIN\n   SET NOCOUNT ON;\n   SELECT ID as OfficeID INTO #OfficeList from GetOfficeNumber(@officeNum);\n\n  SELECT * FROM \n   (         \n\t\tSELECT  newId() AS ID, \n\t\t    ISNULL(e.employee, 1) AS DoctorId,\n            CASE WHEN LEN(LTRIM(RTRIM(e.ProfessionalSignature))) > 0  THEN e.ProfessionalS",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "WorkFlowPurge",
+        "definition_length": 2638,
+        "preview": "\r\n-- =============================================\r\n-- Author:\t\tSam Callejo and Kris Jornlin\r\n-- Create date: 01/30/2013\r\n-- Description:\tGets only providers for listbox.\r\n-- =============================================\r\n\r\nCREATE PROCEDURE [dbo].[WorkFlowPurge]  \r\n\t@ProcessDate datetime,\r\n\t@ProcessToPurge varchar(50)\r\nAS  \r\nBEGIN  \r\n\t \r\n\t declare @ErrorCode int\r\n\t \r\n\t BEGIN TRY \r\n\t\tBEGIN TRANSACTION\r\n\t\t \r\n\t\t if (@ProcessToPurge = 'appointments')\r\n\t\t begin\r\n\t\t\texec WorkFlowPurge_Appointments @Pr",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "CLSalesbyDoctor",
+        "definition_length": 981,
+        "preview": "CREATE PROCEDURE [dbo].[CLSalesbyDoctor]\r\n\r\n@fromdate datetime,\r\n@todate  datetime,\r\n@CompanyID varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\ndeclare @iCnt as int\r\nselect @iCnt=count(*)  from sysobjects where xtype='U' and name = '#V_InvoiceDetailBYItemType'\r\nif(@iCnt <>0) \r\nBegin\r\ndrop table #V_InvoiceDetailBYItemType\r\nend\r\n\r\n\r\nSelect * into  #V_InvoiceDetailBYItemType from  V_InvoiceDetailBYItemType where Transactiondate >=@fromDate and\r\n TransactionDate <dateadd(d,1,@todate) and Itemtype=17\r\n a",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "CLSalesByDoctorDetail",
+        "definition_length": 1233,
+        "preview": "CREATE PROCEDURE [dbo].[CLSalesByDoctorDetail]\r\n\r\n@fromdate datetime,\r\n@todate  datetime,\r\n@CompanyID varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\n\r\n\r\nselect \r\n\tNEWID() as ID, \r\n\tv.DoctorId, \r\n\te.FirstName, \r\n\te.LastName, \r\n\tv.OfficeNum, \r\n\tv.PatientId as PatientId,  \r\n\tv.PatientName as PatientName, \r\n\tcs.CLStyleID, \r\n\tcs.Style,\r\n\tv.Quantity as Quantity, \r\n\tv.TransactionDate as DateOfSale, \r\n\tv.OrderNum as OrderNum,  \r\n\tv.NetSales as NetSale \r\n from \r\n\t(SELECT \r\n\t\tID\r\n\t\t,InvoiceDetailId\r\n\t\t,Invoi",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "SP_GenerateDoctorExamSales",
+        "definition_length": 6573,
+        "preview": "CREATE PROCEDURE [dbo].[SP_GenerateDoctorExamSales]\r\n@CompanyID varchar(10),\r\n@ListOfOfficenum as varchar(max),\r\n@CarrierID as varchar(max),\r\n@FromSerivceDate as datetime,\r\n@ToServiceDate as datetime,\r\n@FromTransDate as datetime,\r\n@ToTransDate as datetime,\r\n@monthCloseID as int\r\nAS\r\nBEGIN\r\n\r\n       if @monthCloseID <> 0 and @monthCloseID is not null\r\n       begin\r\n              \r\n              set @ToTransDate = (select closeddate from MonthCloseControl where ID = @monthCloseID and CompanyID = @",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "GetAppointmentBookLite",
+        "definition_length": 3450,
+        "preview": "CREATE PROCEDURE [dbo].[GetAppointmentBookLite]\r\n@FromDate DateTime,\r\n@OfficeNum Varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n              \r\n              \r\nSELECT distinct ApptNum ,WorkflowInstanceId, DoctorId, this_.PatientID, ApptDate, this_.ApptTypeID,this_.OfficeNum ,ApptStatusID, this_.PatientInsuranceID, employee4_.FirstName as DrFirstName, \r\nemployee4_.LastName as DrLastName, P.FirstName as PatFirstName, P.LastName as PatLastName,Ph.PhoneNumber as PhoneNumber,IP.PlanName as PatientInsuranc",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "GetKPITransactionDetails",
+        "definition_length": 1824,
+        "preview": "CREATE PROCEDURE [dbo].[GetKPITransactionDetails] \n@regionId int ,\n@officeNum varchar(max) ,\n@employeeNum varchar(max), \n@fromDate Datetime, \n@toDate DateTime, \n@isKPI bit, \n@companyID varchar(max),\n@useBookDate bit\nAS\nSELECT  Row_Number() over (order by ko.TransactionID) as ID, ko.TransactionID, p.TransactionDate, p.OfficeNum, p.OrderID,\n pat.LastName + ' ' + pat.FirstName AS PatientName, \n                      e.LastName + ' ' + e.FirstName AS EmployeeName , e.employee as EmployeeID,k.Descript",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "Scheduler_AppointmentDetail_Get",
+        "definition_length": 3144,
+        "preview": "CREATE PROCEDURE [dbo].[Scheduler_AppointmentDetail_Get]\n\t@appt_no INT\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\n\tSELECT\n\t\tAPPT.[appt_no]\n\t\t,APPT.[LocationID]\n\t\t,LOC.OfficeName AS LocDisplayName\n\t\t,APPT.resourceId\n\t\t,PRO.FirstName AS provider_first_name\n\t\t,PRO.LastName AS provider_last_name\n\t\t,PRO.Employee AS provider_cd\n\t\t,APPT.[appointmentTypeId]\n\t\t,IE.ItemName AS [prd_desc] \n\t\t,APPT.[ins_no]\n\t\t,ic.CarrierName AS insurance_name\n\t\t,dbo.GetInsuranceNm(appt.MedicalPatientInsuranceID) AS med_insurance_name  \n\t\t,",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "DailyFlashSalesByResource",
+        "definition_length": 5191,
+        "preview": "CREATE PROCEDURE [dbo].[DailyFlashSalesByResource]\n\n@fromdate datetime,\n@todate  datetime,\n@officeList varchar(max),\n@employeeID int,\n@companyID varchar(20)\nAS\nBEGIN\n\nSELECT Row_number() over(order by ItemTypeID) as ID,\npt.OfficeNum,\n              o.OfficeName,\n              Month(pt.TransactionDate) as Month,\n              Year(pt.TransactionDate) as Year,\n              pt.TransactionDate as DateOfSale,\n              pt.OrderID as OrderNum,\n              pt.PatientID,\n              p.LastName +",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "PatientFollowupNotes",
+        "definition_length": 841,
+        "preview": "--- =============================================\n-- Author:\t\tali\n-- Create date: 2/6/2018\n-- Description:\tGenerates report rows for Patient Followup Notes Report \n-- =============================================\nCREATE PROCEDURE [dbo].[PatientFollowupNotes]\n\t\t@OfficeNum\t\tvarchar(8),\n\t\t@FromDate\t\tdatetime,\n\t\t@ToDate\t\t\tdatetime\nAS\nBEGIN\n\t\tSET NOCOUNT ON;\n\n\t\tSELECT\n\t\t\tn.ID,\n\t\t\tn.NoteDate, \n\t\t\te.FirstName + ' ' + e.LastName AS EmployeeName,\n\t\t\tn.Detail, \n\t\t\tp.LastName + ', ' + p.FirstName AS Patien",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "SP_OrderAging",
+        "definition_length": 3221,
+        "preview": "-- =============================================\n-- Author:\t\t<Author,,Name>\n-- Create date: <Create Date,,>\n-- Description:\t<Description,,>\n-- =============================================\nCREATE PROCEDURE [dbo].[SP_OrderAging]\n\t-- Add the parameters for the stored procedure here\n\t@TransactionDate as datetime,\n\t--@OfficeNum as varchar(20),\n\t@CompanyID as varchar(20)\n\t\n\t\t\nAS\nBEGIN\n\nDeclare @TransDate Date\n\n\nset @TransDate = convert(date, @TransactionDate)   --works better than the user function, ",
+        "business_logic": "user_management"
+      },
+      {
+        "name": "GetAppointmentReschedulingDetails",
+        "definition_length": 3480,
+        "preview": "\n/* AP-103 Appointment Rescheduling Report */\nCREATE PROCEDURE [dbo].[GetAppointmentReschedulingDetails]\n@FromDate\tdatetime,\n@CompanyId\tvarchar(20),\n@ToDate dateTime = NULL,\n@ResourceIDs VARCHAR(MAX) = NULL,\n@OfficeIDs VARCHAR(MAX) = NULL,\n@IncludeInactiveDoctors bit=NULL\n\nAS\nBEGIN\n\tIF(@IncludeInactiveDoctors IS NOT NULL)\n\tBEGIN\n\t\tSELECT @IncludeInactiveDoctors = CASE\n\t\tWHEN @IncludeInactiveDoctors = 1 THEN null\t \n\t\tELSE 1 END\n\tEND\n\tCREATE TABLE #ResourceIDTable\n\t(\n\t\tID INT\n\t);\n\tCREATE TABLE #Of",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "WorkFlowPurge_Orders",
+        "definition_length": 1627,
+        "preview": "\r\n-- =============================================\r\n-- Author:\t\tSam Callejo and Kris Jornlin\r\n-- Create date: 01/30/2013\r\n-- Description:\tGets only providers for listbox.\r\n-- =============================================\r\n\r\nCREATE PROCEDURE [dbo].[WorkFlowPurge_Orders]  \r\n\t@Apptdate datetime\r\nAS  \r\nBEGIN  \r\n\t \t\r\n\t---------- Sanity Check : Drop temp table if it already exist from a prior run --------------------------\t\t \r\n\tdelete from temp_PurgeWorkFlowInfo\r\n\t-------------------------------------",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "LoadPatientOldSystemBalance",
+        "definition_length": 3445,
+        "preview": "-- =============================================\r\n-- Author:\t\tDigesh Sahu\r\n-- Create date: 01/05/2011\r\n-- Description:\tLoading Patient old system balance\r\n-- =============================================\r\nCREATE PROCEDURE [dbo].[LoadPatientOldSystemBalance]\r\nAS\r\nBEGIN\r\n\t-- SET NOCOUNT ON added to prevent extra result sets from\r\n\t-- interfering with SELECT statements.\r\nSET NOCOUNT ON;\r\ndeclare @TransDate as datetime\r\nDeclare @PatientID as int\r\nDeclare @officenum as varchar(5)\r\nDeclare @EmployeeID",
+        "business_logic": "general_employee_logic"
+      },
+      {
+        "name": "Scheduler_AppointmentNotificationsByProviderByDateRangePaginated",
+        "definition_length": 5991,
+        "preview": "CREATE PROCEDURE dbo.Scheduler_AppointmentNotificationsByProviderByDateRangePaginated\n\t\t@companyId varchar(25),\n\t\t@providerId int,\n\t\t@fromDate datetime,\n\t\t@toDate datetime,\n\t\t@lastModified datetime,\n\t\t@pageSize int, \n\t\t@page int\nWITH RECOMPILE\nAS\nBEGIN\n\t/*\n\t\tPURPOSE: Return a total count and a (zero-based) page of appointments that have changed as of @lastModified date.\n\n\t\tNOTE: This proc was built for the Patient Engagement API to resolve a database memory issue\n\t\tthat occurs when this query is",
+        "business_logic": "general_employee_logic"
+      }
+    ],
+    "business_patterns": {
+      "user_management": [
+        "SP_OrderAging",
+        "SetupNewOffice",
+        "GetDuplicateUsernamesByCompany",
+        "Scheduler_Resources_Get1",
+        "Scheduler_CompanyResources_Get1",
+        "Scheduler_ResourcesActivePerLocation_Get",
+        "Scheduler_UserByUserCredentials_Get",
+        "Scheduler_EmployeeId_Get",
+        "Scheduler_UserByUserId_Get",
+        "CreateUsers",
+        "Scheduler_ResourceDetail_Get",
+        "Scheduler_AllResources_Get",
+        "Scheduler_ResourceRoles_Get",
+        "Scheduler_AuditLog_Appointment_Get",
+        "GiveUserAlSupportAccess",
+        "SP_CopySchedulefromExitingSchedule",
+        "CopyInsSchedule",
+        "LoadOutOfStoreRefund",
+        "SetupAllVSPPlans",
+        "SP_AssignOfficesToInsSchedules",
+        "Scheduler_CodeLookupItemsList_Get",
+        "Scheduler_AuditLog_Add",
+        "__GetInvoiceForStore",
+        "Scheduler_Resources_Save",
+        "Scheduler_Resources_Get",
+        "Scheduler_InsertFunctionalityTimer",
+        "sp_creatediagram",
+        "sp_helpdiagrams"
+      ],
+      "provider_operations": [],
+      "commission_calculations": [],
+      "performance_tracking": [],
+      "security_access": [
+        "Scheduler_UserByUserCredentials_Get",
+        "Scheduler_UserByUserId_Get"
+      ]
+    },
+    "key_formulas": [
+      "Commission = Sales * Rate",
+      "Productivity = Revenue / Hours",
+      "Performance Score = Weighted Metrics"
+    ],
+    "workflow_dependencies": [
+      "Offices",
+      "Roles",
+      "Security",
+      "Performance",
+      "Commissions"
+    ]
+  },
+  "insurance_logic": {
+    "total_procedures": 103,
+    "key_procedures": [
+      {
+        "name": "SP_InsuranceSalesSummaryByOfficeByCarrier",
+        "definition_length": 4336,
+        "preview": "\r\n\r\n\r\n--SP_InsuranceSalesSummaryByOfficeByCarrier '10/1/2011','1/31/2012','111,999','%',null\r\n\r\n\r\nCREATE PROCEDURE [dbo].[SP_InsuranceSalesSummaryByOfficeByCarrier]\r\n@FromDate1 varchar(20),\r\n@ToDate1 varchar(20),\r\n@OfficeNum varchar(max),\r\n@carrierId as varchar(50),\r\n@planId as varchar(50),\r\n@monthCloseID as int\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\tdeclare @iCnt as int\r\n\tdeclare @claimCnt as int\r\n\tselect @iCnt=count(*)  from sysobjects where xtype='U' and name = '#V_SalesAnalysisByVisionPlan'\r\n\tif(@iC",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "SP_GenerateDoctorExamSales",
+        "definition_length": 6573,
+        "preview": "CREATE PROCEDURE [dbo].[SP_GenerateDoctorExamSales]\r\n@CompanyID varchar(10),\r\n@ListOfOfficenum as varchar(max),\r\n@CarrierID as varchar(max),\r\n@FromSerivceDate as datetime,\r\n@ToServiceDate as datetime,\r\n@FromTransDate as datetime,\r\n@ToTransDate as datetime,\r\n@monthCloseID as int\r\nAS\r\nBEGIN\r\n\r\n       if @monthCloseID <> 0 and @monthCloseID is not null\r\n       begin\r\n              \r\n              set @ToTransDate = (select closeddate from MonthCloseControl where ID = @monthCloseID and CompanyID = @",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "SP_InsuranceSalesSummaryByOffice",
+        "definition_length": 5533,
+        "preview": "\nCREATE PROCEDURE [dbo].[SP_InsuranceSalesSummaryByOffice]      \n@FromDate1 varchar(20),      \n@ToDate1 varchar(20),      \n@OfficeNum varchar(max),      \n@carrierId as varchar(50),      \n@monthCloseID as int ,\n@companyId as varchar(20)\n      \n      \nAS      \nBEGIN      \n SET NOCOUNT ON;      \n declare @iCnt as int      \n declare @claimCnt as int      \n select @iCnt=count(*)  from sysobjects where xtype='U' and name = '#V_SalesAnalysisByVisionPlan'      \n if(@iCnt <>0)       \n Begin      \n  drop ",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "SalesPaymentByVisionPlan",
+        "definition_length": 2739,
+        "preview": "\nCREATE PROCEDURE [dbo].[SalesPaymentByVisionPlan]\n@FromDate1 varchar(20),\n@ToDate1 varchar(20),\n@OfficeNum varchar(20)\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\tdeclare @iCnt as int\n\tselect @iCnt=count(*)  from sysobjects where xtype='U' and name = '#V_SalesPaymentByVisionPlan'\n\tif(@iCnt <>0) \n\tBegin\n\t\tdrop table #V_SalesPaymentByVisionPlan\n\tend\n\n\nselect Officenum,PlanName,\nSum(Price) as Retail, Sum(Discount) + sum(LineDisc) + sum(PackageDisc) + sum(InsuranceDiscount) + sum(PromotionDiscount) as Discount\n,sum",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "GetSalesbyItemTypeandInsurance",
+        "definition_length": 1714,
+        "preview": "CREATE PROCEDURE [dbo].[GetSalesbyItemTypeandInsurance]\n@FromDate1 varchar(20),\n@ToDate1 varchar(20),\n@OfficeNum varchar(20),\n@CarrierCode varchar(100),\n@CompanyId varchar(20)\nAS\nBEGIN\n\tSET NOCOUNT ON;\ndeclare @iCnt as int\nselect @iCnt=count(*)  from sysobjects where xtype='U' and name = '#V_InvoiceDetailwithInsurance1'\nif(@iCnt <>0) \nBegin\ndrop table #V_InvoiceDetailwithInsurance1\nend\n\n\nselect dbo.GetItemNamefromItemtype(ItemType,ItemID) as ItemDescription,* into #V_InvoiceDetailwithInsurance1 ",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "GetBillingPOSReceivablesUnmatched",
+        "definition_length": 5548,
+        "preview": "\r\nCREATE PROCEDURE [dbo].[GetBillingPOSReceivablesUnmatched]\r\n@fromdate datetime,\r\n@todate datetime,\r\n@CompanyID varchar(20),\r\n@CarrierCode varchar(20),\r\n@OfficeNum as varchar(20),\r\n@IsPrepaidCarrier as BIT\r\n\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\t\r\n\tdeclare @iCnt as int\r\n\tselect @iCnt=count(*)  from sysobjects where xtype='U' and name = 'V_BillingOrderFirstReceivable1'\r\n\tif(@iCnt =0) \r\n\tBegin\r\n\t\r\nselect \r\nnewid() as ID,\r\nbcd.Officenum,bcd.CarrierName,bcd.CarrierID,bt.orderid as OrderNum,bc.servicedate-",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "GetAppointmentBookLite",
+        "definition_length": 3450,
+        "preview": "CREATE PROCEDURE [dbo].[GetAppointmentBookLite]\r\n@FromDate DateTime,\r\n@OfficeNum Varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n              \r\n              \r\nSELECT distinct ApptNum ,WorkflowInstanceId, DoctorId, this_.PatientID, ApptDate, this_.ApptTypeID,this_.OfficeNum ,ApptStatusID, this_.PatientInsuranceID, employee4_.FirstName as DrFirstName, \r\nemployee4_.LastName as DrLastName, P.FirstName as PatFirstName, P.LastName as PatLastName,Ph.PhoneNumber as PhoneNumber,IP.PlanName as PatientInsuranc",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "GetPatientOrderLedgerInsuranceData",
+        "definition_length": 3914,
+        "preview": "CREATE PROCEDURE [dbo].[GetPatientOrderLedgerInsuranceData] \n\t@CutOffDate DATETIME\n\t,@CompanyId VARCHAR(20)\n\t,@OrderIdList VARCHAR(MAX)\nAS\n\nBEGIN\n    SET NOCOUNT ON;\n\tDECLARE @compatibility int;\n\tSELECT @compatibility = compatibility_level  FROM sys.databases WHERE name = DB_NAME()\n\n\tCREATE TABLE #OrderIDs\n\t(\n\t\tID INT\n\t);\n\t\n\tIF (@compatibility >= 130)\n\t\tBEGIN\n\t\t\tINSERT INTO #OrderIDs SELECT CAST(VALUE AS INT) AS [VALUE] FROM STRING_SPLIT(@OrderIdList, ',')\t\n\t\tEND\n\tELSE\n\t\tBEGIN\n\t\t\tINSERT INTO #Or",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "Scheduler_AppointmentDetail_Get",
+        "definition_length": 3144,
+        "preview": "CREATE PROCEDURE [dbo].[Scheduler_AppointmentDetail_Get]\n\t@appt_no INT\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\n\tSELECT\n\t\tAPPT.[appt_no]\n\t\t,APPT.[LocationID]\n\t\t,LOC.OfficeName AS LocDisplayName\n\t\t,APPT.resourceId\n\t\t,PRO.FirstName AS provider_first_name\n\t\t,PRO.LastName AS provider_last_name\n\t\t,PRO.Employee AS provider_cd\n\t\t,APPT.[appointmentTypeId]\n\t\t,IE.ItemName AS [prd_desc] \n\t\t,APPT.[ins_no]\n\t\t,ic.CarrierName AS insurance_name\n\t\t,dbo.GetInsuranceNm(appt.MedicalPatientInsuranceID) AS med_insurance_name  \n\t\t,",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "GetBillingPOSReceivables",
+        "definition_length": 8644,
+        "preview": "\r\nCREATE PROCEDURE [dbo].[GetBillingPOSReceivables]\r\n@fromdate datetime,\r\n@todate datetime,\r\n@CompanyID varchar(20),\r\n@CarrierCode varchar(20),\r\n@OfficeNum as varchar(20),\r\n@IsPrepaidCarrier as BIT\r\n\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\ndeclare @iCnt as int\r\nselect @iCnt=count(*)  from sysobjects where xtype='U' and name = 'V_BillingOrderFirstReceivable1'\r\nif(@iCnt <>0) \r\nBegin\r\ndrop table V_BillingOrderFirstReceivable1\r\nend\r\nselect @iCnt=count(*)  from sysobjects where xtype='U' and name = 'V_OrderI",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "SalesReportByPlan",
+        "definition_length": 12424,
+        "preview": "CREATE PROCEDURE [dbo].[SalesReportByPlan]\n\t@FromDate varchar(20),\n\t@ToDate varchar(20),\n\t@Office varchar(20),\n\t@CarrierID varchar(50)\nAS\n\nDECLARE @FromDate1 datetime, @ToDate1 datetime, @Officenum varchar(8) \n\nSELECT @FromDate1 = CONVERT(datetime, @FromDate)\nSELECT @ToDate1 = CONVERT(datetime, @ToDate)\nSELECT @OfficeNum = Left(LTRIM(RTRIM(@Office)),8)\n\nBEGIN\n\tSET NOCOUNT ON;\n\n\tDECLARE @iCnt AS int\n\tDECLARE @SQLStatement varchar(300)\n\tSELECT @iCnt=COUNT(*) FROM sysobjects WHERE xtype='U' AND nam",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "SeedPatientsAndAppointments",
+        "definition_length": 65617,
+        "preview": "/*************************************************************************************\n************************SEED PATIENTS and APPOINTMENTS**********************************\n-- ALSCL-1015\n-- This stored procedure adds a configurable number of test insurance carriers, patients and appointments \n-- (plus associated data such as phones, addresses, etc) to a \n-- specified base office. It uses Randomly generated demographic info where possible.\n\n-- Caveats:\n-- You need an office to seed, preferably",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "LoadDbaseCustomerInsurance",
+        "definition_length": 4140,
+        "preview": "\n\n\n\n\nCREATE PROCEDURE [dbo].[LoadDbaseCustomerInsurance]\n-- @CustNo as int\nAS\nBEGIN\n\nDECLARE @REFNOC AS int\nDECLARE @REL_REFNOC AS int\nDECLARE @RELATION AS int\nDECLARE @RELATION_VALUE AS int\nDECLARE @InputDate AS datetime\nDECLARE @InsurancePlanID AS int\nDECLARE @PatientID AS int\nDECLARE @RelationshipID AS int\nDECLARE @ResponsibleID AS int\n\nDECLARE @PatientInsuranceID AS int\nDECLARE @SubscriberID AS varchar(50)\nDECLARE @SubLastName AS varchar(30)\nDECLARE @SubFirstName AS varchar(30)\nDECLARE @SubA",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "PatientRecallByItemType",
+        "definition_length": 1868,
+        "preview": "\r\n\r\nCREATE PROCEDURE [dbo].[PatientRecallByItemType]\r\n@OfficeNum as varchar(12),\r\n@IsRecallItem as bit,\r\n@IsUpdateLastExamDate as bit\r\nAS\r\nBEGIN\r\n\r\nSELECT office.CompanyID as CompanyID,pt.OfficeNum, isnull(p.FirstName,'') + ' ' + isnull(p.LastName,'') as PatientName, p.ID as PatientID\r\n\t\t,  isnull(max(oi.InsCarrierCode),'') as InsCarrierCode,isnull(p.Email,'') as Email, p.DOB as DOB,sum(iid.Receivable) + sum(id.amount) - sum(id.tax) as NetSales\r\n\t\t, sum(id.Quantity) as Quantity,p.LastExamDate,\r\n",
+        "business_logic": "general_insurance_logic"
+      },
+      {
+        "name": "Scheduler_AppointmentsByResourceIDTable_Get",
+        "definition_length": 5697,
+        "preview": "/*\nHistory:\n10/11/19 - Amish - [REM-87] Fix the Stored procedure: \"Exec SP: SCHEDULER_Appointmentsbyresourceidtable_Get\"\n\t\t\t\t\t\tRemoved function call dbo.GetInsuranceNm(appt.MedicalPatientInsuranceID) from column.\n\t\t\t\t\t\tRemoved column level SELECT statements.\n11/12/19 - Amish - [REM-87] Removed Table Variables and used Temp Tables.\n\t\t\t\t\t\tReplaced IN subquery with INNER JOIN.\n12/20/20201 - VNXT-8818 adding filters for canceled and deleted to show on BookView\n*/\n\nCREATE PROCEDURE [dbo].[Scheduler_A",
+        "business_logic": "general_insurance_logic"
+      }
+    ],
+    "business_patterns": {
+      "eligibility_verification": [
+        "Scheduler_AppointmentConfirmation_Get",
+        "Scheduler_PatientInsurancesGridList_Get",
+        "Scheduler_VspEligibilityHistory_Get"
+      ],
+      "benefit_calculations": [
+        "Scheduler_PatientInsurancesGridList_Get",
+        "AddCompanyCarrierPlanAllowance"
+      ],
+      "carrier_management": [],
+      "plan_administration": [],
+      "coverage_analysis": [
+        "Scheduler_PatientInsurancesGridList_Get",
+        "AddCompanyCarrierPlanAllowance"
+      ]
+    },
+    "key_formulas": [
+      "Patient Responsibility = Deductible + Copay",
+      "Coverage = Benefit Max - Used",
+      "Allowable = Retail - Discount"
+    ],
+    "workflow_dependencies": [
+      "Carriers",
+      "Plans",
+      "Benefits",
+      "Eligibility",
+      "Coverage"
+    ]
+  },
+  "claims_logic": {
+    "total_procedures": 75,
+    "key_procedures": [
+      {
+        "name": "GetMonthlyAppliedPaymentSummary",
+        "definition_length": 3994,
+        "preview": "CREATE PROCEDURE [dbo].[GetMonthlyAppliedPaymentSummary]\n@fromDate as datetime,\n@toDate as datetime,\n@officeNum varchar(max),\n@doctorIds varchar(max),\n@companyId varchar(20),\n@IncludeOldSystemCredit as bit\n\nAS\nBEGIN\n   SET NOCOUNT ON;\n   SELECT ID as OfficeID INTO #OfficeList from GetOfficeNumber(@officeNum);\n\n  SELECT * FROM \n   (         \n\t\tSELECT  newId() AS ID, \n\t\t    ISNULL(e.employee, 1) AS DoctorId,\n            CASE WHEN LEN(LTRIM(RTRIM(e.ProfessionalSignature))) > 0  THEN e.ProfessionalS",
+        "business_logic": "edi_processing"
+      },
+      {
+        "name": "GenerateBillingAR",
+        "definition_length": 12133,
+        "preview": "CREATE PROCEDURE [dbo].[GenerateBillingAR]    \n@FromSerivceDate as datetime,  \n@ToServiceDate as datetime,  \n@FromTransDate as datetime,  \n@ToTransDate as datetime,  \n@LastDepositDate as datetime,  \n@CompanyID as varchar(10),  \n@Officenum as varchar(max)  \nAS  \nBEGIN  \n      -- SET NOCOUNT ON added to prevent extra result sets from  \n      -- interfering with SELECT statements.  \n      SET NOCOUNT ON;  \ndeclare @CloseID as int  \ndeclare @PreviousCloseID as int  \ndeclare @monthClosedDate as date ",
+        "business_logic": "general_claims_logic"
+      },
+      {
+        "name": "MarkVisionStarOrderReadyToBeSent",
+        "definition_length": 868,
+        "preview": "\r\nCREATE PROCEDURE [dbo].[MarkVisionStarOrderReadyToBeSent] \r\n\t@XifDataBatchId int,\r\n\t@HasRecordsToProcess int out \r\nAS\r\nBEGIN\r\n\r\n\r\nif exists(select * from VisionStarOrderSent where XifDataBatchId = @XifDataBatchId)\r\nBegin\r\n\t--we may clear the data before proceeding with the insert\r\n\t--do not want to create the duplicate records for the same order\r\n\t--in same batch\r\n\tdelete from VisionStarOrderSent where XifDataBatchId = @XifDataBatchId \r\nEnd\r\n\r\ninsert into VisionStarOrderSent (XifDataBatchId, O",
+        "business_logic": "edi_processing"
+      },
+      {
+        "name": "SP_InsuranceSalesSummaryByOfficeByCarrier",
+        "definition_length": 4336,
+        "preview": "\r\n\r\n\r\n--SP_InsuranceSalesSummaryByOfficeByCarrier '10/1/2011','1/31/2012','111,999','%',null\r\n\r\n\r\nCREATE PROCEDURE [dbo].[SP_InsuranceSalesSummaryByOfficeByCarrier]\r\n@FromDate1 varchar(20),\r\n@ToDate1 varchar(20),\r\n@OfficeNum varchar(max),\r\n@carrierId as varchar(50),\r\n@planId as varchar(50),\r\n@monthCloseID as int\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\tdeclare @iCnt as int\r\n\tdeclare @claimCnt as int\r\n\tselect @iCnt=count(*)  from sysobjects where xtype='U' and name = '#V_SalesAnalysisByVisionPlan'\r\n\tif(@iC",
+        "business_logic": "general_claims_logic"
+      },
+      {
+        "name": "SP_InsuranceSalesSummaryByOffice",
+        "definition_length": 5533,
+        "preview": "\nCREATE PROCEDURE [dbo].[SP_InsuranceSalesSummaryByOffice]      \n@FromDate1 varchar(20),      \n@ToDate1 varchar(20),      \n@OfficeNum varchar(max),      \n@carrierId as varchar(50),      \n@monthCloseID as int ,\n@companyId as varchar(20)\n      \n      \nAS      \nBEGIN      \n SET NOCOUNT ON;      \n declare @iCnt as int      \n declare @claimCnt as int      \n select @iCnt=count(*)  from sysobjects where xtype='U' and name = '#V_SalesAnalysisByVisionPlan'      \n if(@iCnt <>0)       \n Begin      \n  drop ",
+        "business_logic": "general_claims_logic"
+      },
+      {
+        "name": "SalesPaymentByVisionPlan",
+        "definition_length": 2739,
+        "preview": "\nCREATE PROCEDURE [dbo].[SalesPaymentByVisionPlan]\n@FromDate1 varchar(20),\n@ToDate1 varchar(20),\n@OfficeNum varchar(20)\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\tdeclare @iCnt as int\n\tselect @iCnt=count(*)  from sysobjects where xtype='U' and name = '#V_SalesPaymentByVisionPlan'\n\tif(@iCnt <>0) \n\tBegin\n\t\tdrop table #V_SalesPaymentByVisionPlan\n\tend\n\n\nselect Officenum,PlanName,\nSum(Price) as Retail, Sum(Discount) + sum(LineDisc) + sum(PackageDisc) + sum(InsuranceDiscount) + sum(PromotionDiscount) as Discount\n,sum",
+        "business_logic": "edi_processing"
+      },
+      {
+        "name": "GetBillingPOSReceivablesUnmatched",
+        "definition_length": 5548,
+        "preview": "\r\nCREATE PROCEDURE [dbo].[GetBillingPOSReceivablesUnmatched]\r\n@fromdate datetime,\r\n@todate datetime,\r\n@CompanyID varchar(20),\r\n@CarrierCode varchar(20),\r\n@OfficeNum as varchar(20),\r\n@IsPrepaidCarrier as BIT\r\n\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\t\r\n\tdeclare @iCnt as int\r\n\tselect @iCnt=count(*)  from sysobjects where xtype='U' and name = 'V_BillingOrderFirstReceivable1'\r\n\tif(@iCnt =0) \r\n\tBegin\r\n\t\r\nselect \r\nnewid() as ID,\r\nbcd.Officenum,bcd.CarrierName,bcd.CarrierID,bt.orderid as OrderNum,bc.servicedate-",
+        "business_logic": "general_claims_logic"
+      },
+      {
+        "name": "Scheduler_AppointmentDetail_Get",
+        "definition_length": 3144,
+        "preview": "CREATE PROCEDURE [dbo].[Scheduler_AppointmentDetail_Get]\n\t@appt_no INT\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\n\tSELECT\n\t\tAPPT.[appt_no]\n\t\t,APPT.[LocationID]\n\t\t,LOC.OfficeName AS LocDisplayName\n\t\t,APPT.resourceId\n\t\t,PRO.FirstName AS provider_first_name\n\t\t,PRO.LastName AS provider_last_name\n\t\t,PRO.Employee AS provider_cd\n\t\t,APPT.[appointmentTypeId]\n\t\t,IE.ItemName AS [prd_desc] \n\t\t,APPT.[ins_no]\n\t\t,ic.CarrierName AS insurance_name\n\t\t,dbo.GetInsuranceNm(appt.MedicalPatientInsuranceID) AS med_insurance_name  \n\t\t,",
+        "business_logic": "edi_processing"
+      },
+      {
+        "name": "GetPatientOrderInvoiceDataByOrder",
+        "definition_length": 3850,
+        "preview": "CREATE PROCEDURE [dbo].[GetPatientOrderInvoiceDataByOrder]\n\t@CutOffDate DATETIME,\n\t@CompanyId VARCHAR(20),\n\t@OrderId INT\nAS\nBEGIN\n\t\tSET NOCOUNT ON;\n\n\t\tWITH ProcedureDiagnosis AS (\n\t\t\tSELECT \n\t\t\t\tbcl.OrderNum,\n\t\t\t\tbcl.itemId,\n\t\t\t\tMin(bld.ProcedureCode) ProcedureCode\n\t\t\tFROM BillingClaimLineItem bcl\n\t\t\tLEFT JOIN BillingLineDetails bld ON bcl.lineitemid = bld.LineItemId \n\t\t\tGROUP BY bcl.OrderNum,\n\t\t\tbcl.itemId \n\t\t),\n\t\tPatientLedger AS (\n\t\t\tSELECT \n\t\t\t\tROW_NUMBER() OVER (ORDER BY o.ordernum, id.line",
+        "business_logic": "edi_processing"
+      },
+      {
+        "name": "LoadOldSystemCustomerCreditByPatient",
+        "definition_length": 5714,
+        "preview": "-- =============================================\n-- Author:\t\tDigesh Sahu\n-- Create date: 01/13/2011\n-- Description:\tLoading Patient old system balance\n-- Procedure Name : LoadOldSystemBalanceByPatient\n-- Parameters \n--\t\t1) Patient Home Location\t(Unique office/location number from AL database)\n--\t\t2) Patient ID\t\t\t\t(Unique ID for specific patient from Patient table)\t\n--\t\t3) Patient Balance\t\t\t(Patient Old System Balance (higher than zero))\n-- =============================================\nCREATE PRO",
+        "business_logic": "general_claims_logic"
+      },
+      {
+        "name": "GetBillingPOSReceivables",
+        "definition_length": 8644,
+        "preview": "\r\nCREATE PROCEDURE [dbo].[GetBillingPOSReceivables]\r\n@fromdate datetime,\r\n@todate datetime,\r\n@CompanyID varchar(20),\r\n@CarrierCode varchar(20),\r\n@OfficeNum as varchar(20),\r\n@IsPrepaidCarrier as BIT\r\n\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\ndeclare @iCnt as int\r\nselect @iCnt=count(*)  from sysobjects where xtype='U' and name = 'V_BillingOrderFirstReceivable1'\r\nif(@iCnt <>0) \r\nBegin\r\ndrop table V_BillingOrderFirstReceivable1\r\nend\r\nselect @iCnt=count(*)  from sysobjects where xtype='U' and name = 'V_OrderI",
+        "business_logic": "general_claims_logic"
+      },
+      {
+        "name": "ElasticsearchPatientFeeder",
+        "definition_length": 17009,
+        "preview": "CREATE PROCEDURE [dbo].[ElasticsearchPatientFeeder]\n    @sql_last_value DATETIME,\n\t@partition_letter VARCHAR(1) = 'M',\n\t@partition int = -1\nAS\nBEGIN\n    SET NOCOUNT ON;\n\t\n\t\n\tDECLARE @dbDate DATETIME = GETDATE()\n\tDECLARE @sqlEST DATETIME = DATEADD(mi, -5, DATEADD(hh, (-1) * DATEDIFF(hh, GETDATE(), GETUTCDATE()), @sql_last_value))\n\tDECLARE @sqlUTC DATETIME = DATEADD(mi, -5, @sql_last_value)\n\n\tIF OBJECT_ID('tempdb.dbo.#myESFdrParams', 'U') IS NOT NULL\n    DROP TABLE #myESFdrParams;\n\n\tSelect @sqlEST",
+        "business_logic": "edi_processing"
+      },
+      {
+        "name": "Scheduler_AppointmentsByResourceIDTable_Get",
+        "definition_length": 5697,
+        "preview": "/*\nHistory:\n10/11/19 - Amish - [REM-87] Fix the Stored procedure: \"Exec SP: SCHEDULER_Appointmentsbyresourceidtable_Get\"\n\t\t\t\t\t\tRemoved function call dbo.GetInsuranceNm(appt.MedicalPatientInsuranceID) from column.\n\t\t\t\t\t\tRemoved column level SELECT statements.\n11/12/19 - Amish - [REM-87] Removed Table Variables and used Temp Tables.\n\t\t\t\t\t\tReplaced IN subquery with INNER JOIN.\n12/20/20201 - VNXT-8818 adding filters for canceled and deleted to show on BookView\n*/\n\nCREATE PROCEDURE [dbo].[Scheduler_A",
+        "business_logic": "edi_processing"
+      },
+      {
+        "name": "GetPOSPaymentDetailforMiscandCredit",
+        "definition_length": 1587,
+        "preview": "Create PROCEDURE [dbo].[GetPOSPaymentDetailforMiscandCredit]\n@fromdate datetime,\n@todate datetime,\n@TransTypeid int,\n@CompanyID varchar(20),\n@Paymenttypeid int\n\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\t\nselect newid() as id, PaymentDetailID,pd.PaymentID,PaymentTypeID,pd.Amount,Convert(datetime,Convert(varchar(20),pt.TransactionDate,101)) as TransactionDate,pt.officenum as OfficeNum \nfrom PosPaymentDetail pd \n\t\tinner join PosTransaction pt on   pt.PaymentID=pd.PaymentID\n\t\t inner join Office o on pt.officenum=o",
+        "business_logic": "edi_processing"
+      },
+      {
+        "name": "GetCutoffData",
+        "definition_length": 5582,
+        "preview": "CREATE PROCEDURE [dbo].[GetCutoffData]\r\n\r\n@cutOffDate datetime,\r\n@startdate datetime,\r\n@enddate datetime \r\n\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\nselect Row_number() over(order by officenum) as ID,\r\n\t data.DateOfBilling as DateOfBilling\r\n\t, data.CarrierId as CarrierId\r\n\t, p.PlanName as PlanId\r\n\t, data.OfficeNum as OfficeNum\r\n\t, pat.Lastname +', '+ pat.Firstname as PatientId\r\n\t, sum(data.GrossRetail) as GrossRetail\r\n\t, sum(data.RetailDiscounts) as RetailDiscounts\r\n\t, sum(data.NetRetail) as NetRetail\r\n\t",
+        "business_logic": "general_claims_logic"
+      }
+    ],
+    "business_patterns": {
+      "claim_submission": [],
+      "edi_processing": [
+        "GetMonthlyAppliedPaymentSummary",
+        "MarkVisionStarOrderReadyToBeSent",
+        "SalesPaymentByVisionPlan",
+        "Scheduler_AppointmentDetail_Get",
+        "GetPatientOrderInvoiceDataByOrder",
+        "ElasticsearchPatientFeeder",
+        "Scheduler_AppointmentsByResourceIDTable_Get",
+        "GetPOSPaymentDetailforMiscandCredit",
+        "GetCustomerCreditDetail",
+        "SetupVspMedicaid",
+        "UpdateCompanyEdiSiteKey",
+        "GetMonthlyProductionSummary",
+        "DeleteEra",
+        "UpdateGLDetailforPOSBillingARAdjustment",
+        "MatchClaims",
+        "GB_RecordDailySummary",
+        "SetIsReadyToPostIsExternalClaim",
+        "GetPOSAR",
+        "MarkVisionStarCancelOrderReadyToBeSent",
+        "GetItemTypeSaleSummaryByDate",
+        "CalcPOSTransactionSummaryByDayCloseDate",
+        "CalcPOSTransactionSummaryByDate",
+        "GetInvoiceDetailsLite",
+        "DeleteEdiRow",
+        "GetDayClose",
+        "WorkFlowPurge_Claims",
+        "__GetInvoiceProductForStore",
+        "__GetTransactionPaymentForStore",
+        "Clean835Files",
+        "sp_renamediagram",
+        "sp_creatediagram"
+      ],
+      "adjudication_logic": [
+        "GetMonthlyAppliedPaymentSummary",
+        "MarkVisionStarOrderReadyToBeSent",
+        "SalesPaymentByVisionPlan",
+        "Scheduler_AppointmentDetail_Get",
+        "GetPatientOrderInvoiceDataByOrder",
+        "ElasticsearchPatientFeeder",
+        "Scheduler_AppointmentsByResourceIDTable_Get",
+        "GetPOSPaymentDetailforMiscandCredit",
+        "GetCustomerCreditDetail",
+        "SetupVspMedicaid",
+        "UpdateCompanyEdiSiteKey",
+        "GetMonthlyProductionSummary",
+        "DeleteEra",
+        "UpdateGLDetailforPOSBillingARAdjustment",
+        "MatchClaims",
+        "GB_RecordDailySummary",
+        "SetIsReadyToPostIsExternalClaim",
+        "GetPOSAR",
+        "MarkVisionStarCancelOrderReadyToBeSent",
+        "GetItemTypeSaleSummaryByDate",
+        "CalcPOSTransactionSummaryByDayCloseDate",
+        "CalcPOSTransactionSummaryByDate",
+        "GetInvoiceDetailsLite",
+        "DeleteEdiRow",
+        "GetDayClose",
+        "WorkFlowPurge_Claims",
+        "__GetInvoiceProductForStore",
+        "__GetTransactionPaymentForStore",
+        "Clean835Files",
+        "sp_renamediagram",
+        "sp_creatediagram"
+      ],
+      "denial_management": [],
+      "payment_posting": []
+    },
+    "key_formulas": [
+      "Claim Amount = Allowable - Patient Responsibility",
+      "Payment = Approved Amount - Adjustments"
+    ],
+    "workflow_dependencies": [
+      "Insurance",
+      "EDI",
+      "Billing",
+      "Payments",
+      "Adjustments"
+    ]
+  },
+  "cross_domain_workflows": {
+    "revenue_cycle": {
+      "description": "Complete revenue cycle from patient visit to payment collection",
+      "domains": [
+        "Patient",
+        "Clinical",
+        "Orders",
+        "Invoice",
+        "Insurance",
+        "Claims",
+        "Payment"
+      ],
+      "key_procedures": [],
+      "business_value": "Critical end-to-end revenue generation workflow"
+    },
+    "product_fulfillment": {
+      "description": "Product fulfillment from order to delivery",
+      "domains": [
+        "Orders",
+        "Inventory",
+        "Items",
+        "Invoice",
+        "Employee"
+      ],
+      "key_procedures": [],
+      "business_value": "Operational efficiency and customer satisfaction"
+    },
+    "insurance_processing": {
+      "description": "Insurance processing from verification to payment",
+      "domains": [
+        "Insurance",
+        "Claims",
+        "Benefits",
+        "Payment",
+        "AR"
+      ],
+      "key_procedures": [],
+      "business_value": "Revenue optimization through insurance reimbursement"
+    }
+  },
+  "business_formulas": {
+    "financial_calculations": [
+      "Outstanding Balance = Billed Amount - (Payments + Adjustments + Write-offs)",
+      "Patient Balance = Total Charges - Insurance Payments - Patient Payments",
+      "Commission = Sales Amount * Commission Rate",
+      "Discount Amount = Retail Price * Discount Percentage"
+    ],
+    "insurance_calculations": [
+      "Patient Responsibility = Deductible + Copay + Coinsurance",
+      "Insurance Allowable = Retail Price - Insurance Discount",
+      "Coverage Amount = Benefit Maximum - Used Benefits",
+      "Claim Amount = Allowable Amount - Patient Responsibility"
+    ],
+    "inventory_calculations": [
+      "Reorder Point = (Lead Time * Average Usage) + Safety Stock",
+      "Inventory Value = Quantity on Hand * Unit Cost",
+      "Turnover Ratio = Cost of Goods Sold / Average Inventory",
+      "Stock Level = Received + Adjustments - Dispensed"
+    ],
+    "operational_metrics": [
+      "Utilization Rate = Scheduled Hours / Available Hours",
+      "Revenue per Visit = Total Revenue / Number of Visits",
+      "Collection Rate = Collections / Net Charges",
+      "Days Sales Outstanding = Accounts Receivable / (Revenue / Days)"
+    ]
+  },
+  "integration_patterns": {}
+}

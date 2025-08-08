@@ -1,0 +1,110 @@
+{
+  "structure": {
+    "database_name": "blink_dev1",
+    "total_tables": 783,
+    "tables": {},
+    "summary_stats": {
+      "total_rows": 0,
+      "total_columns": 0,
+      "estimated_size_mb": 0,
+      "largest_table": null,
+      "most_columns": null
+    },
+    "eyecare_specific_tables": [],
+    "business_domains": {
+      "patient_data": [],
+      "appointments": [],
+      "billing": [],
+      "inventory": [],
+      "staff": [],
+      "clinical": [],
+      "other": []
+    }
+  },
+  "costs": {
+    "data_metrics": {
+      "total_rows": 0,
+      "estimated_size_gb": 0.0,
+      "compressed_size_gb": 0.0,
+      "tables_count": 783
+    },
+    "storage_costs": {
+      "raw_size_tb": 0.0,
+      "compressed_size_tb": 0.0,
+      "monthly_cost_usd": 0.0
+    },
+    "compute_costs": {
+      "recommended_warehouse": "X-SMALL",
+      "estimated_hours_per_day": 4,
+      "credits_per_hour": 1,
+      "monthly_credits": 120,
+      "cost_per_credit_usd": 3,
+      "monthly_cost_usd": 360
+    },
+    "total_monthly_estimate": {
+      "storage_usd": 0.0,
+      "compute_usd": 360,
+      "total_usd": 360.0
+    },
+    "recommendations": [
+      "Perfect for development and testing",
+      "X-Small warehouse is sufficient for this data volume",
+      "Consider auto-suspend after 5 minutes",
+      "Consider using Snowflake's free trial credits for initial setup",
+      "Enable auto-suspend to minimize compute costs",
+      "Use result caching to reduce query costs",
+      "Consider time-travel retention settings based on compliance needs"
+    ]
+  },
+  "migration_plan": {
+    "phases": [
+      {
+        "phase": 1,
+        "name": "Infrastructure Setup",
+        "duration_days": 1,
+        "tasks": [
+          "Initialize Snowflake environment",
+          "Create databases, schemas, and roles",
+          "Set up compute warehouses",
+          "Configure security and permissions"
+        ]
+      },
+      {
+        "phase": 2,
+        "name": "Data Ingestion - Core Tables",
+        "duration_days": 2,
+        "tasks": [
+          "Migrate patient and customer data",
+          "Transfer appointment and scheduling data",
+          "Load billing and transaction data",
+          "Validate data quality and integrity"
+        ]
+      },
+      {
+        "phase": 3,
+        "name": "Data Modeling & Analytics",
+        "duration_days": 3,
+        "tasks": [
+          "Create dimensional models",
+          "Build business logic views",
+          "Implement KPI calculations",
+          "Set up data quality monitoring"
+        ]
+      },
+      {
+        "phase": 4,
+        "name": "Analytics Platform",
+        "duration_days": 2,
+        "tasks": [
+          "Deploy Streamlit dashboards",
+          "Integrate Snowflake Cortex AI",
+          "Create automated reports",
+          "User training and documentation"
+        ]
+      }
+    ],
+    "total_duration_days": 8,
+    "priority_tables": [],
+    "estimated_effort": "Small development project suitable for rapid deployment"
+  }
+}

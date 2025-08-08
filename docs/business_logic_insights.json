@@ -1,0 +1,866 @@
+{
+  "financial_calculations": {
+    "total_financial_procedures": 126,
+    "key_procedures": [
+      {
+        "name": "GetMonthlyAppliedPaymentSummary",
+        "definition_length": 3994,
+        "preview": "CREATE PROCEDURE [dbo].[GetMonthlyAppliedPaymentSummary]\n@fromDate as datetime,\n@toDate as datetime,\n@officeNum varchar(max),\n@doctorIds varchar(max),\n@companyId varchar(20),\n@IncludeOldSystemCredit a"
+      },
+      {
+        "name": "GenerateBillingAR",
+        "definition_length": 12133,
+        "preview": "CREATE PROCEDURE [dbo].[GenerateBillingAR]    \n@FromSerivceDate as datetime,  \n@ToServiceDate as datetime,  \n@FromTransDate as datetime,  \n@ToTransDate as datetime,  \n@LastDepositDate as datetime,  \n@"
+      },
+      {
+        "name": "CopyOfficeInvoiceConfigGoLiveSetup",
+        "definition_length": 2193,
+        "preview": "CREATE PROCEDURE [dbo].[CopyOfficeInvoiceConfigGoLiveSetup]\n\t@FromOfficeNum\tvarchar(8),\n\t@ToOfficeNum\tvarchar(8),\n\t@WithOverlay\t\tint = 0\t\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\n    MERGE OfficeInvoiceConfig AS T "
+      },
+      {
+        "name": "CopyOfficeData",
+        "definition_length": 39099,
+        "preview": "-- IF EXISTS ( SELECT * FROM sysobjects WHERE  id = object_id(N'[dbo].[CopyOfficeData]') and OBJECTPROPERTY(id, N'IsProcedure') = 1 ) BEGIN DROP PROCEDURE [dbo].[CopyOfficeData] END\nCREATE PROCEDURE ["
+      },
+      {
+        "name": "CLSalesbyDoctor",
+        "definition_length": 981,
+        "preview": "CREATE PROCEDURE [dbo].[CLSalesbyDoctor]\r\n\r\n@fromdate datetime,\r\n@todate  datetime,\r\n@CompanyID varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\ndeclare @iCnt as int\r\nselect @iCnt=count(*)  from sysobjects"
+      },
+      {
+        "name": "CLSalesByDoctorDetail",
+        "definition_length": 1233,
+        "preview": "CREATE PROCEDURE [dbo].[CLSalesByDoctorDetail]\r\n\r\n@fromdate datetime,\r\n@todate  datetime,\r\n@CompanyID varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\n\r\n\r\nselect \r\n\tNEWID() as ID, \r\n\tv.DoctorId, \r\n\te.First"
+      },
+      {
+        "name": "GetPatientStatementReport",
+        "definition_length": 7551,
+        "preview": "CREATE PROCEDURE [dbo].[GetPatientStatementReport]\n@cutOffDate datetime,\n@OfficeNumber varchar(30),\n@orderid varchar(10)\nAS\nBEGIN\n\n SET NOCOUNT ON;\n DECLARE @listOrderId VARCHAR(Max)\n\n if (@orderid is"
+      },
+      {
+        "name": "SalesPaymentByVisionPlan",
+        "definition_length": 2739,
+        "preview": "\nCREATE PROCEDURE [dbo].[SalesPaymentByVisionPlan]\n@FromDate1 varchar(20),\n@ToDate1 varchar(20),\n@OfficeNum varchar(20)\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\tdeclare @iCnt as int\n\tselect @iCnt=count(*)  from sys"
+      },
+      {
+        "name": "GetSalesbyItemTypeandInsurance",
+        "definition_length": 1714,
+        "preview": "CREATE PROCEDURE [dbo].[GetSalesbyItemTypeandInsurance]\n@FromDate1 varchar(20),\n@ToDate1 varchar(20),\n@OfficeNum varchar(20),\n@CarrierCode varchar(100),\n@CompanyId varchar(20)\nAS\nBEGIN\n\tSET NOCOUNT ON"
+      },
+      {
+        "name": "GetWarrantyUsage",
+        "definition_length": 3838,
+        "preview": "\r\nCREATE PROCEDURE [dbo].[GetWarrantyUsage]\r\n@fromdate datetime,\r\n@todate datetime,\r\n@CompanyID varchar(20),\r\n@OfficeNum varchar(10)\r\n\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\t\r\n\t\r\ndeclare @iCnt as int\r\nselect "
+      }
+    ],
+    "calculation_patterns": {
+      "summation": [
+        "CopyOfficeData",
+        "SalesPaymentByVisionPlan",
+        "GetWarrantyUsage",
+        "UndeliveredOrdersDetail",
+        "PatientRecallByItemType",
+        "Scheduler_AppointmentNotificationsByProviderByDateRangePaginated",
+        "Scheduler_AppointmentNotificationsByCompanyByDateRangePaginated",
+        "GetCLADHOC",
+        "GetCutoffData",
+        "LoadOrUpdateCompanyDashboard",
+        "SetupExistingCompanyDashBoard",
+        "GetMonthlyProductionSummary",
+        "LoadOrUpdateOfficeDashboard",
+        "NetSaleByDoctor",
+        "CopyResourceScheduleData",
+        "GenerateBillingARWithCloseID",
+        "GetBilledClaimsStatisticAll",
+        "GetBillingFirstReceivables",
+        "GetUnbilledBalanceAging",
+        "SetIsReadyToPostIsExternalClaim",
+        "GetPOSAR",
+        "GetItemTypeSaleSummaryByDate",
+        "GetInvoiceDetailsLite",
+        "UndeliveredOrdersSummary",
+        "GetKPISpecialReportByALLOfficeDaily",
+        "CopyOfficeLabData",
+        "GetKPIProductivityCalcByOfficeByEmployeeDaily",
+        "GetKPIProductivityCalcByEmployeeDaily",
+        "GetKPIProductivityCalcByOfficeDaily",
+        "GetKPIProductivityCalcByALLOfficeDaily",
+        "UpdateGLSummary",
+        "DoesInsCheckModified",
+        "GetOutStandingReceivableforClaim",
+        "GetPaidAmountByClaimId",
+        "ADHOCQuery"
+      ],
+      "balance_calculation": [
+        "GetPatientStatementReport",
+        "LoadOldSystemBalanceByPatient",
+        "SP_OrderAgingFilterByOfficeIds",
+        "LoadOldSystemCustomerCreditByPatient",
+        "LoadPatientOldSystemBalance",
+        "Scheduler_PatientDetail_Get",
+        "BalanceAgingReportNew",
+        "BalanceAgingReportCarrierPatient",
+        "BalanceAgingReportbyCloseID",
+        "BalanceAgingReport",
+        "GetUnbilledBalanceAging",
+        "GetUnbilledAging",
+        "LoadInventoryPhysicalFile",
+        "CalcPOSTransactionSummaryByDayCloseDate",
+        "CalcPOSTransactionSummaryByDate",
+        "UpdateInventoryBalanceOnOrderAndTransitIn",
+        "UpdateInventoryBalanceOnHand",
+        "UpdateInventoryBalanceOnHand1",
+        "GetOutstandingBalance"
+      ],
+      "discount_calculation": [
+        "SalesPaymentByVisionPlan",
+        "UndeliveredOrdersDetail",
+        "GetCutoffData",
+        "GetMonthlyProductionSummary",
+        "GB_RecordDailySummary",
+        "GetItemTypeSaleSummaryByDateRange",
+        "GetItemTypeSaleSummaryByDate",
+        "InsertPOSTransactionSummaryByDate",
+        "CalcPOSTransactionSummaryByDayCloseDate",
+        "CalcPOSTransactionSummaryByDate",
+        "GetInvoiceDetailsLite",
+        "GetKPISpecialReportByALLOfficeDaily",
+        "__GetInvoiceDetailForStore",
+        "__GetInvoiceProductForStore"
+      ]
+    },
+    "business_value": "Critical revenue cycle and financial operations"
+  },
+  "clinical_workflows": {
+    "total_clinical_procedures": 268,
+    "key_procedures": [
+      {
+        "name": "GetMonthlyAppliedPaymentSummary",
+        "definition_length": 3994,
+        "preview": "CREATE PROCEDURE [dbo].[GetMonthlyAppliedPaymentSummary]\n@fromDate as datetime,\n@toDate as datetime,\n@officeNum varchar(max),\n@doctorIds varchar(max),\n@companyId varchar(20),\n@IncludeOldSystemCredit a"
+      },
+      {
+        "name": "CopyOfficeInvoiceConfigGoLiveSetup",
+        "definition_length": 2193,
+        "preview": "CREATE PROCEDURE [dbo].[CopyOfficeInvoiceConfigGoLiveSetup]\n\t@FromOfficeNum\tvarchar(8),\n\t@ToOfficeNum\tvarchar(8),\n\t@WithOverlay\t\tint = 0\t\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\n    MERGE OfficeInvoiceConfig AS T "
+      },
+      {
+        "name": "spLoadPearleCustomer",
+        "definition_length": 5424,
+        "preview": "CREATE PROCEDURE [dbo].[spLoadPearleCustomer]\n(\n\t-- Patient\n\t @homeOffice\t\t\tVARCHAR(8) = NULL\n\t,@lastName\t\t\t\tVARCHAR(30)\n\t,@firstName\t\t\t\tVARCHAR(30)\n\t,@middleName\t\t\tVARCHAR(1) = NULL\n\t,@title\t\t\t\t\tINT "
+      },
+      {
+        "name": "WorkFlowPurge",
+        "definition_length": 2638,
+        "preview": "\r\n-- =============================================\r\n-- Author:\t\tSam Callejo and Kris Jornlin\r\n-- Create date: 01/30/2013\r\n-- Description:\tGets only providers for listbox.\r\n-- ========================="
+      },
+      {
+        "name": "GetPatientLite",
+        "definition_length": 3127,
+        "preview": "\nCREATE PROCEDURE [dbo].[GetPatientLite]\n@CompanyID as varchar(20) ,\n@PatientID as int ,\n@FirstName as varchar(30) ,\n@LastName as varchar(30) ,\n@BirthDate as varchar(100) ,\n@PhoneNumber as varchar(50)"
+      },
+      {
+        "name": "SP_PatientSearch_Extension",
+        "definition_length": 987,
+        "preview": "\nCREATE PROCEDURE [SP_PatientSearch_Extension]\n\t@CompanyID   VARCHAR(20)  = NULL,\n    @FirstName   VARCHAR(30)  = NULL,\n    @LastName    VARCHAR(30)  = NULL,\n    @PhoneNumber VARCHAR(50)  = NULL,\n    "
+      },
+      {
+        "name": "CLSalesbyDoctor",
+        "definition_length": 981,
+        "preview": "CREATE PROCEDURE [dbo].[CLSalesbyDoctor]\r\n\r\n@fromdate datetime,\r\n@todate  datetime,\r\n@CompanyID varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\ndeclare @iCnt as int\r\nselect @iCnt=count(*)  from sysobjects"
+      },
+      {
+        "name": "CLSalesByDoctorDetail",
+        "definition_length": 1233,
+        "preview": "CREATE PROCEDURE [dbo].[CLSalesByDoctorDetail]\r\n\r\n@fromdate datetime,\r\n@todate  datetime,\r\n@CompanyID varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\n\r\n\r\nselect \r\n\tNEWID() as ID, \r\n\tv.DoctorId, \r\n\te.First"
+      },
+      {
+        "name": "GetPatientStatementReport",
+        "definition_length": 7551,
+        "preview": "CREATE PROCEDURE [dbo].[GetPatientStatementReport]\n@cutOffDate datetime,\n@OfficeNumber varchar(30),\n@orderid varchar(10)\nAS\nBEGIN\n\n SET NOCOUNT ON;\n DECLARE @listOrderId VARCHAR(Max)\n\n if (@orderid is"
+      },
+      {
+        "name": "SP_GenerateDoctorExamSales",
+        "definition_length": 6573,
+        "preview": "CREATE PROCEDURE [dbo].[SP_GenerateDoctorExamSales]\r\n@CompanyID varchar(10),\r\n@ListOfOfficenum as varchar(max),\r\n@CarrierID as varchar(max),\r\n@FromSerivceDate as datetime,\r\n@ToServiceDate as datetime,"
+      }
+    ],
+    "workflow_patterns": {
+      "appointment_management": [
+        "CopyOfficeInvoiceConfigGoLiveSetup",
+        "WorkFlowPurge",
+        "GetScheduleRecallDetailsReportByCriteria",
+        "Scheduler_ExistingAppointmentsHistory_Get",
+        "GetAppointmentBookLite",
+        "Scheduler_AppointmentDetail_Get",
+        "Scheduler_AppointmentConfirmationDateRange_Get",
+        "Scheduler_ExistingAppointments_Get",
+        "Scheduler_AppointmentBook_GetByPatientId",
+        "Scheduler_RecurringAppointment_Get",
+        "Scheduler_ExistingAppointmentsByResourceAndDate_Get",
+        "RetransmitPatientsViaServiceFailure",
+        "Scheduler_AppointmentsByResourceIDs_Get",
+        "SeedPatientsAndAppointments",
+        "GetAppointmentReschedulingDetails",
+        "Scheduler_AppointmentNotificationsByProviderByDateRangePaginated",
+        "Scheduler_Appointments_Get",
+        "Scheduler_AppointmentsByResourceIDForBookView",
+        "Scheduler_AppointmentNotificationsByCompanyByDateRangePaginated",
+        "Scheduler_AppointmentsByResourceIDTable_Get",
+        "RetransmitAppointmentsViaServiceFailure",
+        "Scheduler_AppointmentsInTimeSlot_Get",
+        "Scheduler_AppointmentBook_Get",
+        "Scheduler_AppointmentConfirmation_Get",
+        "Scheduler_PatientAppointmentsHistory_Get",
+        "CopyInvoiceConfigGoLiveSetup",
+        "CopyPracticeData",
+        "GetAppointmentItemTypes_Extension",
+        "Scheduler_PatientAppointmentsLite_Get",
+        "Scheduler_ServiceTypeByOffice",
+        "Scheduler_Appointment_InvoiceId_Update",
+        "GetCompanyOpenAppointmentSlots",
+        "Scheduler_AvailabilityByResourceIDs_Get",
+        "Scheduler_AppointmentsOpen_Get",
+        "Scheduler_AllResources_Get",
+        "GetOpenAppointmentSlots",
+        "Scheduler_AuditLog_Appointment_Get",
+        "Scheduler_InsuranceRemindersAppointmentCount_Get",
+        "Scheduler_TemplatesForTimeSlot_Get",
+        "Scheduler_Appointment_Del",
+        "WorkFlowPurge_Appointments",
+        "Scheduler_AppointmentNote_Save",
+        "Scheduler_ScheduleTemplateServiceGroupServiceItems_Get",
+        "Scheduler_ServiceReminders_Save",
+        "Scheduler_ServiceReminder_Get",
+        "Scheduler_ServiceReminders_Get",
+        "Scheduler_Templates_Get",
+        "Scheduler_ScheduleTemplatesForCompany_Get",
+        "Scheduler_RecurringAppointment_Save",
+        "Scheduler_ExceptionAppointmentConflict_Get",
+        "Scheduler_ExceptionAppointmentExceptionStatus_Get",
+        "Scheduler_AuditLog_Add",
+        "Scheduler_Service_Save",
+        "Scheduler_Services_Del",
+        "Scheduler_ExceptionAppointmentStatus_Get",
+        "Scheduler_AppointmentRecurringInstances_Delete",
+        "Scheduler_AppointmentDetail_Save",
+        "Scheduler_AppointmentsInDayTimeSlotCount_Get",
+        "Scheduler_ServiceRemindersAppointmentCount_Get",
+        "Scheduler_AppointmentIcon_Count",
+        "Scheduler_AppointmentsInNormalAvailability_Get",
+        "Scheduler_AppointmentsInRangeAvailability_Get",
+        "Scheduler_AppointmentConfirmation_Upd",
+        "Scheduler_RecurringAppointment_Delete",
+        "Scheduler_AppointmentCountByTelehealthAppId_Get",
+        "Scheduler_AppointmentsInTimeSlot2_Get",
+        "SP_Archive_Appointment_Schedule",
+        "WorkFlowPurge_Appointments",
+        "GetOpenAppointmentSlots_2",
+        "GetCompanyOpenAppointmentSlotsDev",
+        "GetOpenAppointmentSlots_Dev4",
+        "GetCompanyOpenAppointmentSlots_temp",
+        "GetCompanyOpenAppointmentSlots_Dev",
+        "GetOpenAppointmentSlots_Dev2",
+        "GetOpenAppointmentSlots_Dev3",
+        "GetOpenAppointmentSlots_Dev",
+        "Scheduler_AppointmentBookByPatId",
+        "Scheduler_ScheduleTemplate_ServiceGroupServiceItems_Save",
+        "Scheduler_TemplateServices_Get",
+        "Scheduler_Authorizations_Get",
+        "Scheduler_AppointmentIcons_Save",
+        "Scheduler_AppointmentIcons_Get",
+        "Scheduler_AppointmentIcon_Get",
+        "Scheduler_AppointmentIcon_Delete"
+      ],
+      "patient_registration": [
+        "CopyOfficeInvoiceConfigGoLiveSetup",
+        "spLoadPearleCustomer",
+        "GetPatientLite",
+        "SP_PatientSearch_Extension",
+        "CLSalesByDoctorDetail",
+        "GetPatientStatementReport",
+        "GetScheduleRecallDetailsReportByCriteria",
+        "GetWarrantyUsage",
+        "Scheduler_ExistingAppointmentsHistory_Get",
+        "GetAppointmentBookLite",
+        "GetPatientOrderLedgerInsuranceData",
+        "GetKPITransactionDetails",
+        "VerifyParametersValidForCompany",
+        "GetPatientQuickList",
+        "Scheduler_AppointmentDetail_Get",
+        "FixTransactions",
+        "LoadOldSystemBalanceByPatient",
+        "GetPatientOrderInvoiceDataByOrder",
+        "GetPatientLiteWithPhone",
+        "DailyFlashSalesByResource",
+        "SP_OrderAgingFilterByOfficeIds",
+        "Scheduler_ExistingAppointments_Get",
+        "Scheduler_AppointmentBook_GetByPatientId",
+        "Scheduler_PatientDuplicates_Get",
+        "UndeliveredOrdersDetail",
+        "LoadOldSystemCustomerCreditByPatient",
+        "LoadDbaseCustomer",
+        "AccessVerification",
+        "SP_OrderAgingForPatientStmt",
+        "PatientFollowupNotes",
+        "LoadSAASCustomer",
+        "GetPatientLiteTodaysPatient",
+        "LoadDbaseCustomerInsurance",
+        "Scheduler_FindPatients_Get",
+        "PurgeDuplicatePatient",
+        "ElasticsearchPatientFeeder",
+        "PatientRecallByItemType",
+        "GetPatientLiteWithPhoneOnly",
+        "GetPatientReferrals",
+        "GetUndeliveredCashOrders",
+        "LoadPatientOldSystemBalance",
+        "GetPatientLiteById",
+        "CopyPatientData",
+        "GetPatientLiteWithNamesOnly",
+        "Scheduler_AppointmentNotificationsByProviderByDateRangePaginated",
+        "GetPatientDemographicDetailsforGender",
+        "Scheduler_Appointments_Get",
+        "GetMailCheckDetail",
+        "blink_findPatient",
+        "Scheduler_AppointmentNotificationsByCompanyByDateRangePaginated",
+        "Scheduler_AppointmentsByResourceIDTable_Get",
+        "GetCLADHOC",
+        "Scheduler_AppointmentBook_Get",
+        "GetPatientOrderLedgerInvoiceData",
+        "GetUndeliveredOrdersbyOrders",
+        "GetCutoffData",
+        "Scheduler_PatientDetail_Get",
+        "GetCustomerCreditDetail",
+        "SP_PatientRecallReport",
+        "Scheduler_PatientReferral_Get",
+        "GetPatientLiteWithoutPhone",
+        "GetUndeliveredCashOrdersByOrder",
+        "Scheduler_PatientAppointmentsHistory_Get",
+        "CleanUpPatientAfterMerge",
+        "CopyInvoiceConfigGoLiveSetup",
+        "CopyCompanyPatientNoticeMappingGoLiveSetup",
+        "FixPatientInsuranceAddressAndPhone",
+        "Scheduler_PatientInsurancesGridList_Get",
+        "Scheduler_PatientAppointmentsLite_Get",
+        "BalanceAgingReportNew",
+        "BalanceAgingReportCarrierPatient",
+        "BalanceAgingReportbyCloseID",
+        "BalanceAgingReport",
+        "AuditDacpacChange",
+        "LoadOrUpdateOfficeDashboard",
+        "GetPatientOrderLedgerPaymentData",
+        "GetPOSReceivables",
+        "Scheduler_PatientInsurance_Get",
+        "GetBillingSnapshotData",
+        "GetBillingFirstReceivables",
+        "Sp_InsuranceBillingClaimTransaction",
+        "GB_RecordDailySummary",
+        "GetUnbilledAging",
+        "CopyRxInfo",
+        "LoadOutOfStoreRefund",
+        "UndeliveredOrdersSummary",
+        "CopyPatientPreferencesSetup",
+        "CleanUpPatientQuickList",
+        "UpdatePatientCorrespondence",
+        "GetDayClose",
+        "GetPaidAmountByClaimId",
+        "Scheduler_Preferences_Get",
+        "Scheduler_AppointmentDetail_Save",
+        "__GetInvoiceTransactions",
+        "__GetInvoiceTransactionForStore",
+        "__GetPatientExamForStore",
+        "__GetPatientForStore",
+        "MergeExtensionTables",
+        "Scheduler_AppointmentBookByPatId",
+        "ExportData",
+        "CreatePrimaryPhone",
+        "Scheduler_VspEligibilityHistory_Get",
+        "Scheduler_VspClaimHistory_Get",
+        "Scheduler_PatientValidationPreferences_Get",
+        "Scheduler_PatientOptions_Get",
+        "Scheduler_PatientInsuranceUsed_Get",
+        "Scheduler_PatientInsurancesDetail_Get",
+        "Scheduler_PatientInsuranceOnFeeslip_Get",
+        "Scheduler_PatientInsurance_Save",
+        "Scheduler_PatientInsurance_Delete",
+        "Scheduler_PatientDemoPreferences_Get",
+        "Scheduler_InsAuthorizations_Get",
+        "Scheduler_Authorizations_Get",
+        "LoadSEECustomer",
+        "GetPatientRXSales"
+      ],
+      "examination_workflow": [
+        "SP_GenerateDoctorExamSales",
+        "Scheduler_ExistingAppointments_Get",
+        "Scheduler_PatientDuplicates_Get",
+        "RetransmitPatientsViaServiceFailure",
+        "AccessVerification",
+        "PatientRecallByItemType",
+        "RetransmitAppointmentsViaServiceFailure",
+        "UnusedEehrExams",
+        "Scheduler_PatientDetail_Get",
+        "Scheduler_AvailableDateRange_Delete",
+        "Scheduler_ServiceGroupServices_Get",
+        "Scheduler_Services_Get",
+        "CreateCLExamRx",
+        "GetAppointmentItemTypes_Extension",
+        "GetServiceExamItems_Extension",
+        "ValidateAndAuditPatch",
+        "AuditDacpacChange",
+        "Scheduler_CompanyResources_Get1",
+        "Scheduler_ResourcesActivePerLocation_Get",
+        "Scheduler_ResourcesDefaults_Get",
+        "Scheduler_ResourceDuration_Get",
+        "Scheduler_ResourcesAll_Get",
+        "Scheduler_ResourceInformation_Get",
+        "Scheduler_AppointmentsOpen_Get",
+        "Scheduler_ResourceDurationsByResourceIDs_Get",
+        "GetLastExamRecallReport",
+        "CopyRxInfo",
+        "Scheduler_LocationsByLocType_Get",
+        "Scheduler_DisplayedLocations_Get",
+        "Scheduler_CompanyId_Get",
+        "Scheduler_LocationByResourceID_Get",
+        "Scheduler_Appointment_Del",
+        "Scheduler_ServiceGroupServiceItems_Get",
+        "Scheduler_CodesLookup_Get",
+        "Scheduler_ServiceGroups_Get",
+        "Scheduler_ServiceGroup_Delete",
+        "Scheduler_ServiceGroup_Save",
+        "Scheduler_ScheduleTemplateAvailability_Del",
+        "Scheduler_ScheduleTemplateAvailability_Get",
+        "Scheduler_ScheduleTemplateAvailability_Save",
+        "Scheduler_Exception_Del",
+        "Scheduler_ExceptionAppointmentConflict_Get",
+        "Scheduler_ExceptionAppointmentExceptionStatus_Get",
+        "Scheduler_ResourceAvailability_Del",
+        "Scheduler_ResourceAvailability_Get",
+        "Scheduler_AvailabilityOfficeHourStatus_Get",
+        "Scheduler_ResourceAvailability_Save",
+        "Scheduler_Preferences_Get",
+        "Scheduler_AvailableDateRange_DeleteProviderBlocksOrphans",
+        "Scheduler_AvailableDateRange_Save",
+        "Scheduler_ResourceLocation_Del",
+        "Scheduler_AvailabilityDateRange_Get",
+        "Scheduler_Services_Del",
+        "Scheduler_ExceptionAppointmentStatus_Get",
+        "Scheduler_AppointmentIcon_Count",
+        "__GetPatientExamForStore",
+        "MergeExtensionTables",
+        "ExportData",
+        "ExampleProcedure",
+        "Scheduler_ServiceGroupServiceItems_Save",
+        "Scheduler_ServiceGroupServiceItems_Delete",
+        "Scheduler_Resources_Save",
+        "Scheduler_Resources_Get",
+        "Scheduler_ResourceInformation_Save",
+        "Scheduler_ReferringProfessionals_Get",
+        "Scheduler_PatientValidationPreferences_Get",
+        "Scheduler_PatientOptions_Get",
+        "Scheduler_LocationOfficeHours_Get",
+        "Scheduler_LocationDisplayedOnlyStatus_Upd",
+        "Scheduler_LocationDisplayedOnlyStatus_Get",
+        "Scheduler_Location_Get",
+        "Scheduler_InsAuthorizations_Get",
+        "Scheduler_ExceptionOfficeHourStatus_Get",
+        "Scheduler_DisplayedLocations_Delete",
+        "Scheduler_DisplayedLocation_Add",
+        "Scheduler_ControlItem_Get",
+        "Scheduler_Authorizations_Get",
+        "Scheduler_AppointmentIcons_Save",
+        "Scheduler_AppointmentIcons_Get",
+        "Scheduler_AppointmentIcon_Get",
+        "Scheduler_AppointmentIcon_Delete",
+        "ADHOCQuery"
+      ]
+    },
+    "business_value": "Patient care and clinical operations"
+  },
+  "integration_patterns": {
+    "total_integration_procedures": 57,
+    "key_procedures": [
+      {
+        "name": "GetMonthlyAppliedPaymentSummary",
+        "definition_length": 3994,
+        "preview": "CREATE PROCEDURE [dbo].[GetMonthlyAppliedPaymentSummary]\n@fromDate as datetime,\n@toDate as datetime,\n@officeNum varchar(max),\n@doctorIds varchar(max),\n@companyId varchar(20),\n@IncludeOldSystemCredit a"
+      },
+      {
+        "name": "GetTrizettoIntegration",
+        "definition_length": 2918,
+        "preview": "/****** Object:  StoredProcedure [AdvancedMetric].[GetTrizettoIntegration]    Script Date: 12/04/2024 3:40:12 PM ******/\r\n-- =============================================\r\n-- Author:\t\tAnton\r\n-- Create"
+      },
+      {
+        "name": "GetWorldPayIntegration",
+        "definition_length": 2010,
+        "preview": "/****** Object:  StoredProcedure [AdvancedMetric].[GetWorldPayIntegration]    Script Date: 12/04/2024 3:20:33 PM ******/\r\n-- =============================================\r\n-- Author:\t\tAnton\r\n-- Create"
+      },
+      {
+        "name": "MarkVisionStarOrderReadyToBeSent",
+        "definition_length": 868,
+        "preview": "\r\nCREATE PROCEDURE [dbo].[MarkVisionStarOrderReadyToBeSent] \r\n\t@XifDataBatchId int,\r\n\t@HasRecordsToProcess int out \r\nAS\r\nBEGIN\r\n\r\n\r\nif exists(select * from VisionStarOrderSent where XifDataBatchId = @"
+      },
+      {
+        "name": "SalesPaymentByVisionPlan",
+        "definition_length": 2739,
+        "preview": "\nCREATE PROCEDURE [dbo].[SalesPaymentByVisionPlan]\n@FromDate1 varchar(20),\n@ToDate1 varchar(20),\n@OfficeNum varchar(20)\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\tdeclare @iCnt as int\n\tselect @iCnt=count(*)  from sys"
+      },
+      {
+        "name": "SalesOrderExport",
+        "definition_length": 6093,
+        "preview": "\n\nCreate Procedure [dbo].[SalesOrderExport]  \n@transmissionDate DateTime,\n@updateStatus bit\nAs\nBEGIN\n\nIf(@updateStatus =0)\nBegin\nDeclare @fromDate DateTime = CAST (GETDATE() AS DATE)\n \n\nSELECT distinc"
+      },
+      {
+        "name": "Scheduler_AppointmentDetail_Get",
+        "definition_length": 3144,
+        "preview": "CREATE PROCEDURE [dbo].[Scheduler_AppointmentDetail_Get]\n\t@appt_no INT\nAS\nBEGIN\n\tSET NOCOUNT ON;\n\n\tSELECT\n\t\tAPPT.[appt_no]\n\t\t,APPT.[LocationID]\n\t\t,LOC.OfficeName AS LocDisplayName\n\t\t,APPT.resourceId\n\t"
+      },
+      {
+        "name": "GetPatientOrderInvoiceDataByOrder",
+        "definition_length": 3850,
+        "preview": "CREATE PROCEDURE [dbo].[GetPatientOrderInvoiceDataByOrder]\n\t@CutOffDate DATETIME,\n\t@CompanyId VARCHAR(20),\n\t@OrderId INT\nAS\nBEGIN\n\t\tSET NOCOUNT ON;\n\n\t\tWITH ProcedureDiagnosis AS (\n\t\t\tSELECT \n\t\t\t\tbcl.O"
+      },
+      {
+        "name": "RetransmitPatientsViaServiceFailure",
+        "definition_length": 3579,
+        "preview": "-- =============================================\n-- Description: retransmitts patients via servicefailure table\n-- =============================================\n/*\nYou should transmit patients before "
+      },
+      {
+        "name": "AccessVerification",
+        "definition_length": 1806,
+        "preview": "\r\n/****** Object:  StoredProcedure [dbo].[AccessVerification]    Script Date: 10/5/2016 3:20:33 PM ******/\r\n-- =============================================\r\n-- Author:\t\tAli\r\n-- Create date: 10/07/201"
+      }
+    ],
+    "integration_types": {
+      "edi_processing": [
+        "GetMonthlyAppliedPaymentSummary",
+        "MarkVisionStarOrderReadyToBeSent",
+        "SalesPaymentByVisionPlan",
+        "Scheduler_AppointmentDetail_Get",
+        "GetPatientOrderInvoiceDataByOrder",
+        "ElasticsearchPatientFeeder",
+        "Scheduler_AppointmentsByResourceIDTable_Get",
+        "GetPOSPaymentDetailforMiscandCredit",
+        "GetCustomerCreditDetail",
+        "SetupVspMedicaid",
+        "UpdateCompanyEdiSiteKey",
+        "GetMonthlyProductionSummary",
+        "DeleteEra",
+        "UpdateGLDetailforPOSBillingARAdjustment",
+        "MatchClaims",
+        "GB_RecordDailySummary",
+        "SetIsReadyToPostIsExternalClaim",
+        "GetPOSAR",
+        "MarkVisionStarCancelOrderReadyToBeSent",
+        "GetItemTypeSaleSummaryByDate",
+        "CalcPOSTransactionSummaryByDayCloseDate",
+        "CalcPOSTransactionSummaryByDate",
+        "GetInvoiceDetailsLite",
+        "DeleteEdiRow",
+        "GetDayClose",
+        "WorkFlowPurge_Claims",
+        "__GetInvoiceProductForStore",
+        "__GetTransactionPaymentForStore",
+        "Clean835Files",
+        "sp_renamediagram",
+        "sp_creatediagram"
+      ],
+      "data_export": [
+        "SalesOrderExport",
+        "GetCompanyGLExportIntacct",
+        "GetCompanyGLExportDataByGLInterface",
+        "ExportData"
+      ],
+      "data_import": [
+        "AssignAllPriceListsToOffice",
+        "CopyItemPrices",
+        "GetCompanyGLExportIntacct"
+      ]
+    },
+    "business_value": "External system connectivity and data exchange"
+  },
+  "data_transformations": {},
+  "business_rules": {
+    "total_rule_procedures": 223,
+    "key_procedures": [
+      {
+        "name": "GetMonthlyAppliedPaymentSummary",
+        "definition_length": 3994,
+        "complexity": "Medium",
+        "preview": "CREATE PROCEDURE [dbo].[GetMonthlyAppliedPaymentSummary]\n@fromDate as datetime,\n@toDate as datetime,\n@officeNum varchar(max),\n@doctorIds varchar(max),\n@companyId varchar(20),\n@IncludeOldSystemCredit a"
+      },
+      {
+        "name": "GetPackageLite",
+        "definition_length": 3938,
+        "complexity": "Medium",
+        "preview": "CREATE PROCEDURE [dbo].[GetPackageLite] \n\t@officeNum VARCHAR(8), \n\t@description VARCHAR(50) = NULL,\n\t@packageID int = NULL,\n\t@isVSPIOF bit = 0\nAS\nBEGIN\n\n\tSET NOCOUNT ON;\n\n\tSET @description = CASE WHEN"
+      },
+      {
+        "name": "CopyOfficeData",
+        "definition_length": 39099,
+        "complexity": "High",
+        "preview": "-- IF EXISTS ( SELECT * FROM sysobjects WHERE  id = object_id(N'[dbo].[CopyOfficeData]') and OBJECTPROPERTY(id, N'IsProcedure') = 1 ) BEGIN DROP PROCEDURE [dbo].[CopyOfficeData] END\nCREATE PROCEDURE ["
+      },
+      {
+        "name": "WorkFlowPurge",
+        "definition_length": 2638,
+        "complexity": "Medium",
+        "preview": "\r\n-- =============================================\r\n-- Author:\t\tSam Callejo and Kris Jornlin\r\n-- Create date: 01/30/2013\r\n-- Description:\tGets only providers for listbox.\r\n-- ========================="
+      },
+      {
+        "name": "MarkVisionStarOrderReadyToBeSent",
+        "definition_length": 868,
+        "complexity": "Medium",
+        "preview": "\r\nCREATE PROCEDURE [dbo].[MarkVisionStarOrderReadyToBeSent] \r\n\t@XifDataBatchId int,\r\n\t@HasRecordsToProcess int out \r\nAS\r\nBEGIN\r\n\r\n\r\nif exists(select * from VisionStarOrderSent where XifDataBatchId = @"
+      },
+      {
+        "name": "CLSalesbyDoctor",
+        "definition_length": 981,
+        "complexity": "Medium",
+        "preview": "CREATE PROCEDURE [dbo].[CLSalesbyDoctor]\r\n\r\n@fromdate datetime,\r\n@todate  datetime,\r\n@CompanyID varchar(20)\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\ndeclare @iCnt as int\r\nselect @iCnt=count(*)  from sysobjects"
+      },
+      {
+        "name": "GetPatientStatementReport",
+        "definition_length": 7551,
+        "complexity": "High",
+        "preview": "CREATE PROCEDURE [dbo].[GetPatientStatementReport]\n@cutOffDate datetime,\n@OfficeNumber varchar(30),\n@orderid varchar(10)\nAS\nBEGIN\n\n SET NOCOUNT ON;\n DECLARE @listOrderId VARCHAR(Max)\n\n if (@orderid is"
+      },
+      {
+        "name": "SP_InsuranceSalesSummaryByOfficeByCarrier",
+        "definition_length": 4336,
+        "complexity": "Medium",
+        "preview": "\r\n\r\n\r\n--SP_InsuranceSalesSummaryByOfficeByCarrier '10/1/2011','1/31/2012','111,999','%',null\r\n\r\n\r\nCREATE PROCEDURE [dbo].[SP_InsuranceSalesSummaryByOfficeByCarrier]\r\n@FromDate1 varchar(20),\r\n@ToDate1 "
+      },
+      {
+        "name": "SP_GenerateDoctorExamSales",
+        "definition_length": 6573,
+        "complexity": "High",
+        "preview": "CREATE PROCEDURE [dbo].[SP_GenerateDoctorExamSales]\r\n@CompanyID varchar(10),\r\n@ListOfOfficenum as varchar(max),\r\n@CarrierID as varchar(max),\r\n@FromSerivceDate as datetime,\r\n@ToServiceDate as datetime,"
+      },
+      {
+        "name": "SP_InsuranceSalesSummaryByOffice",
+        "definition_length": 5533,
+        "complexity": "High",
+        "preview": "\nCREATE PROCEDURE [dbo].[SP_InsuranceSalesSummaryByOffice]      \n@FromDate1 varchar(20),      \n@ToDate1 varchar(20),      \n@OfficeNum varchar(max),      \n@carrierId as varchar(50),      \n@monthCloseID"
+      }
+    ],
+    "rule_patterns": {
+      "conditional_logic": [
+        "GetMonthlyAppliedPaymentSummary",
+        "GetPackageLite",
+        "GetWarrantyUsage",
+        "LoadAndUpdateFrameTables",
+        "GetKPIEmployeeRanking",
+        "UndeliveredOrdersSummary",
+        "GetKPISpecialReportByALLOfficeDaily",
+        "GetKPIReportBYDateByKPIIDs",
+        "GetKPIProductivityCalcByOffice",
+        "GetKPIProductivityCalcByOfficeByEmployeeDaily",
+        "GetKPIProductivityCalcByEmployeeDaily",
+        "GetKPIProductivityCalcByEmployee",
+        "GetKPIProductivityCalcByOfficeDaily",
+        "GetKPIProductivityCalcByALLOfficeDaily",
+        "GetKPIProductivityCalcByALLOffice",
+        "GetContactLensDetail_Extension",
+        "GetPaidAmountByClaimId",
+        "__GetInvoiceOrderForStore",
+        "GetLatestTransTypeAndAmount",
+        "ADHOCQuery",
+        "sp_CreateDataLoadScript"
+      ],
+      "data_checks": [
+        "VerifyParametersValidForCompany",
+        "WorkFlowPurge_Orders",
+        "GetMailCheckDetail",
+        "GetPOSPaymentDetailbyTransactionDateforMailCheckandCC",
+        "ConvertOfficesToEncompass",
+        "UpdateInsCheck",
+        "GetPackageByIdAndCheckIsValidIOF",
+        "MapInsurancePlan",
+        "Clean_CSVFrame",
+        "uspCleanTempFrame",
+        "CleanVSTFrameTable",
+        "SP_CleanSpexFrame",
+        "DeleteOldTempCouponCodes",
+        "DeleteCompanyPromotionTempCouponCodes",
+        "Clean_CSVAccessory",
+        "DoesInsCheckModified",
+        "WorkFlowPurge_Claims",
+        "WorkFlowPurge_Appointments",
+        "__GetPatientExamForStore",
+        "Scheduler_Resources_Save",
+        "Scheduler_PatientInsuranceOnFeeslip_Get"
+      ],
+      "validation_rules": [
+        "ValidateAndAuditPatch"
+      ]
+    },
+    "business_value": "Data validation and business logic enforcement"
+  },
+  "performance_patterns": {},
+  "key_procedures": {
+    "top_20_procedures": [
+      {
+        "name": "SeedPatientsAndAppointments",
+        "importance_score": 19,
+        "definition_length": 65617,
+        "last_modified": "2025-06-25 07:55:37.213",
+        "business_area": "Clinical Operations",
+        "preview": "/*************************************************************************************\n************************SEED PATIENTS and APPOINTMENTS**********************************\n-- ALSCL-1015\n-- This stored procedure adds a configurable number of test insurance carriers, patients and appointments \n-- "
+      },
+      {
+        "name": "Scheduler_FindPatients_Get",
+        "importance_score": 19,
+        "definition_length": 12230,
+        "last_modified": "2025-06-25 07:55:37.180",
+        "business_area": "Clinical Operations",
+        "preview": "-- =============================================\r\n-- Author:\t\tJoel Deister\r\n-- Create date: 12/22/2009\r\n-- Description:\tGets the patients based on the selection criteria for the Find Patients.\r\n-- =============================================\r\n\r\nCREATE PROCEDURE [Scheduler_FindPatients_Get]\r\n\t@LastN"
+      },
+      {
+        "name": "GetPatientOrderLedgerPaymentData",
+        "importance_score": 18,
+        "definition_length": 1677,
+        "last_modified": "2024-11-15 07:55:39.763",
+        "business_area": "Financial Operations",
+        "preview": "CREATE PROCEDURE [dbo].[GetPatientOrderLedgerPaymentData]\n@cutOffDate datetime,\n@CompanyId varchar(20),\n@orderIdList varchar(max)\nAS\nBEGIN\n\n SET NOCOUNT ON;\n \n\tSELECT \n\t\tROW_NUMBER() OVER( ORDER BY o.ordernum, pt.transactionid, ppd.amount desc ) as Row \n\t\t, o.ordernum as OrderNum \n\t\t, isum.invoiceid"
+      },
+      {
+        "name": "Scheduler_AppointmentBook_GetByPatientId",
+        "importance_score": 17,
+        "definition_length": 6654,
+        "last_modified": "2025-06-25 07:55:37.323",
+        "business_area": "Clinical Operations",
+        "preview": "\nCREATE PROCEDURE [dbo].[Scheduler_AppointmentBook_GetByPatientId]                \n@PatientId int,      \n@CompanyId varchar(20)      \n              \nAS                \nBEGIN                \n--Scheduler_AppointmentBookByPatId 489538, 'AL999'      \n SET NOCOUNT ON;                \n             \nSELECT"
+      },
+      {
+        "name": "GenerateBillingAR",
+        "importance_score": 15,
+        "definition_length": 12133,
+        "last_modified": "2025-07-25 07:58:57.157",
+        "business_area": "Financial Operations",
+        "preview": "CREATE PROCEDURE [dbo].[GenerateBillingAR]    \n@FromSerivceDate as datetime,  \n@ToServiceDate as datetime,  \n@FromTransDate as datetime,  \n@ToTransDate as datetime,  \n@LastDepositDate as datetime,  \n@CompanyID as varchar(10),  \n@Officenum as varchar(max)  \nAS  \nBEGIN  \n      -- SET NOCOUNT ON added "
+      },
+      {
+        "name": "DeleteBillingClaimsAndRelatedData",
+        "importance_score": 15,
+        "definition_length": 19353,
+        "last_modified": "2024-09-18 17:18:43.070",
+        "business_area": "Financial Operations",
+        "preview": "/****** Object:  StoredProcedure [dbo].[DeleteBillingClaimsAndRelatedData]    Script Date: 5/9/2023 11:43:13 AM ******/\n\n-- =============================================\n-- Author:\t\tRavi Thakkar\n-- Create date: 5/2/2023\n-- Description:\tStoed Proceduer to delete claims older than specified parameter "
+      },
+      {
+        "name": "GetBillingTransactionwithGLAccount",
+        "importance_score": 15,
+        "definition_length": 13540,
+        "last_modified": "2024-06-12 07:55:24.467",
+        "business_area": "Financial Operations",
+        "preview": "    \n    \n--select * from monthclosecontrol where sourceid = 3 and year = 2016    \n    \n-- exec sp_executesql N'exec dbo.GetBillingTransactionwithGLAccount @p0,@p1,@p2,@p3,@p4,@p5,@p6,@p7',N'@p0 datetime,@p1 datetime,@p2 datetime,@p3 datetime,@p4 nvarchar(4000),@p5 nvarchar(4000),@p6 nvarchar(4000),"
+      },
+      {
+        "name": "Scheduler_PatientDuplicates_Get",
+        "importance_score": 14,
+        "definition_length": 1804,
+        "last_modified": "2025-06-25 07:55:37.320",
+        "business_area": "Clinical Operations",
+        "preview": "CREATE PROCEDURE [Scheduler_PatientDuplicates_Get] \r\n\t@firstName\tnvarchar(40)\t= NULL,\r\n\t@lastName\tnvarchar(30)\t= NULL,\r\n\t@dob\t\tdatetime\t\t= NULL,\r\n\t@ssn\t\tnvarchar(11)\t= NULL\r\nAS\r\n\r\n-- =============================================\r\n-- File Name:\tScheduler_PatientDuplicates_Get.sql\r\n-- Description:\tThi"
+      },
+      {
+        "name": "Scheduler_PatientDetail_Get",
+        "importance_score": 14,
+        "definition_length": 4485,
+        "last_modified": "2025-06-25 07:55:36.883",
+        "business_area": "Clinical Operations",
+        "preview": "\r\nCREATE PROCEDURE [Scheduler_PatientDetail_Get] \r\n\t(\r\n\t@patientId int\r\n\t)\t\r\nAS\r\n\r\n-- =============================================\r\n-- File Name:\tScheduler_PatientDetail_Get.sql\r\n-- Description:\tThis Stored Procedure Gets Details of the patients.\r\n-- Author:\tB. VanHorne/JD\r\n-- Example: Scheduler_Pa"
+      },
+      {
+        "name": "Scheduler_PatientAppointmentsHistory_Get",
+        "importance_score": 14,
+        "definition_length": 3597,
+        "last_modified": "2025-06-25 07:55:36.830",
+        "business_area": "Clinical Operations",
+        "preview": "-- =============================================\n-- File Name:\tScheduler_PatientAppointmentsHistory_Get.sql\n-- Description:\tThis stored procedure gets all appointments for a patient that aren't deleted.\n-- Author:\t\tJoel Deister\n-- History:\tDate\t\tInitials\tDescription\n--\t\t\t02/10/2014\tJD\t\t\tCreated\n-- ="
+      },
+      {
+        "name": "Scheduler_PatientInsurancesGridList_Get",
+        "importance_score": 14,
+        "definition_length": 2024,
+        "last_modified": "2025-03-26 07:56:29.917",
+        "business_area": "Clinical Operations",
+        "preview": "\n-- =============================================\n-- Author:\t\tJoel Deister\n-- Create date: 03/17/2010\n-- Description:\tGets all insurance detail collections for patient.\n-- added coverage type -ali\n-- added expiredate and DESC -kdinh\n-- added planId to join of InsuranceEligibility and added the insEl"
+      },
+      {
+        "name": "Scheduler_PatientAppointmentsLite_Get",
+        "importance_score": 14,
+        "definition_length": 1776,
+        "last_modified": "2025-01-01 07:56:01.483",
+        "business_area": "Clinical Operations",
+        "preview": "CREATE PROCEDURE [dbo].[Scheduler_PatientAppointmentsLite_Get]\n\t( \n\t@patientId\t\tINT\n\t)\nAS\nBEGIN\n\tSET NOCOUNT ON;  \n\tSET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;\n\n\tSELECT DISTINCT appt.[appt_no] as appointmentId             \n\t  , appt.[PatientID] as patientId          \n\t  , CONVERT(DATETIME, app"
+      },
+      {
+        "name": "Scheduler_PatientInsurancesDetail_Get",
+        "importance_score": 14,
+        "definition_length": 1736,
+        "last_modified": "2014-03-10 00:08:00.960",
+        "business_area": "Clinical Operations",
+        "preview": "-- =============================================\r\n-- Author:\t\tJoel Deister\r\n-- Create date: 06/11/2010\r\n-- Description:\tGets insurance detail for a selected insurance for a patient.\r\n-- =============================================\r\n\r\nCREATE PROCEDURE [Scheduler_PatientInsurancesDetail_Get]\r\n\t@patie"
+      },
+      {
+        "name": "Scheduler_PatientInsuranceOnFeeslip_Get",
+        "importance_score": 14,
+        "definition_length": 2028,
+        "last_modified": "2014-03-10 00:08:00.943",
+        "business_area": "Clinical Operations",
+        "preview": "-- =============================================\r\n-- Author:\t\tJoel Deister\r\n-- Create date: 12/12/2010\r\n-- Description: Checks feeslip the patient insurance is used on.\r\n-- =============================================\r\n\r\nCREATE PROCEDURE [Scheduler_PatientInsuranceOnFeeslip_Get]\r\n\t@patientId\t\t\t\tINT"
+      },
+      {
+        "name": "Scheduler_PatientInsurance_Save",
+        "importance_score": 14,
+        "definition_length": 1951,
+        "last_modified": "2014-03-10 00:08:00.923",
+        "business_area": "Clinical Operations",
+        "preview": "-- =============================================\r\n-- File Name:\tScheduler_PatientInsurance_Save.sql\r\n-- Description:\tThis Stored Procedure saves the PatientInsurance data.\r\n-- Author:\tJoel Deister\r\n-- History:\tDate\t\tInitials\tDescription\r\n--\t\t\t04/06/2010\tJD\t\t\tCreated\r\n--\t\t\t12/06/2010\tJD\t\t\tAdded new f"
+      },
+      {
+        "name": "GetBillingPOSReceivablesUnmatched",
+        "importance_score": 13,
+        "definition_length": 5548,
+        "last_modified": "2025-06-25 07:55:37.450",
+        "business_area": "Financial Operations",
+        "preview": "\r\nCREATE PROCEDURE [dbo].[GetBillingPOSReceivablesUnmatched]\r\n@fromdate datetime,\r\n@todate datetime,\r\n@CompanyID varchar(20),\r\n@CarrierCode varchar(20),\r\n@OfficeNum as varchar(20),\r\n@IsPrepaidCarrier as BIT\r\n\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\t\r\n\tdeclare @iCnt as int\r\n\tselect @iCnt=count(*)  from sysobj"
+      },
+      {
+        "name": "GetPatientLiteWithPhone",
+        "importance_score": 13,
+        "definition_length": 19026,
+        "last_modified": "2025-06-25 07:55:37.353",
+        "business_area": "Clinical Operations",
+        "preview": "\nCREATE PROCEDURE [dbo].[GetPatientLiteWithPhone]\n@MaxResultValue as int,\n@FirstResult as int,\n@PhoneNumber varchar(25),\n@CompanyID varchar(20),\n@FirstName varchar(30),\n@LastName varchar(30),\n@BirthDate varchar(100),\n@InActiveValue bit,\n@OfficeId varchar(8)\n\nAS\nBEGIN\n    SET NOCOUNT ON;\n\n\tif (@First"
+      },
+      {
+        "name": "GetBillingPOSReceivables",
+        "importance_score": 13,
+        "definition_length": 8644,
+        "last_modified": "2025-06-25 07:55:37.287",
+        "business_area": "Financial Operations",
+        "preview": "\r\nCREATE PROCEDURE [dbo].[GetBillingPOSReceivables]\r\n@fromdate datetime,\r\n@todate datetime,\r\n@CompanyID varchar(20),\r\n@CarrierCode varchar(20),\r\n@OfficeNum as varchar(20),\r\n@IsPrepaidCarrier as BIT\r\n\r\nAS\r\nBEGIN\r\n\tSET NOCOUNT ON;\r\n\r\ndeclare @iCnt as int\r\nselect @iCnt=count(*)  from sysobjects where x"
+      },
+      {
+        "name": "ElasticsearchPatientFeeder",
+        "importance_score": 13,
+        "definition_length": 17009,
+        "last_modified": "2025-06-25 07:55:37.147",
+        "business_area": "Clinical Operations",
+        "preview": "CREATE PROCEDURE [dbo].[ElasticsearchPatientFeeder]\n    @sql_last_value DATETIME,\n\t@partition_letter VARCHAR(1) = 'M',\n\t@partition int = -1\nAS\nBEGIN\n    SET NOCOUNT ON;\n\t\n\t\n\tDECLARE @dbDate DATETIME = GETDATE()\n\tDECLARE @sqlEST DATETIME = DATEADD(mi, -5, DATEADD(hh, (-1) * DATEDIFF(hh, GETDATE(), GE"
+      },
+      {
+        "name": "GetPatientLiteWithPhoneOnly",
+        "importance_score": 13,
+        "definition_length": 17785,
+        "last_modified": "2025-06-25 07:55:37.123",
+        "business_area": "Clinical Operations",
+        "preview": "\nCREATE PROCEDURE [dbo].[GetPatientLiteWithPhoneOnly]\n@MaxResultValue as int,\n@FirstResult as int,\n@PhoneNumber varchar(25),\n@CompanyID varchar(20),\n@InActiveValue bit,\n@OfficeId varchar(8)\n\nAS\nBEGIN\n    SET NOCOUNT ON;\n\n\tif (@FirstResult = 0) begin\n\t\tif (@OfficeId = '%') begin\n\t\tif (@InActiveValue "
+      }
+    ],
+    "total_analyzed": 417,
+    "scoring_criteria": "Business impact + complexity + recent modifications"
+  }
+}

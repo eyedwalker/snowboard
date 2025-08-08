@@ -1,0 +1,1824 @@
+schema_name,function_name,type_desc,create_date,modify_date,definition_length,definition_preview
+dbo,GetPatientPaymentTransaction,SQL_INLINE_TABLE_VALUED_FUNCTION,2016-05-11 00:04:36.270,2025-06-25 07:55:36.823,2005,"CREATE FUNCTION [dbo].[GetPatientPaymentTransaction]
+(
+    @TransactionDate as datetime,
+	@CompanyID as varchar(20),
+	@listOrderId as varchar(max)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT 
+        ROW_NUMBER() OVER( ORDER BY o.ordernum, pt.transactionid, ppd.amount desc ) as Row 
+        , p.id as PatientId
+        , coalesce(p.firstname, '') as PatientFirstName 
+        , coalesce(p.lastname, '') as PatientLastName 
+        , o.ordernum as OrderNum 
+        , isum.invoiceid as InvoiceId 
+        "
+dbo,GetPatientOrdersWithBalance,SQL_INLINE_TABLE_VALUED_FUNCTION,2016-05-11 00:04:36.257,2025-06-25 07:55:36.817,2525,"CREATE FUNCTION [dbo].[GetPatientOrdersWithBalance]
+(
+    @TransactionDate as datetime,
+	@CompanyID as varchar(20)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+
+SELECT    
+	s.OfficeNum, 
+	p.LastName, 
+	p.FirstName,   
+	isnull(pp.PhoneNumber,'') as PrimaryPhone , 
+	MAX(OrderDate) as OrderDate,
+	OrderNum as OrderNum,
+	SUM(OrderAmount) AS OrderAmount, 
+	MAX(LastPaymentDate) AS LastPaymentDate,
+	SUM(OrderAmount) + SUM(PaidAmount) AS Balance,
+	SUM(PaidAmount) AS PaidAmount,
+	isnull(CustomerID,0) as CustomerID
+FROM   "
+dbo,fn_DiscountDetail,SQL_INLINE_TABLE_VALUED_FUNCTION,2022-08-16 12:33:48.047,2025-06-25 07:55:36.810,3623,"CREATE FUNCTION [dbo].[fn_DiscountDetail]
+(	
+	@fromDate datetime,
+	@toDate datetime
+)
+RETURNS TABLE 
+AS
+RETURN 
+(
+    SELECT isum.ordernum,sum(Discount) AS discount,p.firstname + ' ' + p.lastname AS patientname,pt.invoicesummaryid,
+        isum.discounttypeid,pt.EmployeeId AS Associate, o.OrderDate, pt.TransactionDate,pt.officenum 
+    FROM invoicedet id
+        INNER JOIN invoicesum isum ON id.invoiceid = isum.invoiceid  AND (isum.discounttypeid NOT IN (SELECT discounttypeid FROM invoicedet WHE"
+dbo,GetPatientBillingTransaction,SQL_INLINE_TABLE_VALUED_FUNCTION,2016-05-11 00:04:36.243,2025-06-25 07:55:36.800,2886,"CREATE FUNCTION [dbo].[GetPatientBillingTransaction]
+(
+    @TransactionDate as datetime,
+	@CompanyID as varchar(20),
+	@listOrderId as varchar(max)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+	SELECT 
+        ROW_NUMBER() OVER( ORDER BY o.ordernum, bli.invoicedetaillinenum, bt.transid ) as Row 
+        ,p.firstname as PatientFirstName 
+        ,p.lastname as PatientLastName 
+		,p.Id as PatientId
+		,o.OfficeNum as OfficeNum
+        ,o.ordernum as OrderNum 
+        ,bc.claimid as ClaimId 
+        ,bc.primaryflag a"
+dbo,GetPatientPosTransaction,SQL_INLINE_TABLE_VALUED_FUNCTION,2016-05-11 00:04:36.283,2025-06-25 07:55:36.790,4197,"CREATE FUNCTION [dbo].[GetPatientPosTransaction]
+(
+    @TransactionDate as datetime,
+	@CompanyID as varchar(20),
+	@listOrderId as varchar(MAX)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+	SELECT 
+        ROW_NUMBER() OVER( ORDER BY o.ordernum, id.linenum, pt.transactionid ) as Row 
+        , p.id as PatientId 
+            , coalesce(p.firstname, '') as PatientFirstName 
+            , coalesce(p.lastname, '') as PatientLastName 
+        , offc.officenum as OfficeNum 
+            , offc.officename as OfficeName 
+"
+dbo,fn_LookupFrameItem,SQL_INLINE_TABLE_VALUED_FUNCTION,2021-09-13 14:33:00.920,2025-01-15 07:55:55.250,3224,"CREATE FUNCTION [dbo].[fn_LookupFrameItem]
+(
+	  @companyId nvarchar(20)
+	, @officeNum varchar(8)
+    , @itemId int
+)
+RETURNS TABLE
+AS
+RETURN
+(SELECT        
+          itm.ID AS ItemID
+        , isnull(icm.CompanyItemName, itm.ItemName) as CompanyItemName
+        , m.Name as Manufacturer
+        , m.Name as Vendor
+        , fc.Description AS Collection
+        , isnull(itf.Color,'None') as Color
+        , isnull(catelcolfam.Value,'None') as ColorFamily
+        , isnull(catelshp.Value,'None') AS S"
+dbo,fn_LookupFrames_Filters,SQL_INLINE_TABLE_VALUED_FUNCTION,2021-09-13 14:33:00.943,2025-01-01 07:56:01.107,1871,"CREATE FUNCTION [dbo].[fn_LookupFrames_Filters]
+(
+	@companyId nvarchar(20)
+)
+RETURNS TABLE
+AS
+RETURN
+(SELECT   distinct     
+		isnull(fst.FrameCategoryID,-1) AS CategoryID
+        , isnull(catelcat.Value,'None') AS Category
+        , isnull(fst.AgeGroupID,-1) as AgeGroupID
+        , isnull(catelage.Value,'None') AS AgeGroup
+        , isnull(fst.GenderTypeID,-1) as GenderTypeID
+        , isnull(catelgen.Value,'None') AS GenderType
+        , isnull(itm.ItemStatusID,-1) AS StatusID
+        , isnull"
+dbo,fn_LookupFramesAllowUnMapped,SQL_INLINE_TABLE_VALUED_FUNCTION,2024-09-13 07:56:21.530,2025-01-01 07:56:01.103,2292,"CREATE FUNCTION [dbo].[fn_LookupFramesAllowUnMapped]
+(
+	  @companyId varchar(20)
+	, @officeNum varchar(8)
+	, @includeUnMapped bit
+)
+RETURNS TABLE
+AS
+RETURN
+(SELECT 
+     fs.ID AS ItemID
+     , fs.UPCCode
+     , fs.itemNum AS ItemNumber
+     , fs.CollectionDescription AS Collection
+     , fst.Style
+     , isnull(fs.Color,'None') as Color
+     , fs.Eye
+     , fs.Bridge
+     , fs.Temple
+     , [dbo].[fn_getLookupitemprice](@officeNum,fs.id) as Retail
+     , isnull(ib.OnHand,0) as OnHand		
+     , fs"
+dbo,fn_LookupEGLenses,SQL_INLINE_TABLE_VALUED_FUNCTION,2021-09-13 14:33:00.913,2025-01-01 07:56:01.097,3536,"CREATE FUNCTION [dbo].[fn_LookupEGLenses]
+(	
+		@companyId nvarchar(20)
+)
+RETURNS TABLE 
+AS
+RETURN 
+(
+	SELECT  itm.ID AS ItemID, itm.ItemNum AS ItemNumber, itegt.Description AS Type, itegs.Description AS Style, itmat.Description AS Material, itcol.Description AS Color, itct.Description AS Coating, egl.SphereMin, egl.SphereMax, 
+                         egl.CylinderMin, egl.CylinderMax, egl.AddMin, egl.AddMax, egl.MinSegHeight AS SegHeightMin, egl.MaxSegHeight AS SegHeightMax, ISNULL(itm.ItemNum, "
+dbo,fn_LookupFrames_Collections,SQL_INLINE_TABLE_VALUED_FUNCTION,2021-09-13 14:33:00.937,2025-01-01 07:56:01.093,516,"CREATE FUNCTION [dbo].[fn_LookupFrames_Collections]
+(
+	@companyId varchar(20)
+)
+RETURNS TABLE
+AS
+RETURN
+(with cte (datasourceid)
+	as (select datasourceid from companyinfo where id = @CompanyId union select 1)
+	SELECT
+		distinct      
+		fs.CollectionDescription AS Collection
+		, fs.CollectionID
+	FROM            
+		dbo.FrameSearch AS fs WITH (nolock) 
+		INNER JOIN dbo.ItemCompanyMapping AS icm WITH (nolock) ON icm.ItemID = fs.ID and icm.CompanyID=@companyId
+		INNER JOIN cte on fs.DataSourceId = ct"
+dbo,fn_LookupContactLenses,SQL_INLINE_TABLE_VALUED_FUNCTION,2021-09-13 14:33:00.903,2025-01-01 07:56:01.077,2406,"CREATE FUNCTION [dbo].[fn_LookupContactLenses]
+(
+	@companyId varchar(20),
+	@officeNum varchar(8)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+SELECT DISTINCT 
+		  itmcl.ItemID
+		, itm.ItemNum AS ItemNumber
+		, SS.Supplier
+		, clm.VendName AS Manufacturer
+		, cls.Style
+		, clc.Description AS Color
+		, clp.Base
+		, clp.Diameter
+		, powers.BaseMin
+		, powers.BaseMax
+		, powers.DiameterMin
+		, powers.DiameterMax
+		, cls.SphereMin
+		, cls.SphereMax
+		, cls.SphereStep
+		, cls.CylinderMin
+		, cls.CylinderMax
+		, cls.Ax"
+dbo,fn_LookupFrames,SQL_INLINE_TABLE_VALUED_FUNCTION,2021-09-13 14:33:00.930,2025-01-01 07:56:01.070,2827,"CREATE FUNCTION [dbo].[fn_LookupFrames]
+(
+	  @companyId varchar(20)
+	, @officeNum varchar(8)
+)
+RETURNS TABLE
+AS
+RETURN
+(with cte (datasourceid)
+as (select distinct datasourceid  from companyinfo where id = @CompanyId)
+SELECT 
+     fs.ID AS ItemID
+     , fs.UPCCode
+     , ISNULL([fs].[ItemNum],'') AS ItemNumber
+     , fs.CollectionDescription AS Collection
+     , fs.Style
+     , isnull(fs.Color,'None') as Color
+     , fs.Eye
+     , fs.Bridge
+     , fs.Temple
+     , [dbo].[fn_getLookupitemprice](@"
+dbo,fn_LookupAccessories,SQL_INLINE_TABLE_VALUED_FUNCTION,2021-09-13 14:33:00.897,2025-01-01 07:56:01.067,990,"CREATE FUNCTION [dbo].[fn_LookupAccessories]
+(
+	@companyId nvarchar(20),
+	@officeNum varchar(8)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+SELECT        
+		  itm.ID AS ItemID
+		, itm.ItemNum AS ItemNumber
+		, itm.UPCCode
+		, itm.ItemName
+		, [dbo].[fn_getLookupitemprice](@officeNum,itm.ID) as Retail
+		, 0 AS OnHand
+		, icm.CompanyID
+		, icm.CompanyItemName
+		, @officeNum as OfficeNum
+		, ISNULL(itm.ItemNum, '') + ISNULL(itm.ItemName, '') + ISNULL(icm.CompanyItemName, '') AS SearchString
+		, icm.AllowZeroPrice
+"
+dbo,ReturnPaymentByTransaction,SQL_SCALAR_FUNCTION,2010-02-26 13:23:22.437,2024-11-26 07:55:57.800,399,"CREATE FUNCTION [dbo].[ReturnPaymentByTransaction]
+(
+    @paymentID INT,
+    @transAmount DECIMAL(12,2)
+)
+RETURNS DECIMAL(12,2)
+AS
+BEGIN
+    DECLARE @actAmount DECIMAL(12,2);
+
+    SELECT  @actAmount = SUM(Amount)
+    FROM    PosPaymentDetail
+    WHERE   PaymentID = @paymentID;
+
+    RETURN CASE 
+        WHEN ABS(@transAmount) < ABS(@actAmount) THEN @transAmount
+        ELSE @actAmount
+    END;
+END"
+dbo,fn_PatientInsEligibility,SQL_INLINE_TABLE_VALUED_FUNCTION,2014-03-10 00:07:51.123,2024-06-12 07:55:24.087,878,"
+CREATE FUNCTION [dbo].[fn_PatientInsEligibility] (@InsuranceId int)
+RETURNS TABLE
+AS
+RETURN 
+(
+
+SELECT PIns.ID
+     , IP.PlanName as PatientInsurance        
+     , IC.CarrierName as insurance_name    
+     , IC.EligibilityRequirements        
+     , IE.ID as EligibilityID        
+     , IE.AuthExpireDate           
+  FROM PatientInsurance PIns left join   
+	   InsPlan IP on IP.ID = PIns.InsurancePlanID left join         
+       InsCarrier IC on IC.ID = IP.CarrierCode left join  "
+dbo,CUSTOM_FLAG_MODIFY,SQL_SCALAR_FUNCTION,2023-12-04 10:30:17.043,2023-12-04 11:05:10.920,737,"
+
+CREATE FUNCTION CUSTOM_FLAG_MODIFY
+(
+    @JSON NVARCHAR(3000),
+    @PropertyName NVARCHAR(3000),
+	@NewValue NVARCHAR(3000)
+)
+RETURNS NVARCHAR(3000)
+AS
+BEGIN
+
+DECLARE @result NVARCHAR(3000)
+DECLARE @trimmedJSON NVARCHAR(3000)
+DECLARE @start INT
+DECLARE @end INT
+
+IF @JSON IS NULL OR @JSON = ''
+BEGIN
+	set @result = 'Error'
+END 
+ELSE
+BEGIN
+	set @start = PATINDEX('%' + @PropertyName + '%',@JSON) 
+	IF @start <> 0
+	BEGIN
+		set @start = @start + LEN(@PropertyName) + 3
+		SET "
+dbo,CUSTOM_FLAG_VALUE,SQL_SCALAR_FUNCTION,2023-12-01 09:52:43.137,2023-12-01 09:52:43.137,701,"
+
+CREATE FUNCTION CUSTOM_FLAG_VALUE
+(
+    @JSON NVARCHAR(3000),
+    @PropertyName NVARCHAR(3000)
+)
+RETURNS NVARCHAR(3000)
+AS
+BEGIN
+
+DECLARE @result NVARCHAR(3000)
+DECLARE @trimmedJSON NVARCHAR(3000)
+DECLARE @start INT
+DECLARE @end INT
+
+IF @JSON IS NULL OR @JSON = ''
+BEGIN
+	set @result = 'Default'
+END 
+ELSE
+BEGIN
+	set @start = PATINDEX('%' + @PropertyName + '%',@JSON) 
+	IF @start <> 0
+	BEGIN
+		set @start = @start + LEN(@PropertyName) + 3
+		SET @trimmedJSON = SUBSTRING(@J"
+dbo,fn_ApptColorByOffice,SQL_INLINE_TABLE_VALUED_FUNCTION,2014-03-10 00:07:51.100,2023-10-30 18:50:49.107,299,"
+CREATE FUNCTION [dbo].[fn_ApptColorByOffice] (@OfficeNum varchar(8))
+RETURNS TABLE
+AS
+RETURN 
+(
+    SELECT O.OfficeId, Clr.ApptTypeId, Clr.ColorCode 
+    FROM AppointmentColor Clr inner join 
+         Office O ON Clr.OfficeNum = O.OfficeNum
+    WHERE O.OfficeNum = @OfficeNum
+    
+);
+
+"
+dbo,RemoveSpecialCharsNew,SQL_SCALAR_FUNCTION,2023-03-19 07:58:52.823,2023-03-19 07:58:52.823,371,"CREATE FUNCTION [dbo].[RemoveSpecialCharsNew] (@s VARCHAR(256)) RETURNS VARCHAR(256)
+   WITH SCHEMABINDING 
+BEGIN
+   IF @s IS NULL RETURN NULL
+   IF @s = '' RETURN ''
+
+   DECLARE @pos int
+   set @pos = -1
+   while(@pos <>0)
+   begin
+	set @pos = PATINDEX('%[^ 0-9A-z]%', @s)
+	if(@pos>0)
+	begin
+		set @s = replace(@s,substring(@s,@pos,1),'')
+	end
+   end
+
+   return @s
+  END"
+dbo,attrep_fn_NumericLsnToHexa,SQL_SCALAR_FUNCTION,2023-02-06 13:32:41.780,2023-02-06 13:32:41.780,1512,"
+CREATE FUNCTION [dbo].[attrep_fn_NumericLsnToHexa](@numeric25Lsn numeric(25,0)) returns varchar(32)
+ AS
+ BEGIN
+-- In order to avoid form sign overflow problems - declare the LSN segments 
+-- to be one 'type' larger than the intendent target type.
+-- For example, convert(smallint, convert(numeric(25,0),65535)) will fail 
+-- but convert(binary(2), convert(int,convert(numeric(25,0),65535))) will give the 
+-- expected result of 0xffff.
+
+declare @high4bytelsnSegment bigint,@mid4bytelsnSegment bigint"
+dbo,attrep_fn_LsnSegmentToHexa,SQL_SCALAR_FUNCTION,2023-02-06 13:32:41.503,2023-02-06 13:32:41.503,885,"
+CREATE FUNCTION [dbo].[attrep_fn_LsnSegmentToHexa] (@InputData VARBINARY(32)) RETURNS VARCHAR(64)
+AS
+  BEGIN
+    DECLARE  @HexDigits   	CHAR(16),
+             @OutputData      VARCHAR(64),
+             @i           	INT,
+             @InputDataLength INT
+
+    DECLARE  @ByteInfo  	INT,
+             @LeftNibble 	INT,
+             @RightNibble INT
+
+    SET @OutputData = ''
+
+    SET @i = 1
+
+    SET @InputDataLength = DATALENGTH(@InputData)
+
+    SET @HexDigits = '0123456789abcdef'
+
+    WHILE (@i <= "
+dbo,CalculateFrameBulkPricing,SQL_SCALAR_FUNCTION,2014-12-17 23:08:36.620,2022-03-10 10:31:41.403,2283,"
+CREATE FUNCTION [dbo].[CalculateFrameBulkPricing]
+(
+	@ChangeTypeValue decimal(18,2),
+	@ChangeTypePercentage int,
+	@DollarAdd int,
+	@DollarAmountValue decimal(18,2),
+	@Rounding varchar(100),
+	@ListPrice decimal(18,2))  
+RETURNS decimal(18,2)  
+  
+AS  
+  
+BEGIN  
+    DECLARE @EndIn as decimal (18,2)
+	DECLARE @ToPrice as decimal(18,2)
+	DECLARE @PriceAfterRounding as decimal(18,2)
+	DECLARE @RoundupDecimal as decimal(18,2)
+	DECLARE @RoundupValue as decimal(18,2)
+	DECLARE @CurrentP"
+dbo,fn_GetLookupItemPrice,SQL_SCALAR_FUNCTION,2021-10-05 13:53:54.380,2021-10-05 13:53:54.380,420,"CREATE FUNCTION [dbo].[fn_GetLookupItemPrice]
+(
+	  @officeNum varchar(8)
+	, @itemID int
+)
+RETURNS decimal(18,2)
+AS
+BEGIN
+
+	DECLARE @Price as decimal(18,2)
+
+	set @Price = isnull((
+		select top 1 ip.price 
+		from itemprice ip 
+		inner join officepricelist opl with (nolock) on opl.pricelistid = ip.pricelistid and opl.officenum = @officeNum
+		WHERE ip.PriceTypeID = 1 and ip.ItemID = @itemID
+		),0.00)
+
+	RETURN @Price
+
+END"
+dbo,GetUsername,SQL_SCALAR_FUNCTION,2021-02-15 18:06:51.787,2021-07-06 04:36:31.760,347,"CREATE FUNCTION [dbo].[GetUsername]
+(
+@FullUsername  Varchar(150),
+@Characters varchar(100)
+)
+RETURNS varchar(150)
+AS
+BEGIN
+declare @Username as varchar(150)
+if CHARINDEX(@Characters, @FullUsername) > 0
+begin
+set @Username = LEFT(@FullUsername, CHARINDEX(@Characters, @FullUsername) - 1)
+end
+else
+set @Username = @FullUsername
+return @Username
+END"
+dbo,GetWFAStateDate,SQL_SCALAR_FUNCTION,2012-02-29 08:07:42.840,2021-04-07 21:05:16.140,351,"
+create FUNCTION [dbo].[GetWFAStateDate] (@OrdWFIID int, @OrderStateID int)
+Returns datetime
+AS
+BEGIN
+declare @OrderDate as datetime
+
+set @OrderDate = (
+		select top 1 wfa.ActivityDate 
+		From WFActivity wfa 
+		Where wfa.WFInstanceId = @OrdWFIID 
+		AND wfa.StateId = @OrderStateID
+		Order by wfa.ID desc
+	)
+
+return @OrderDate
+
+END
+
+"
+dbo,GetOriginalOrder,SQL_SCALAR_FUNCTION,2011-04-07 21:57:49.750,2021-04-07 21:05:16.140,523,"CREATE FUNCTION [dbo].[GetOriginalOrder](@OrderID int) 
+RETURNS int
+AS
+BEGIN
+declare @isRemake as bit
+declare @RemakeOrder as int
+declare @associate as int
+set @RemakeOrder =@orderid
+
+select @isRemake= isnull(remake,0), @remakeorder=isnull(remakeorder,0),@associate = associate from orders where ordernum=@remakeorder
+
+while @isremake=1
+Begin
+	select @isRemake= isnull(remake,0), @remakeorder=isnull(remakeorder,0),@associate = associate from orders where ordernum=@remakeorder
+END
+ret"
+dbo,ConvertTimeBlockToTime,SQL_SCALAR_FUNCTION,2012-02-29 08:07:42.943,2021-04-07 21:05:16.140,1144,"
+CREATE FUNCTION dbo.ConvertTimeBlockToTime(@BlockDate datetime, @TimeBlock int)
+RETURNS datetime
+AS
+BEGIN
+	declare @TimeValue as int
+	declare @Hour as int
+	declare @MinuteValue as int
+	declare @Minute as int
+	declare @ExceptionTimeString as varchar(30)
+	declare @MinuteString as varchar(2)
+	declare @ConvertDate as datetime
+	declare @TimeString as varchar
+	
+	set @TimeValue = @TimeBlock /36
+	set @MinuteValue = RIGHT(@TimeValue,2)
+	set @Minute = 00
+	
+	IF LEN(@TimeValue) = 3
+	BEGI"
+dbo,GetCommunicationPrefValue,SQL_SCALAR_FUNCTION,2012-02-29 08:07:43.040,2021-04-07 21:05:16.140,411,"
+CREATE FUNCTION dbo.GetCommunicationPrefValue(@PrefId int)
+RETURNS varchar(20)
+AS
+BEGIN
+	declare @CommunicationPref as varchar(20)
+	
+	set @CommunicationPref = '';
+	IF @PrefId = 0
+	BEGIN
+		set @CommunicationPref = 'Mail';
+	END
+	IF @PrefId = 1
+	BEGIN
+		set @CommunicationPref = 'Email';
+	END
+	IF @PrefId = 2
+	BEGIN
+		set @CommunicationPref = 'Phone';
+	END
+	
+	return @CommunicationPref
+
+END"
+dbo,GetWFAOrderStateName,SQL_SCALAR_FUNCTION,2012-02-29 08:07:42.740,2021-04-07 21:05:16.137,1221,"
+create FUNCTION [dbo].[GetWFAOrderStateName] (@OrdWFIID int)
+Returns varchar(50)
+AS
+BEGIN
+declare @StateName as varchar(50)
+
+
+set @StateName = (
+		select top 1
+		CASE 
+			WHEN wfa.StateId=721 THEN 'Unpriced'
+			WHEN wfa.StateId=722 THEN 'Priced'
+			WHEN wfa.StateId=723 THEN 'Processing On Hold'
+			WHEN wfa.StateId=724 THEN 'Ready For Processing'
+			WHEN wfa.StateId=725 THEN 'Voided'
+			WHEN wfa.StateId=726 THEN 'In Process'
+			WHEN wfa.StateId=727 THEN 'Received'
+			WHEN wfa.S"
+dbo,GetPQRIString,SQL_SCALAR_FUNCTION,2010-05-24 21:37:56.857,2021-04-07 21:05:16.133,654,"CREATE FUNCTION [dbo].[GetPQRIString]
+(
+	@OrderNum as int
+)
+RETURNS varchar(200)
+AS
+BEGIN
+	
+	DECLARE @PQRICodes as varchar(200)
+	DECLARE @PQRICode as varchar(20)
+	set @PQRICodes = ''
+	Declare c Cursor For select pqricode + (case when (modifier is null or modifier='') then ''  else '-' end) + isnull(modifier, '') from orderattributes oa inner join pqricode p on oa.value=p.id and oa.type=1  and ordernum=@OrderNum
+	Open c
+
+	Fetch next From c into @PQRICode
+
+	While @@Fetch_Status=0 "
+dbo,GetInsuranceTotal,SQL_SCALAR_FUNCTION,2012-02-29 08:07:42.537,2021-04-07 21:05:16.133,303,"CREATE FUNCTION dbo.GetInsuranceTotal(@InvoiceDetailID int)
+RETURNS decimal(18,2)
+AS
+BEGIN
+	declare @InsuranceTotal as decimal(18,2)
+	
+	BEGIN
+		set @InsuranceTotal = (select SUM(receivable) from InvoiceInsuranceDet where InvoiceDetailID=@InvoiceDetailID)
+	END
+		
+	return @InsuranceTotal
+
+END"
+dbo,GetPrimaryPhone,SQL_SCALAR_FUNCTION,2012-02-29 08:07:42.640,2021-04-07 21:05:16.133,350,"
+create FUNCTION [dbo].[GetPrimaryPhone] (@PatientID int)
+Returns varchar(50)
+AS
+BEGIN
+declare @PrimaryPhone as varchar(50)
+
+set @PrimaryPhone = isnull(
+	(select top 1 ph.PhoneNumber from Phone ph 
+		join PatientPhone pph on ph.ID = pph.PhoneID 
+		Where pph.PatientID = @PatientID and ph.IsPrimary=1), '')
+
+return @PrimaryPhone
+
+END
+
+"
+dbo,GetPlanNamebyPlanID,SQL_SCALAR_FUNCTION,2011-02-24 23:15:08.957,2021-04-07 21:05:16.130,465,"-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date, ,>
+-- Description:	<Description, ,>
+-- =============================================
+create FUNCTION [dbo].[GetPlanNamebyPlanID]
+(
+@PlanID int
+)
+RETURNS varchar(100)
+AS
+BEGIN
+declare @PlanName as varchar(100)
+
+set @PlanName = isnull((select top 1 PlanName from InsPlan where ID=@PlanID ),'Non Insurance Sales')
+
+return @PlanName
+END
+
+
+
+
+"
+dbo,GetCarrierNamebyCarrierCode,SQL_SCALAR_FUNCTION,2011-02-24 23:15:09.053,2021-04-07 21:05:16.130,305,"Create FUNCTION [dbo].[GetCarrierNamebyCarrierCode]
+(
+@CarrierCode as varchar(100)
+)
+RETURNS varchar(100)
+AS
+BEGIN
+declare @PlanName as varchar(100)
+
+set @CarrierCode = isnull((select top 1 CarrierName from InsCarrier where ID=@CarrierCode ),'Non Insurance Sales')
+
+return @CarrierCode
+END
+
+"
+dbo,fn_GetCustomerBalance,SQL_SCALAR_FUNCTION,2018-10-16 09:46:44.470,2021-04-07 21:05:16.130,355,"CREATE FUNCTION [dbo].[fn_GetCustomerBalance] 
+(
+	@PatientId AS INT
+) 
+RETURNS decimal(10,2) 
+AS 
+    BEGIN 
+
+	declare @TotalAmount as decimal(10,2)
+
+	set @TotalAmount = (SELECT Sum(amount) AS TotalAmount 
+						   FROM   postransaction 
+						   WHERE  patientid = @PatientId 
+								  AND transactiontypeid NOT IN ( 11, 16 ))
+	RETURN @TotalAmount
+
+	END"
+dbo,GetPatientPhoneID,SQL_SCALAR_FUNCTION,2011-12-28 22:43:12.500,2021-04-07 21:05:16.130,603,"Create FUNCTION [dbo].[GetPatientPhoneID](@PatientID int)
+RETURNS int
+AS
+BEGIN
+declare @PhoneID as int
+set @PhoneID =0
+if((Select count(*) from patientphone PP inner join phone Ph on PP.patientID = @PatientID and pp.Phoneid=ph.ID and ph.ISprimary=1)>0)
+	begin
+		set @PhoneID = (Select top 1 PH.ID from patientphone PP inner join phone Ph on PP.patientID = @PatientID and pp.Phoneid=ph.ID and ph.ISprimary=1)
+	end
+else
+begin
+		set @PhoneID = (Select top 1 PH.ID from patientphone PP inner "
+dbo,GetUnderlyingConditionText,SQL_SCALAR_FUNCTION,2018-08-23 15:34:09.577,2021-04-07 21:05:16.130,436,"CREATE FUNCTION [dbo].[GetUnderlyingConditionText](@UnderlyingConditionInt int)  
+RETURNS varchar(50)   
+AS  
+BEGIN   
+	DECLARE @UnderlyingConditionText varchar(50)  
+  
+	SELECT @UnderlyingConditionText =
+		CASE @UnderlyingConditionInt
+			WHEN 60 THEN 'Balance Lens'
+			WHEN 61 THEN 'No Lens'
+			WHEN 62 THEN 'Not Recorded'
+			WHEN 63 THEN 'Prosthesis'
+			WHEN 64 THEN 'Plano'
+			ELSE null
+		END
+   
+	RETURN @UnderlyingConditionText
+END"
+dbo,IsOrderStatusReadyToProcess,SQL_SCALAR_FUNCTION,2011-02-24 23:15:08.660,2021-04-07 21:05:16.127,723,"
+CREATE FUNCTION [dbo].[IsOrderStatusReadyToProcess]
+(
+	@OrderID int
+)
+RETURNS bit
+AS
+BEGIN
+	declare @IsReadyToProcess bit
+	IF EXISTS (Select top 1 ordernum from Orders ord, WfActivity wfAct where (wfAct.WfInstanceId = ord.LabOrderWorkflowID) 
+                and wfAct.StateId = 724
+                and wfAct.WfInstanceId not in (select wfAct3.WfInstanceId from WfActivity wfAct3 where wfAct3.StateId in (726))
+                and wfAct.ID = (select max(wfAct2.ID) from WfActivity wfAct2"
+dbo,GetPaymentAmountbyOrder,SQL_SCALAR_FUNCTION,2011-02-24 23:15:08.757,2021-04-07 21:05:16.127,286,"CREATE FUNCTION GetPaymentAmountbyOrder
+(
+	@OrderID int
+)
+RETURNS decimal(18,2)
+AS
+BEGIN
+	declare @PaymentAmount decimal(18,2)
+	set @PaymentAmount = (select isnull(sum(amount),0) from Postransaction where Orderid=@OrderID and TransactiontypeID=2)
+	return @PaymentAmount 
+END
+"
+dbo,GetPatientLastExamDate,SQL_SCALAR_FUNCTION,2016-03-09 00:02:23.183,2021-04-07 21:05:16.123,249,"
+CREATE FUNCTION [dbo].[GetPatientLastExamDate] ( @PatientId int) RETURNS datetime 
+AS 
+BEGIN
+DECLARE @res datetime;
+SET @res = (select top 1 e.ExamDate from PatientExam e 
+	where e.PatientID =  @PatientId
+	order by ExamDate desc)
+
+	return @res;
+END"
+dbo,GetEligAuthExpireDt,SQL_SCALAR_FUNCTION,2014-03-10 00:07:51.153,2021-04-07 21:05:16.123,839,"
+CREATE FUNCTION [dbo].[GetEligAuthExpireDt](@InsuranceId int)  
+RETURNS DATETIME  
+  
+AS  
+  
+BEGIN  
+  
+DECLARE @EligibilityAuthExpireDt DATETIME   
+  
+   SET @EligibilityAuthExpireDt = (SELECT IE.AuthExpireDate           
+   FROM PatientInsurance PIns left join     
+    InsPlan IP on IP.ID = PIns.InsurancePlanID left join           
+       InsCarrier IC on IC.ID = IP.CarrierCode left join       
+    InsEligibility IE on IE.InsCarrierCode = IP.CarrierCode and IE.PatientInsuranceI"
+dbo,GetLensBaseItemNum,SQL_SCALAR_FUNCTION,2017-04-13 00:40:53.243,2021-04-07 21:05:16.123,316,"CREATE FUNCTION [dbo].[GetLensBaseItemNum]
+(
+@invoiceID as int
+)
+RETURNS varchar(70)
+AS
+BEGIN
+	RETURN (select top 1 (case i.itemnum when  'PL' then 'SV' when 'DS' then 'BF' else isnull(i.ItemNum,'') end) from InvoiceDet d inner join item i on i.id = d.ItemID and i.ItemType = 9
+    where d.InvoiceID =@invoiceID)
+END"
+dbo,GetInsuranceNm,SQL_SCALAR_FUNCTION,2014-03-10 00:07:51.130,2021-04-07 21:05:16.120,822,"
+CREATE FUNCTION [dbo].[GetInsuranceNm](@PatInsuranceId int)  
+RETURNS varchar(50)  
+  
+AS  
+  
+BEGIN  
+  
+DECLARE @InsuranceName varchar(50)  
+  
+SET @InsuranceName = (  
+ SELECT IC.CarrierName as insurance_name      
+  FROM PatientInsurance PIns left join     
+    InsPlan IP on IP.ID = PIns.InsurancePlanID left join           
+       InsCarrier IC on IC.ID = IP.CarrierCode left join       
+    InsEligibility IE on IE.InsCarrierCode = IP.CarrierCode and IE.PatientInsuranceID = PI"
+dbo,GetEligibilityRequirement,SQL_SCALAR_FUNCTION,2014-03-10 00:07:51.137,2021-04-07 21:05:16.120,781,"
+CREATE FUNCTION [dbo].[GetEligibilityRequirement](@InsuranceId int)
+RETURNS int 
+
+AS
+
+BEGIN
+
+DECLARE @EligibilityReq int 
+
+   SET @EligibilityReq  = (SELECT IC.EligibilityRequirements        
+   FROM PatientInsurance PIns left join   
+	   InsPlan IP on IP.ID = PIns.InsurancePlanID left join         
+       InsCarrier IC on IC.ID = IP.CarrierCode left join     
+	   InsEligibility IE on IE.InsCarrierCode = IP.CarrierCode and IE.PatientInsuranceID = PIns.ID         
+	   AND  IE.ID ="
+dbo,GetEligibilityID,SQL_SCALAR_FUNCTION,2014-03-10 00:07:51.147,2021-04-07 21:05:16.120,778,"
+CREATE FUNCTION [dbo].[GetEligibilityID](@InsuranceId int)  
+RETURNS int   
+  
+AS  
+  
+BEGIN  
+  
+DECLARE @EligibilityID int   
+  
+   SET @EligibilityID  = (SELECT IE.ID   
+   FROM PatientInsurance PIns left join     
+    InsPlan IP on IP.ID = PIns.InsurancePlanID left join           
+       InsCarrier IC on IC.ID = IP.CarrierCode left join       
+    InsEligibility IE on IE.InsCarrierCode = IP.CarrierCode and IE.PatientInsuranceID = PIns.ID           
+    AND  IE.ID = (SELECT TO"
+dbo,DateOnly,SQL_SCALAR_FUNCTION,2008-09-17 21:42:25.650,2021-04-07 21:05:16.120,231,"create  function DateOnly(@DateTime DateTime)
+-- Returns @DateTime at midnight; i.e., it removes the time portion of a DateTime value.
+returns datetime
+as
+    begin
+    return dateadd(dd,0, datediff(dd,0,@DateTime))
+    end
+"
+dbo,GetDoctorExamMinutesPerDay,SQL_SCALAR_FUNCTION,2014-03-10 00:07:51.107,2021-04-07 21:05:16.117,798,"
+CREATE FUNCTION [dbo].[GetDoctorExamMinutesPerDay](@DoctorId int, @OfficeNum varchar(8), @ScheduleDate datetime)
+RETURNS int
+AS
+BEGIN
+	declare @ScheduleDayOfWeek as int
+	declare @DefaultExamMinutes as int
+	declare @ExamMinuteForDay as int
+	declare @ExamMinutes as int
+	
+	set @DefaultExamMinutes = isnull((select MinutesExam from dbo.Employee where Employee = @DoctorId), 0)
+	set @ScheduleDayOfWeek = DATEPART(WEEKDAY, @ScheduleDate) - 1
+	set @ExamMinuteForDay = (select Minutes from dbo."
+dbo,GetDoctorExamMinutes,SQL_SCALAR_FUNCTION,2014-03-10 00:07:51.113,2021-04-07 21:05:16.117,784,"
+CREATE FUNCTION [dbo].[GetDoctorExamMinutes](@DoctorId int, @OfficeNum varchar(8), @ScheduleDate datetime)
+RETURNS int
+AS
+BEGIN
+	declare @ScheduleDayOfWeek as int
+	declare @DefaultExamMinutes as int
+	declare @ExamMinuteForDay as int
+	declare @ExamMinutes as int
+	
+	set @DefaultExamMinutes = isnull((select MinutesExam from dbo.Employee where Employee = @DoctorId), 0)
+	set @ScheduleDayOfWeek = DATEPART(WEEKDAY, @ScheduleDate)
+	set @ExamMinuteForDay = (select Minutes from dbo.EmployeeEx"
+dbo,GetAppointmentStatus,SQL_SCALAR_FUNCTION,2012-04-09 23:13:17.280,2021-04-07 21:05:16.113,298,"
+CREATE FUNCTION dbo.GetAppointmentStatus(@StatusId int)
+Returns varchar(15)
+AS
+BEGIN
+	declare @status as varchar(15)
+	declare @confirmed as bit
+	
+	set @confirmed = 0
+	set @status = isNull((select Value from dbo.CatElementLU where ID = @StatusId and Type = 20),'')
+	
+	return @status
+END"
+dbo,GetCopaybyOrderid,SQL_SCALAR_FUNCTION,2010-01-29 21:48:05.710,2021-04-07 21:05:16.113,813,"-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date, ,>
+-- Description:	<Description, ,>
+-- =============================================
+create FUNCTION [dbo].[GetCopaybyOrderid]
+(
+@Orderid int
+)
+RETURNS decimal
+AS
+BEGIN
+	DECLARE @receivable as decimal
+
+	 select @Receivable= sum(bcl.copay) from 
+	 dbo.BillingClaim AS bc INNER JOIN
+	  dbo.BillingClaimData AS bcd ON bc.ClaimId = bcd.ClaimId AND bcd.IsCurrent = 1 INNER JOIN
+	  d"
+dbo,GetWorkPhone,SQL_SCALAR_FUNCTION,2012-04-09 23:13:17.380,2021-04-07 21:05:16.113,401,"
+create FUNCTION [dbo].[GetWorkPhone] (@PatientID int)
+Returns varchar(50)
+AS
+BEGIN
+declare @WorkPhone as varchar(50)
+
+set @WorkPhone = isnull((select top 1 ph.PhoneNumber from Phone ph join PatientPhone pph on ph.ID = pph.PhoneID join CatElementLU c on c.ID = ph.PhoneTypeID Where pph.PatientID = @PatientID and (ph.PhoneTypeID = 305 or ph.PhoneTypeID = 78)), '')
+
+return @WorkPhone
+
+END
+"
+dbo,GetOfficeNumFromPaymentID,SQL_SCALAR_FUNCTION,2011-06-21 15:34:20.217,2021-04-07 21:05:16.113,276,"CREATE FUNCTION GetOfficeNumFromPaymentID
+(
+@PaymentID as int
+)
+RETURNS varchar(20)
+AS
+BEGIN
+Declare @Officenum as varchar(20)
+
+set @Officenum = (select top 1 isnull(officenum,'') as Officenum from postransaction where paymentid=@PaymentID)
+return @Officenum 
+END
+"
+dbo,GetWFEventsBYWFInstanceID,SQL_SCALAR_FUNCTION,2011-10-26 11:43:55.853,2021-04-07 21:05:16.113,386,"
+
+create FUNCTION [dbo].[GetWFEventsBYWFInstanceID]
+(
+@WFInstanceID int
+)
+RETURNS varchar(max)
+AS
+BEGIN
+	declare @events varchar(max)
+	select @events = COALESCE(@events+ ',','') + EventName  from
+(SELECT DISTINCT EventName FROM wfevent we inner join wfActivity wa on we.ID=wa.WFEventid
+	and wa.wfinstanceid = @WFInstanceID
+	) as t
+
+	return isnull(@events,'')
+END
+
+
+
+"
+dbo,GetAgingBYDate,SQL_SCALAR_FUNCTION,2010-03-09 14:07:47.390,2021-04-07 21:05:16.110,2627,"-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date, ,>
+-- Description:	<Description, ,>
+-- =============================================
+CREATE FUNCTION [dbo].[GetAgingBYDate]
+(
+@cutOffDate datetime,
+@OfficeNumber varchar(30),
+@DepositDate datetime,
+@CompanyID varchar(20)
+
+)
+RETURNS Decimal(18,2)
+AS
+BEGIN
+
+Declare @BeginingAR as decimal(18,2)
+set @BeginingAR=0
+
+if (@OfficeNumber is null or @OfficeNumber  = '' or @OfficeNum"
+dbo,GetReceivablebyOrderid,SQL_SCALAR_FUNCTION,2010-01-29 21:48:05.697,2021-04-07 21:05:16.110,814,"-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date, ,>
+-- Description:	<Description, ,>
+-- =============================================
+CREATE FUNCTION GetReceivablebyOrderid
+(
+@Orderid int
+)
+RETURNS decimal
+AS
+BEGIN
+	DECLARE @receivable as decimal
+
+	 select @Receivable= sum(bd.receivable) from 
+	 dbo.BillingClaim AS bc INNER JOIN
+	  dbo.BillingClaimData AS bcd ON bc.ClaimId = bcd.ClaimId AND bcd.IsCurrent = 1 INNER JOIN
+	  "
+dbo,GetWeekNumber,SQL_SCALAR_FUNCTION,2011-02-24 23:14:58.550,2021-04-07 21:05:16.107,565,"CREATE FUNCTION [dbo].[GetWeekNumber] (@DATE datetime)
+RETURNS int
+WITH EXECUTE AS CALLER
+AS
+BEGIN
+     DECLARE @ISOweek int;
+     SET @ISOweek= DATEPART(wk,@DATE)+1
+          -DATEPART(wk,CAST(DATEPART(yy,@DATE) as CHAR(4))+'0104');
+     IF (@ISOweek=0) 
+          SET @ISOweek=dbo.GetWeekNumber(CAST(DATEPART(yy,@DATE)-1 
+               AS CHAR(4))+'12'+ CAST(24+DATEPART(DAY,@DATE) AS CHAR(2)))+1;
+     IF ((DATEPART(mm,@DATE)=12) AND 
+          ((DATEPART(dd,@DATE)-DATEPART(dw,@DATE)"
+dbo,AppSch_GetAppointmentStatus,SQL_SCALAR_FUNCTION,2014-03-10 00:07:50.683,2021-04-07 21:05:16.107,922,"
+
+
+CREATE FUNCTION [dbo].[AppSch_GetAppointmentStatus](@cancelstatus bit, @confirmstatus bit, @leftmsgstatus bit, @noanswerstatus bit, @showstatus smallint)
+Returns varchar(15)
+AS
+BEGIN
+	declare @status as varchar(15)
+	declare @status_conf as varchar(15)
+	declare @status_show as varchar(15)
+		
+	SELECT @status_conf = CASE WHEN (@confirmstatus = 1) THEN
+		'Confirmed'
+	WHEN (@leftmsgstatus = 1) THEN
+		'Left message'
+	WHEN (@noanswerstatus = 1) THEN
+		'No answer'
+	ELSE
+		'Scheduled"
+dbo,GetDiagPointer,SQL_SCALAR_FUNCTION,2012-08-31 15:44:27.457,2021-04-07 21:05:16.107,1207,"
+create FUNCTION [dbo].[GetDiagPointer]
+(
+	@OrderNum as int
+)
+RETURNS varchar(50)
+AS
+BEGIN
+
+	DECLARE @DiagPointer as varchar(50)
+	declare @diagcode1 as int
+	declare @diagcode2 as int
+	declare @diagcode3 as int
+	declare @diagcode4 as int
+	
+	set @DiagPointer = ''
+	set @diagcode1=( select DiagCode1 from orders where ordernum=@ordernum)
+	set @diagcode2=( select DiagCode2 from orders where ordernum=@ordernum)
+	set @diagcode3=( select DiagCode3 from orders where ordernum=@ordernum)
+"
+dbo,GetFirstDatefromweeknumber,SQL_SCALAR_FUNCTION,2011-02-24 23:14:58.650,2021-04-07 21:05:16.107,482,"CREATE FUNCTION GetFirstDatefromweeknumber
+(
+@year INT,
+@week INT
+)
+RETURNS DateTime
+AS
+BEGIN
+
+
+-- find the date of the week
+Declare @FirstDate as Datetime
+
+set @FirstDate =(SELECT MIN(date)
+FROM (SELECT CAST('01-01-' + CAST(@year AS VARCHAR) AS DATETIME) + Number AS Date,
+        DATEPART(wk,CAST('01-01-' + CAST(@year AS VARCHAR) AS DATETIME) + Number ) AS Week
+    FROM master..spt_values
+    WHERE type = 'P'
+) a
+WHERE Week = @week)
+return @FirstDate
+END
+"
+dbo,GetCommonCPTCode,SQL_SCALAR_FUNCTION,2011-06-21 15:31:50.153,2021-04-07 21:05:16.103,437,"CREATE FUNCTION [dbo].[GetCommonCPTCode]
+(
+@OrderNum as int
+)
+RETURNS varchar(100)
+AS
+BEGIN
+	declare @CptCode varchar(100)
+	select @CptCode = COALESCE(@CptCode + '|','') + CptCode  from
+(select i.ItemNum as CPTCode from item i inner join invoicedet ind on i.id=ind.itemid and ind.itemtype=6
+	inner join invoicesum ins on ind.invoiceid=ins.invoiceid and ins.ordernum=@OrderNum 
+	) as t
+
+	return isnull(@CptCode+'|','')
+END
+"
+dbo,GetCarrierCode,SQL_SCALAR_FUNCTION,2011-02-24 23:14:57.120,2021-04-07 21:05:16.103,268,"CREATE FUNCTION [dbo].[GetCarrierCode]
+(
+@Orderid int
+)
+RETURNS varchar(100)
+AS
+BEGIN
+declare @CarrierCode as varchar(100)
+
+set @CarrierCode = isnull((select top 1 inscarriercode from orderinsurance where orderid=@orderid),0)
+
+return @CarrierCode
+END
+
+
+"
+dbo,PaymentbyMultipleTransaction,SQL_SCALAR_FUNCTION,2012-04-09 23:13:16.453,2021-04-07 21:05:16.103,821,"create FUNCTION [dbo].[PaymentbyMultipleTransaction]
+(
+	@paymentID int,
+	@transAmount decimal(8,2),
+	@TransID int
+)
+RETURNS decimal(8,2)
+AS
+BEGIN
+declare @iTransCount as int
+declare @actAmount decimal(8,2)
+declare @PreviousTransPayment decimal(8,2)
+set @actAmount = (select SUM(Amount) from PosPaymentDetail where PaymentID  = @paymentID and paymenttypeid<>10 and Paymenttypeid<>7)
+set @iTransCount = (select count(*) from postransaction where PaymentID  = @paymentID )
+set @PreviousTra"
+dbo,GetRetail,SQL_SCALAR_FUNCTION,2010-01-07 22:07:53.577,2021-04-07 21:05:16.100,926,"CREATE FUNCTION [dbo].[GetRetail]
+(
+@Officenum as varchar(10),
+@ItemID as int,
+@itemtype as int
+)
+RETURNS decimal(18,2)
+AS
+BEGIN
+	
+	DECLARE @Retail as decimal(18,2)
+	
+	
+	--select @Retail =price from itemprice ip inner join officepricelist ol on ip.pricelistid=ol.pricelistid and officenum=@officenum and itemid=@itemid
+	--inner join pricelist pl on ip.pricelistid=pl.pricelistid and pl.itemtype=@itemtype
+
+
+	DECLARE CodesCur CURSOR FOR  
+	select price from itemprice ip inner join o"
+dbo,PaymentbyTransaction,SQL_SCALAR_FUNCTION,2011-02-24 23:14:56.927,2021-04-07 21:05:16.100,610,"-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date, ,>
+-- Description:	<Description, ,>
+-- =============================================
+create FUNCTION [dbo].[PaymentbyTransaction]
+(
+	@paymentID int,@transAmount decimal(8,2)
+)
+RETURNS decimal(8,2)
+AS
+BEGIN
+
+declare @actAmount decimal(8,2)
+set @actAmount = (select SUM(Amount) from PosPaymentDetail where PaymentID  = @paymentID and paymenttypeid<>10 and Paymenttypeid<>7)
+if (abs"
+dbo,GetPriceAfterRounding,SQL_SCALAR_FUNCTION,2010-01-18 12:13:43.233,2021-04-07 21:05:16.100,441,"Create FUNCTION [dbo].[GetPriceAfterRounding] 
+(@price decimal(18,2), @useRounding bit)
+RETURNS decimal(18,2)
+AS
+BEGIN
+	declare @returnValue varchar(8)	
+	select @returnValue = 
+		case 
+			when ((@price % 10) > 9 and @price <> 0 and @useRounding = 1) then  round(@price, 0, 1) + 10  
+			when ((@price % 10) < 9	and @price <> 0 and @useRounding = 1) then  round(@price, -1, 1) + 9
+		else 
+			@price 
+end
+return @returnValue
+end
+"
+dbo,GetItemNamefromItemtype,SQL_SCALAR_FUNCTION,2011-02-24 23:14:57.023,2021-04-07 21:05:16.100,402,"CREATE FUNCTION GetItemNamefromItemtype
+(
+@ItemType as int,
+@ItemID as int
+)
+RETURNS varchar(100)
+AS
+BEGIN
+Declare @ItemName as varchar(100)
+
+if(@itemtype =1 or @itemtype =2 or @itemtype =17)
+	begin
+		set @ItemName =(select Description from ItemType where Itemtype=@Itemtype)
+	end
+else
+	begin 
+		set @ItemName =(select ItemName from Item where Id=@ItemID)
+	end
+return @ItemName
+END
+"
+dbo,GetPlanCarrierfromOrder,SQL_SCALAR_FUNCTION,2010-04-29 21:33:23.737,2021-04-07 21:05:16.097,300,"CREATE FUNCTION GetPlanCarrierfromOrder
+(
+@Orderid as int
+)
+RETURNS varchar(100)
+AS
+BEGIN
+Declare @PlanName as varchar(100)
+set @PlanName=''	
+select @PlanName =(select top 1 PlanName + ' - ' + InsCarrierCode from orderinsurance where orderid=@Orderid)
+
+return isnull(@PlanName,'')
+
+END
+"
+dbo,RemoveSpecialChars,SQL_SCALAR_FUNCTION,2016-07-27 00:03:44.447,2021-04-07 21:05:16.093,592,"CREATE FUNCTION dbo.RemoveSpecialChars (@s VARCHAR(256)) RETURNS VARCHAR(256)
+   WITH SCHEMABINDING 
+BEGIN
+   IF @s IS NULL RETURN NULL
+   IF @s = '' RETURN ''
+
+   DECLARE  @s2 VARCHAR(256)
+   SET @s2 = ''
+   DECLARE @l INT
+   SET @l = len(@s)
+   DECLARE @p INT
+   SET @p = 1
+   WHILE @p <= @l 
+   BEGIN
+      DECLARE @c INT
+      SET @c = ascii(substring(@s, @p, 1))
+      IF @c between 48 and 57 or @c between 65 and 90 or @c between 97 and 122
+         SET @s2 = @s2 + CHAR(@c)
+ "
+dbo,GetNetSaleByItemType,SQL_SCALAR_FUNCTION,2011-09-01 22:58:33.457,2021-04-07 21:05:16.093,776,"
+CREATE FUNCTION [dbo].[GetNetSaleByItemType]
+(
+@OrderNum as int,
+@ItemType as varchar(50)
+)
+RETURNS decimal(18,2)
+AS
+BEGIN
+declare @Netsale decimal(18,2)
+
+set @NetSale=0
+select @NetSale =
+isnull(sum( isnull((CASE WHEN ((iid.isprimary) = 0 AND iid.Receivable IS NOT NULL) THEN 0 ELSE (id.Amount) END) ,0)
++ isnull(iid.Receivable ,0)
+- ((isnull((CASE WHEN  ((iid.isprimary) = 0 AND (iid.Receivable) IS NOT NULL) THEN 0 ELSE (isnull(id.Tax, 0)) END),0)))),0)
+from dbo.InvoiceSum AS ins "
+dbo,GETMinLineNum,SQL_SCALAR_FUNCTION,2010-09-20 11:14:19.337,2021-04-07 21:05:16.090,252,"CREATE FUNCTION GETMinLineNum
+(
+@InvoiceID as int
+)
+RETURNS int
+AS
+BEGIN
+	-- Declare the return variable here
+	DECLARE  @LineNum as int
+
+	set @LineNum=(select min(Linenum) from invoicedet where invoiceid=@invoiceid)
+	return @linenum
+
+END
+"
+dbo,GetCost,SQL_SCALAR_FUNCTION,2010-09-20 11:14:19.450,2021-04-07 21:05:16.090,278,"Create FUNCTION [dbo].[GetCost]
+(
+@ItemID as int,
+@CompanyID as varchar(20)
+)
+RETURNS decimal(18,2)
+AS
+BEGIN
+	
+	DECLARE @Cost as decimal(18,2)
+
+	set @Cost=(select Cost from  ItemCompanyMapping Where  ItemID =@ItemID and CompanyID=@CompanyID)
+
+	RETURN @Cost
+
+END
+"
+dbo,GetUtcOfficeTime,SQL_SCALAR_FUNCTION,2021-03-09 17:45:52.373,2021-04-07 21:05:16.090,2294,"
+-- =============================================
+-- Author:		Mihaela Robb
+-- Create date: 2021-03-09
+-- Description:	Returns the coordinated universal time of
+-- a local date/time at a given office.
+-- This is based on current rules for Daylight Savings time
+-- at http://www.nist.gov/pml/div688/dst.cfm
+-- Daylight Saving Time in the United States
+-- begins at 2:00 a.m. on the second Sunday of March
+-- ends at 2:00 a.m. on the first Sunday of November
+-- =============================="
+dbo,GetPlanID,SQL_SCALAR_FUNCTION,2010-09-20 11:14:18.850,2021-04-07 21:05:16.087,427,"-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date, ,>
+-- Description:	<Description, ,>
+-- =============================================
+CREATE FUNCTION [dbo].[GetPlanID]
+(
+@Orderid int
+)
+RETURNS int
+AS
+BEGIN
+declare @PlanID as varchar(100)
+
+set @PlanID = isnull((select top 1insplanid from orderinsurance where orderid=@orderid),0)
+
+return @PlanID
+END
+
+"
+dbo,GetPlanName,SQL_SCALAR_FUNCTION,2010-09-20 11:14:19.090,2021-04-07 21:05:16.087,462,"-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date, ,>
+-- Description:	<Description, ,>
+-- =============================================
+CREATE FUNCTION [dbo].[GetPlanName]
+(
+@Orderid int
+)
+RETURNS varchar(100)
+AS
+BEGIN
+declare @PlanName as varchar(100)
+
+set @PlanName = isnull((select top 1 PlanName from orderinsurance where orderid=@orderid),'Non Insurance Sales')
+
+return @PlanName
+END
+"
+dbo,GetCLStyleProperCase,SQL_SCALAR_FUNCTION,2014-07-16 00:11:54.830,2021-04-07 21:05:16.083,697,"create function GetCLStyleProperCase(@Text as varchar(8000))
+returns varchar(8000)
+as
+begin
+   declare @Reset bit;
+   declare @Ret varchar(8000);
+   declare @i int;
+   declare @c char(1);
+   
+   select @Reset = 1, @i=1, @Ret = '';
+   
+   while (@i <= len(@Text))
+    select @c= substring(@Text,@i,1),
+               @Ret = @Ret + case when @Reset=1 then UPPER(@c) else LOWER(@c) end,
+               @Reset = case when @c like '[a-zA-Z]' then 0 else 1 end,
+               @i = @i +1
+  "
+dbo,VSFrameStatus,SQL_SCALAR_FUNCTION,2009-10-21 22:11:32.627,2021-04-07 21:05:16.083,508,"CREATE FUNCTION [dbo].[VSFrameStatus] 
+(@FrameStatus int, @Make bit)
+RETURNS varchar(8)
+AS
+BEGIN
+declare @return varchar(8)
+select @return = 
+case 
+when @FrameStatus = 1 then  'POF' 
+when @FrameStatus = 2 then  'ENCLOSED'
+when @FrameStatus = 3 and @Make=1 then  'SUPPLY'
+when @FrameStatus = 4 then  'POF'
+when @FrameStatus = 5 and @Make=1 then  'SUPPLY'
+when @FrameStatus = 6 and @Make=1 then  'TEMPLE'
+when @FrameStatus = 7 and @Make=1 then  'FRONT'
+else 'ENCLOSED' end
+return @retur"
+dbo,GetSpecificCode,SQL_SCALAR_FUNCTION,2010-01-01 14:21:08.940,2021-04-07 21:05:16.083,934,"CREATE FUNCTION  [dbo].[GetSpecificCode]
+(
+@str varchar(100),
+@intLim int
+)
+RETURNS varchar(20)
+AS
+BEGIN
+DECLARE @intCount INT
+Declare @iPrevPos int
+declare @icurPos int
+declare @ReturnString as varchar(20)
+set @iPrevPos =0
+set @icurPos =0
+set @intCount=0
+set @returnstring=''
+
+
+SET @intCount = 1
+WHILE (@intCount <=@intLim)
+BEGIN
+	if(@iprevpos=0 and @icurPos=0 )  
+	begin
+		set @icurPos =CHARINDEX('|', @str)
+	end
+	else
+	begin
+		set @iprevpos = @icurpos+1
+		if(len(@str) "
+dbo,fn_diagramobjects,SQL_SCALAR_FUNCTION,2008-02-14 17:42:34.970,2021-04-07 21:05:16.083,1693,"
+	CREATE FUNCTION dbo.fn_diagramobjects() 
+	RETURNS int
+	WITH EXECUTE AS N'dbo'
+	AS
+	BEGIN
+		declare @id_upgraddiagrams		int
+		declare @id_sysdiagrams			int
+		declare @id_helpdiagrams		int
+		declare @id_helpdiagramdefinition	int
+		declare @id_creatediagram	int
+		declare @id_renamediagram	int
+		declare @id_alterdiagram 	int 
+		declare @id_dropdiagram		int
+		declare @InstalledObjects	int
+
+		select @InstalledObjects = 0
+
+		select 	@id_upgraddiagrams = object_id(N'dbo.sp_upgraddiag"
+dbo,RemoveNonAlphaCharacters,SQL_SCALAR_FUNCTION,2017-02-15 00:04:20.900,2021-04-07 21:05:16.080,312,"Create Function [dbo].[RemoveNonAlphaCharacters](@Temp VarChar(1000))
+Returns VarChar(1000)
+AS
+Begin
+
+    Declare @KeepValues as varchar(50)
+    Set @KeepValues = '%[^a-z^0-9]%'
+    While PatIndex(@KeepValues, @Temp) > 0
+        Set @Temp = Stuff(@Temp, PatIndex(@KeepValues, @Temp), 1, '')
+
+    Return @Temp
+End"
+dbo,GetItemSupplierMapping,SQL_SCALAR_FUNCTION,2009-12-21 15:35:49.970,2021-04-07 21:05:16.080,852,"CREATE FUNCTION [dbo].[GetItemSupplierMapping](@OrderID int) 
+RETURNS varchar(100)
+AS
+BEGIN
+	-- Declare the return variable here
+		DECLARE  @Codes as varchar(100)
+	Declare @ItemCode as varchar(50)
+	 
+	set @Codes =''
+	DECLARE CodesCur CURSOR FOR  
+	SELECT  ism.Code1 from invoicesum ins inner join invoicedet ind on ins.invoiceid=ind.invoiceid and 
+	(ind.Itemtype<>1 and ind.itemtype <>8  and ind.itemtype<>11 and ind.itemtype <>13)
+	inner join itemsuppliermapping ism on ind.itemid=ism.it"
+dbo,GetPQRIIDString,SQL_SCALAR_FUNCTION,2010-06-08 17:02:16.057,2021-04-07 21:05:16.080,509,"
+CREATE FUNCTION [dbo].[GetPQRIIDString]
+(
+	@OrderNum as int
+)
+RETURNS varchar(200)
+AS
+BEGIN
+
+	DECLARE @PQRIIDs as varchar(200)
+	DECLARE @PQRIID as varchar(20)
+	set @PQRIIDs = ''
+	Declare c Cursor For select oa.value from orderattributes oa where oa.type=1  and ordernum=@OrderNum
+	Open c
+
+	Fetch next From c into @PQRIID
+
+	While @@Fetch_Status=0 
+	Begin
+		set @PQRIIDs =@PQRIIDs + @PQRIID + ','
+		Fetch next From c into @PQRIID
+	End	
+	Close c
+	Deallocate c
+
+	RETURN @PQRIIDs"
+dbo,FormatDate,SQL_SCALAR_FUNCTION,2011-02-24 23:15:19.830,2021-04-07 21:05:16.080,3451,"
+CREATE FUNCTION [dbo].[FormatDate] (@d as sql_variant,@fOUT NVARCHAR(100))
+
+RETURNS NVARCHAR(100) AS 
+
+BEGIN
+
+      DECLARE @rv as NVARCHAR(100),@d1 datetime,@dc NVARCHAR(100)
+
+      DECLARE @s NVARCHAR(100),@n int
+
+      SET @dc=CONVERT(NVARCHAR(100),@d,109)
+
+      IF ISDATE(@dc)=0
+
+            RETURN @dc
+
+      SET @d1=CONVERT(datetime,@dc)
+
+ 
+
+      DECLARE @aUpper tinyint,@aLower tinyint
+
+      DECLARE @a NVARCHAR(2),@p NVARCHAR(2)
+
+      SET @aUpper=ASCII('A')
+
+ "
+dbo,ParseHtml,SQL_SCALAR_FUNCTION,2016-05-11 00:04:36.237,2021-04-07 21:05:16.077,921,"-- =============================================
+-- Author:		Dzung Nguyen
+-- Create date: 3/30/2016
+-- Description:	strip HTML tag from string
+-- =============================================
+
+CREATE FUNCTION [dbo].[ParseHtml] (@HtmlString varchar(MAX))
+RETURNS VARCHAR(MAX)
+
+AS
+BEGIN
+	DECLARE @Start INT
+    DECLARE @End INT
+    DECLARE @Length INT
+    SET @Start = CHARINDEX('<',@HtmlString)
+    SET @End = CHARINDEX('>',@HtmlString,CHARINDEX('<',@HtmlString))
+    SET @Length = (@End - @Start) + 1"
+dbo,GetAgingBYClaim,SQL_SCALAR_FUNCTION,2013-02-20 00:00:50.910,2021-04-07 21:05:16.073,787,"
+CREATE FUNCTION [dbo].[GetAgingBYClaim]
+(
+@ClaimID as int
+)
+RETURNS Decimal(18,2)
+AS
+BEGIN
+
+Declare @BeginingAR as decimal(18,2)
+set @BeginingAR=0
+
+if (@ClaimID is null or @ClaimID = '' or @ClaimID =0)
+Begin
+	return 0
+end
+
+					
+select 
+		@BeginingAR =  sum( dbo.SignByTransactionType(b.transtypeid)* b.amount)
+from billingtransaction b
+inner join BillingClaimLineItem li on b.lineitemId = li.lineitemId and li.claimid=@ClaimID 
+inner join BillingClaim c on li.ClaimId = c.Clai"
+dbo,GetDiagCode,SQL_SCALAR_FUNCTION,2016-05-11 00:04:36.223,2021-04-07 21:05:16.073,1452,"CREATE FUNCTION dbo.GetDiagCode(@orderNum int, @itemId int)
+RETURNS varchar(max)
+AS
+BEGIN
+	declare @DiagCode as varchar(max)
+	
+	 SELECT @DiagCode = COALESCE(@DiagCode+', ' ,'') + cast(a.code as varchar(10))
+     FROM ( select code from DiagCode where id in(
+    (select DiagCode1 from OrderExamDetails where orderNum = @orderNum and itemId = @itemId)  union
+	(select DiagCode2 from OrderExamDetails where orderNum = @orderNum and itemId = @itemId)  union
+	(select DiagCode3 from OrderExamDetails wher"
+dbo,GetWeekRotation,SQL_SCALAR_FUNCTION,2014-03-10 00:07:59.110,2021-04-07 21:05:16.070,1186,"
+-- =============================================
+-- File Name:	GetWeekRotation.sql
+-- Description:	This function accepts Rotation start date, number of rotating 
+--				weeks, and current date as input and calculates
+--				which rotation week (1-4) 
+-- Author:	Ali
+-- History:	Date		Initials	Description
+--			01/11/2012	AA			Created
+-- =============================================
+
+CREATE FUNCTION [dbo].[GetWeekRotation](@RotationStartDate DATETIME
+										, @NumWeeks INT	
+									"
+dbo,Scheduler_GetOfficeTime,SQL_SCALAR_FUNCTION,2014-03-10 00:07:59.120,2021-04-07 21:05:16.070,2495,"
+-- =============================================
+-- Author:		Joel Deister
+-- Create date: 11/09/2012
+-- Description:	Returns a date/time that is offset to the offices timezone.
+-- This is based on current rules for Daylight Savings time
+-- at http://www.nist.gov/pml/div688/dst.cfm
+-- Daylight Saving Time in the United States
+-- begins at 2:00 a.m. on the second Sunday of March
+-- ends at 2:00 a.m. on the first Sunday of November
+-- =============================================
+
+CREATE FUNCTION "
+dbo,SignByBillingTransactionType,SQL_SCALAR_FUNCTION,2009-12-09 15:11:53.677,2021-04-07 21:05:16.070,424,"CREATE FUNCTION [dbo].[SignByBillingTransactionType] 
+(@BillingTransType int)
+RETURNS int
+AS
+BEGIN
+declare @return int
+select @return = 
+case when @BillingTransType = 1 or @BillingTransType= 2 or  @BillingTransType= 3
+ or @BillingTransType= 6 or @BillingTransType= 9 or @BillingTransType= 14 
+or @BillingTransType= 17 or @BillingTransType= 18 or @BillingTransType= 19
+  then  1 
+else -1 end
+return @return
+end
+"
+dbo,GetOfficeTime,SQL_SCALAR_FUNCTION,2020-11-10 17:44:45.087,2021-04-07 21:05:16.067,2083,"
+CREATE FUNCTION [dbo].[GetOfficeTime] (@officeId int)
+RETURNS SMALLDATETIME
+
+AS
+BEGIN
+	IF @officeId IS NULL OR @officeId = 0
+		RETURN GETUTCDATE()
+	ELSE
+	BEGIN	
+		DECLARE @currentDateTime SMALLDATETIME
+		DECLARE @currentYear VARCHAR(4)
+		DECLARE @dstStart SMALLDATETIME
+		DECLARE @dstEnd SMALLDATETIME
+		DECLARE @timeZone INT
+		DECLARE @useDST BIT
+		DECLARE @dstActive BIT
+		
+		SET @currentDateTime = GETUTCDATE()
+		SET @currentYear = DATEPART(YEAR, @currentDateTime)
+		SET @dstA"
+dbo,GetAgingBYDateandCloseID,SQL_SCALAR_FUNCTION,2014-03-10 00:07:59.097,2021-04-07 21:05:16.067,2342,"CREATE FUNCTION [dbo].[GetAgingBYDateandCloseID]
+(
+@cutOffDate datetime,
+@OfficeNumber varchar(30),
+@DepositDate datetime,
+@CompanyID varchar(20),
+@CloseID as int
+)
+RETURNS Decimal(18,2)
+AS
+BEGIN
+
+Declare @BeginingAR as decimal(18,2)
+set @BeginingAR=0
+
+declare @effectiveCutoffDate as datetime
+
+if (@OfficeNumber is null or @OfficeNumber  = '')
+Begin
+	return 0
+end
+
+if(@CloseID is null or @CloseID = 0)
+	set @effectiveCutoffDate = @cutOffDate
+else 
+	set @effectiveCutoffDate = dateadd(d,1,@cutOffDate"
+dbo,GetNetSaleByType,SQL_SCALAR_FUNCTION,2009-08-25 11:00:00.700,2021-04-07 21:05:16.063,1110,"CREATE  function GetNetSaleByType(@DateFrom DateTime,@DateTo DateTime, @OfficeNum Varchar(20),@ItemTypeID Varchar(100),@PlanID Varchar(10))
+-- Returns @DateTime at midnight; i.e., it removes the time portion of a DateTime value.
+returns datetime
+as
+    begin
+Declare @NetSale as Decimal
+    SELECT  @NetSale=  (case when (iid.isprimary =0 and sum(iid.Receivable) is not null )then 
+           0 else 
+           sum(id.Amount)+sum(Receivable)-sum(Tax) end) 
+FROM     postransaction pt inner "
+dbo,ExampleFunction,SQL_SCALAR_FUNCTION,2014-03-10 00:07:59.090,2021-04-07 21:05:16.063,192,"
+CREATE FUNCTION dbo.ExampleFunction(@StatusId int)
+Returns bit
+AS
+BEGIN
+	declare @status as nvarchar(15)
+	declare @confirmed as bit
+	
+	set @confirmed = 0
+	
+	return @confirmed
+END
+"
+dbo,GetMobilePhone,SQL_SCALAR_FUNCTION,2012-02-29 08:07:44.443,2021-04-07 21:05:16.060,411,"
+create FUNCTION [dbo].[GetMobilePhone] (@PatientID int)
+Returns varchar(50)
+AS
+BEGIN
+declare @MobilePhone as varchar(50)
+
+set @MobilePhone = isnull((select top 1 ph.PhoneNumber from Phone ph join PatientPhone pph on ph.ID = pph.PhoneID join CatElementLU c on c.ID = ph.PhoneTypeID Where pph.PatientID = @PatientID and (ph.PhoneTypeID = 306 or ph.PhoneTypeID = 79)), '')
+
+return @MobilePhone
+
+END
+
+"
+dbo,GetTitle,SQL_SCALAR_FUNCTION,2012-02-29 08:07:44.647,2021-04-07 21:05:16.060,223,"
+create FUNCTION [dbo].[GetTitle] (@TitleId int)
+Returns varchar(10)
+AS
+BEGIN
+declare @Title as varchar(10)
+
+set @Title = isnull((select value from dbo.CatElementLU where ID = @TitleId), '')
+
+return @Title
+
+END
+"
+dbo,AgeAtDate,SQL_SCALAR_FUNCTION,2017-07-25 20:01:45.627,2021-04-07 21:05:16.060,543,"CREATE function [dbo].[AgeAtDate](
+--returns age of patient, based on today's date
+    @DOB    datetime,
+    @PassedDate datetime
+)
+
+returns int
+with SCHEMABINDING
+as
+begin
+
+declare @iMonthDayDob int
+declare @iMonthDayPassedDate int
+
+
+select @iMonthDayDob = CAST(datepart (mm,@DOB) * 100 + datepart  (dd,@DOB) AS int) 
+select @iMonthDayPassedDate = CAST(datepart (mm,@PassedDate) * 100 + datepart  (dd,@PassedDate) AS int) 
+
+return DateDiff(yy,@DOB, @PassedDate) 
+- CASE WHEN @iMonthDayDob <= @iMonth"
+dbo,SignByTransactionType,SQL_SCALAR_FUNCTION,2009-08-25 11:00:00.310,2021-04-07 21:05:16.060,491,"CREATE FUNCTION [dbo].[SignByTransactionType] 
+(@TransType int)
+RETURNS int
+AS
+BEGIN
+declare @return int
+select @return = 
+case when @TransType = 10 or @TransType= 2 or  @TransType= 11 or @TransType= 3 or @TransType= 12 or @TransType= 4 
+or @TransType= 14 or @TransType= 7 or @TransType= 15 or @TransType= 8  
+  or @TransType= 16 then  -1 
+when @TransType = 18 then 0
+when @TransType=19 then 0
+when @TransType=17 then 0
+when @TransType= 5 then 0
+else 1 end
+return @return
+end"
+dbo,GetHomePhone,SQL_SCALAR_FUNCTION,2012-02-29 08:07:44.167,2021-04-07 21:05:16.057,401,"
+create FUNCTION [dbo].[GetHomePhone] (@PatientID int)
+Returns varchar(50)
+AS
+BEGIN
+declare @HomePhone as varchar(50)
+
+set @HomePhone = isnull((select top 1 ph.PhoneNumber from Phone ph join PatientPhone pph on ph.ID = pph.PhoneID join CatElementLU c on c.ID = ph.PhoneTypeID Where pph.PatientID = @PatientID and (ph.PhoneTypeID = 304 or ph.PhoneTypeID = 77)), '')
+
+return @HomePhone
+
+END
+"
+dbo,GetProperCasing,SQL_SCALAR_FUNCTION,2010-03-31 22:16:26.780,2021-04-07 21:05:16.057,200,"
+    
+CREATE FUNCTION [dbo].[GetProperCasing]
+(
+@Name as varchar(200)
+)
+RETURNS varchar(200)
+AS
+BEGIN	
+	return upper(substring(@Name, 1, 1)) + lower(substring(@Name, 2, len(@Name))) 
+END
+
+"
+dbo,GetAppointmentEndTime,SQL_SCALAR_FUNCTION,2012-02-29 08:07:43.850,2021-04-07 21:05:16.053,837,"
+CREATE FUNCTION dbo.GetAppointmentEndTime(@DoctorId int, @OfficeNum varchar(8), @Appointment datetime)
+RETURNS datetime
+AS
+BEGIN
+
+	declare @ApptEndTime as datetime
+	declare @ApptDayOfWeek as int
+	declare @DefaultExamMinutes as int
+	declare @ExamMinuteForDay as int
+	
+	set @DefaultExamMinutes = isnull((select MinutesExam from dbo.Employee where Employee = @DoctorId), 0)
+	set @ApptDayOfWeek = DATEPART(WEEKDAY, @Appointment)
+	set @ExamMinuteForDay = (select Minutes from dbo.EmployeeExa"
+dbo,GetAppointmentCancelStatus,SQL_SCALAR_FUNCTION,2012-02-29 08:07:43.437,2021-04-07 21:05:16.053,369,"
+CREATE FUNCTION dbo.GetAppointmentCancelStatus(@StatusId int)
+Returns bit
+AS
+BEGIN
+	declare @status as varchar(15)
+	declare @cancelled as bit
+	
+	set @cancelled = 0
+	set @status = isNull((select Value from dbo.CatElementLU where ID = @StatusId and Type = 20),'')
+	
+	if(@status = 'Cancelled')
+		begin
+			set @cancelled = 1
+		end
+	
+	return @cancelled
+END"
+dbo,GetAppointmentConfirmedStatus,SQL_SCALAR_FUNCTION,2012-02-29 08:07:43.750,2021-04-07 21:05:16.053,375,"
+CREATE FUNCTION dbo.GetAppointmentConfirmedStatus(@StatusId int)
+Returns bit
+AS
+BEGIN
+	declare @status as varchar(15)
+	declare @confirmed as bit
+	
+	set @confirmed = 0
+	set @status = isNull((select Value from dbo.CatElementLU where ID = @StatusId and Type = 20),'')
+	
+	
+	if(@status = 'Confirmed')
+		begin
+			set @confirmed = 1
+		end
+	
+	return @confirmed
+END"
+dbo,fn_GetCompanyIDsFromList,SQL_TABLE_VALUED_FUNCTION,2018-08-23 15:34:09.763,2018-08-23 15:34:09.763,462,"CREATE Function [dbo].[fn_GetCompanyIDsFromList] (@IDs Varchar(max) )  
+Returns @Tbl_IDs Table  (ID varchar(20))  As  
+
+Begin 
+ Set @IDs =  @IDs + ',' 
+ Declare @Pos1 int
+ Declare @pos2 int
+ Set @Pos1=1
+ Set @Pos2=1
+
+ While @Pos1<Len(@IDs)
+ Begin
+  Set @Pos1 = CharIndex(',',@IDs,@Pos1)
+  Insert @Tbl_IDs Select  ltrim(rtrim( Cast(Substring(@IDs,@Pos2,@Pos1-@Pos2) As varchar(20))))  
+  Set @Pos2=@Pos1+1
+  Set @Pos1 = @Pos1+1
+ End 
+ Return
+End"
+dbo,GetOfficeNumber,SQL_TABLE_VALUED_FUNCTION,2011-08-11 11:41:02.150,2018-08-23 15:34:09.747,451,"CREATE Function [dbo].[GetOfficeNumber] (@IDs Varchar(max) )  
+Returns @Tbl_IDs Table  (ID varchar(8))  As  
+
+Begin 
+ Set @IDs =  @IDs + ',' 
+ Declare @Pos1 int
+ Declare @pos2 int
+ Set @Pos1=1
+ Set @Pos2=1
+
+ While @Pos1<Len(@IDs)
+ Begin
+  Set @Pos1 = CharIndex(',',@IDs,@Pos1)
+  Insert @Tbl_IDs Select  ltrim(rtrim( Cast(Substring(@IDs,@Pos2,@Pos1-@Pos2) As varchar(8))))  
+  Set @Pos2=@Pos1+1
+  Set @Pos1 = @Pos1+1
+ End 
+ Return
+End"
+dbo,fn_GetIDsFromList,SQL_TABLE_VALUED_FUNCTION,2014-03-10 00:07:51.090,2014-03-10 00:07:51.090,1062,"
+
+-- =============================================
+-- Author:		J. Lee
+-- Create date: 12/30/2009
+-- Description:	Returns a table of IDs based on the list passed in, and delimieter to use (comma by default).
+-- =============================================
+
+CREATE FUNCTION [dbo].[fn_GetIDsFromList] (@DelimitedList varchar(MAX), @delimiter varchar(20) = ',')
+RETURNS @IDs TABLE
+(
+	ID int
+)
+
+AS
+BEGIN
+	DECLARE @id int
+	DECLARE @index int
+	SET @index = -1
+	
+	WHILE (LEN(@DelimitedLi"
+dbo,GetStringintable,SQL_TABLE_VALUED_FUNCTION,2011-09-01 22:58:32.023,2011-09-01 22:58:32.023,469,"CREATE Function [dbo].[GetStringintable] (@IDs Varchar(max) )  
+Returns @Tbl_IDs Table  (ID varchar(max))  As  
+
+Begin 
+ Set @IDs =  ltrim(rtrim(@IDs)) + ',' 
+ Declare @Pos1 int
+ Declare @pos2 int
+ Set @Pos1=1
+ Set @Pos2=1
+
+ While @Pos1<Len(@IDs)
+ Begin
+  Set @Pos1 = CharIndex(',',@IDs,@Pos1)
+  Insert @Tbl_IDs Select ltrim(rtrim( Cast(Substring(@IDs,@Pos2,@Pos1-@Pos2) As varchar(max))))
+  Set @Pos2=@Pos1+1
+  Set @Pos1 = @Pos1+1
+ End 
+ Return
+End
+"
