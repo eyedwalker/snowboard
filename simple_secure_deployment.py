@@ -675,7 +675,7 @@ def show_financial_page(auth, username, user_info):
     # Patient Count
     with col4:
         patient_query = """
-        SELECT COUNT(DISTINCT "PatientID") as patient_count 
+        SELECT COUNT(DISTINCT "ID") as patient_count 
         FROM "DBO_PATIENT"
         """
         patient_df = execute_safe_query(patient_query)
