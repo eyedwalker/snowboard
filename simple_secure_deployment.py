@@ -217,7 +217,7 @@ class SimpleSecureAuth:
     
     def create_session(self, username):
         """Create secure session"""
-        session_id = secrets.token_hex(32)
+        session_id = os.urandom(32).hex()
         session_data = {
             'username': username,
             'created_at': datetime.now().isoformat(),
