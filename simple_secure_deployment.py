@@ -18,6 +18,9 @@ import os
 import json
 import pandas as pd
 import logging
+import snowflake.connector
+import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
@@ -569,8 +572,42 @@ def show_dashboard(auth, username, user_info):
     for activity in activities:
         st.write(f"• {activity}")
 
+def get_snowflake_connection():
+    """Get Snowflake connection using secrets"""
+    try:
+        conn = snowflake.connector.connect(
+            account=st.secrets["SNOWFLAKE_ACCOUNT"],
+            user=st.secrets["SNOWFLAKE_USER"],
+            password=st.secrets["SNOWFLAKE_PASSWORD"],
+            warehouse=st.secrets["SNOWFLAKE_WAREHOUSE"],
+            database=st.secrets["SNOWFLAKE_DATABASE"],
+            schema="RAW"
+        )
+        return conn
+    except Exception as e:
+        st.error(f"❌ Database connection failed: {str(e)}")
+        return None
+
+def execute_safe_query(query, limit=1000):
+    """Execute query safely with error handling"""
+    try:
+        conn = get_snowflake_connection()
+        if conn is None:
+            return None
+        
+        # Add limit to prevent large result sets
+        if "LIMIT" not in query.upper():
+            query = f"{query} LIMIT {limit}"
+        
+        df = pd.read_sql(query, conn)
+        conn.close()
+        return df
+    except Exception as e:
+        st.error(f"❌ Query failed: {str(e)}")
+        return None
+
 def show_financial_page(auth, username, user_info):
-    """Show financial analytics"""
+    """Show financial analytics with live data"""
     if not auth.check_permission(username, 'financial'):
         st.error("🚫 Access Denied: Financial data permissions required")
         auth.log_security_event('ACCESS_DENIED', username, 'Attempted to access financial analytics')
@@ -580,7 +617,130 @@ def show_financial_page(auth, username, user_info):
     auth.log_security_event('PAGE_ACCESS', username, 'Accessed financial analytics')
     
     st.success("✅ Access granted to financial analytics")
-    st.info("💡 This would show detailed financial reports, revenue analytics, and profitability metrics.")
+    
+    # Test connection
+    with st.spinner("🔄 Connecting to Snowflake..."):
+        conn = get_snowflake_connection()
+        if conn is None:
+            st.error("❌ Unable to connect to database. Please check your Snowflake configuration.")
+            return
+        conn.close()
+    
+    st.success("✅ Connected to Snowflake successfully!")
+    
+    # Financial KPIs
+    st.subheader("📊 Key Financial Metrics")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    # Total Revenue from POS Transactions
+    with col1:
+        revenue_query = """
+        SELECT SUM("Amount") as total_revenue 
+        FROM "DBO_POSTRANSACTION" 
+        WHERE "Amount" > 0
+        """
+        revenue_df = execute_safe_query(revenue_query)
+        if revenue_df is not None and not revenue_df.empty:
+            total_revenue = revenue_df['TOTAL_REVENUE'].iloc[0] or 0
+            st.metric("💰 Total Revenue", f"${total_revenue:,.2f}")
+        else:
+            st.metric("💰 Total Revenue", "$0.00")
+    
+    # Transaction Count
+    with col2:
+        count_query = """
+        SELECT COUNT(*) as transaction_count 
+        FROM "DBO_POSTRANSACTION"
+        """
+        count_df = execute_safe_query(count_query)
+        if count_df is not None and not count_df.empty:
+            transaction_count = count_df['TRANSACTION_COUNT'].iloc[0] or 0
+            st.metric("📈 Transactions", f"{transaction_count:,}")
+        else:
+            st.metric("📈 Transactions", "0")
+    
+    # Average Transaction
+    with col3:
+        avg_query = """
+        SELECT AVG("Amount") as avg_transaction 
+        FROM "DBO_POSTRANSACTION" 
+        WHERE "Amount" > 0
+        """
+        avg_df = execute_safe_query(avg_query)
+        if avg_df is not None and not avg_df.empty:
+            avg_transaction = avg_df['AVG_TRANSACTION'].iloc[0] or 0
+            st.metric("💳 Avg Transaction", f"${avg_transaction:.2f}")
+        else:
+            st.metric("💳 Avg Transaction", "$0.00")
+    
+    # Patient Count
+    with col4:
+        patient_query = """
+        SELECT COUNT(DISTINCT "PatientID") as patient_count 
+        FROM "DBO_PATIENT"
+        """
+        patient_df = execute_safe_query(patient_query)
+        if patient_df is not None and not patient_df.empty:
+            patient_count = patient_df['PATIENT_COUNT'].iloc[0] or 0
+            st.metric("👥 Total Patients", f"{patient_count:,}")
+        else:
+            st.metric("👥 Total Patients", "0")
+    
+    # Revenue by Office
+    st.subheader("🏢 Revenue by Office")
+    office_revenue_query = """
+    SELECT 
+        o."OfficeName" as office_name,
+        SUM(pt."Amount") as total_revenue,
+        COUNT(pt."TransactionID") as transaction_count
+    FROM "DBO_POSTRANSACTION" pt
+    JOIN "DBO_PATIENT" p ON pt."PatientID" = p."PatientID"
+    JOIN "DBO_OFFICE" o ON p."OfficeID" = o."OfficeID"
+    WHERE pt."Amount" > 0
+    GROUP BY o."OfficeName"
+    ORDER BY total_revenue DESC
+    """
+    
+    office_df = execute_safe_query(office_revenue_query)
+    if office_df is not None and not office_df.empty:
+        # Create bar chart
+        fig = px.bar(
+            office_df, 
+            x='OFFICE_NAME', 
+            y='TOTAL_REVENUE',
+            title='Revenue by Office Location',
+            labels={'TOTAL_REVENUE': 'Revenue ($)', 'OFFICE_NAME': 'Office'}
+        )
+        fig.update_layout(xaxis_tickangle=-45)
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Show data table
+        st.dataframe(office_df, use_container_width=True)
+    else:
+        st.info("📊 No office revenue data available")
+    
+    # Recent Transactions
+    st.subheader("🕒 Recent Transactions")
+    recent_query = """
+    SELECT 
+        pt."TransactionID",
+        pt."TransactionDate",
+        p."FirstName" || ' ' || p."LastName" as patient_name,
+        pt."Amount",
+        pt."TransactionTypeID"
+    FROM "DBO_POSTRANSACTION" pt
+    JOIN "DBO_PATIENT" p ON pt."PatientID" = p."PatientID"
+    WHERE pt."Amount" > 0
+    ORDER BY pt."TransactionDate" DESC
+    LIMIT 20
+    """
+    
+    recent_df = execute_safe_query(recent_query)
+    if recent_df is not None and not recent_df.empty:
+        st.dataframe(recent_df, use_container_width=True)
+    else:
+        st.info("📊 No recent transaction data available")
 
 def show_clinical_page(auth, username, user_info):
     """Show clinical analytics"""
