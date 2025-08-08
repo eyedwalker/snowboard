@@ -17,6 +17,7 @@ import time
 import os
 import json
 import pandas as pd
+import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
