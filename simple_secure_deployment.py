@@ -13,13 +13,12 @@ Production-grade security without complex dependencies:
 import streamlit as st
 import hashlib
 import hmac
-import secrets
-import logging
-from datetime import datetime, timedelta
+import time
 import os
 import json
 import pandas as pd
-import time
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
 
 # Security configuration
 st.set_page_config(
@@ -111,12 +110,16 @@ class SimpleSecureAuth:
             'password_min_length': 8,
             'require_https': True,
             'allowed_ips': [],  # Empty = allow all, add IPs to restrict
-            'secret_key': secrets.token_hex(32)
+            'secret_key': os.urandom(32).hex()
         }
+    
+    def generate_salt(self) -> str:
+        """Generate a random salt for password hashing"""
+        return os.urandom(32).hex()
     
     def hash_password(self, password):
         """Hash password with salt"""
-        salt = secrets.token_hex(16)
+        salt = self.generate_salt()
         pwd_hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
         return f"{salt}:{pwd_hash.hex()}"
     
