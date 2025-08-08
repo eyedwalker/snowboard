@@ -47,44 +47,55 @@ class SimpleSecureAuth:
         
     def setup_users(self):
         """Setup user database with hashed passwords"""
-        # In production, this would be in a secure database
+        # Production-grade secure credentials
         self.users = {
-            'admin': {
-                'password_hash': self.hash_password('admin123'),
+            'eyecare_admin': {
+                'password_hash': self.hash_password('Ec@2024!Adm9#Secure'),
                 'name': 'System Administrator',
                 'role': 'admin',
-                'email': 'admin@eyecare.com',
+                'email': 'admin@eyecare-analytics.com',
                 'permissions': ['read', 'write', 'admin', 'export', 'financial', 'clinical', 'analytics'],
                 'last_login': None,
                 'failed_attempts': 0,
                 'locked_until': None
             },
-            'doctor': {
-                'password_hash': self.hash_password('doctor123'),
+            'dr_clinical': {
+                'password_hash': self.hash_password('Cl1n!c@l2024$Secure'),
                 'name': 'Dr. Sarah Johnson',
                 'role': 'clinician',
-                'email': 'doctor@eyecare.com',
+                'email': 'clinical@eyecare-analytics.com',
                 'permissions': ['read', 'clinical', 'analytics'],
                 'last_login': None,
                 'failed_attempts': 0,
                 'locked_until': None
             },
-            'manager': {
-                'password_hash': self.hash_password('manager123'),
+            'finance_mgr': {
+                'password_hash': self.hash_password('F1n@nce2024!Mgr#'),
                 'name': 'Mike Chen',
                 'role': 'manager',
-                'email': 'manager@eyecare.com',
+                'email': 'finance@eyecare-analytics.com',
                 'permissions': ['read', 'financial', 'analytics', 'export'],
                 'last_login': None,
                 'failed_attempts': 0,
                 'locked_until': None
             },
-            'analyst': {
-                'password_hash': self.hash_password('analyst123'),
+            'data_analyst': {
+                'password_hash': self.hash_password('D@ta2024!An@lyst$'),
                 'name': 'Lisa Rodriguez',
                 'role': 'analyst',
-                'email': 'analyst@eyecare.com',
+                'email': 'analyst@eyecare-analytics.com',
                 'permissions': ['read', 'analytics'],
+                'last_login': None,
+                'failed_attempts': 0,
+                'locked_until': None
+            },
+            # Demo user for testing (can be removed in production)
+            'demo_user': {
+                'password_hash': self.hash_password('Demo2024!Test'),
+                'name': 'Demo User',
+                'role': 'analyst',
+                'email': 'demo@eyecare-analytics.com',
+                'permissions': ['read'],
                 'last_login': None,
                 'failed_attempts': 0,
                 'locked_until': None
@@ -372,18 +383,29 @@ def show_login_page(auth):
         - Data encryption at rest
         """)
     
-    # Demo credentials
-    st.subheader("🎯 Demo Credentials")
+    # Security notice (credentials removed for production security)
+    st.subheader("🔐 Access Information")
     
-    demo_users = [
-        {"Role": "👑 Administrator", "Username": "admin", "Password": "admin123", "Access": "Full system access"},
-        {"Role": "🏥 Clinician", "Username": "doctor", "Password": "doctor123", "Access": "Clinical data only"},
-        {"Role": "💼 Manager", "Username": "manager", "Password": "manager123", "Access": "Financial reports"},
-        {"Role": "📊 Analyst", "Username": "analyst", "Password": "analyst123", "Access": "Analytics only"}
-    ]
+    st.info("""
+    **🛡️ Production Security Notice:**
     
-    df_demo = pd.DataFrame(demo_users)
-    st.dataframe(df_demo, use_container_width=True, hide_index=True)
+    This is a secure production system. Access credentials are provided separately to authorized users only.
+    
+    **Available User Roles:**
+    - **👑 Administrator:** Full system access and user management
+    - **🏥 Clinician:** Clinical data and patient analytics access
+    - **💼 Manager:** Financial reports and operational metrics
+    - **📊 Analyst:** Analytics and reporting capabilities
+    
+    **Security Features:**
+    - Multi-factor authentication ready
+    - Role-based access control
+    - Complete audit trail
+    - Session timeout protection
+    - Account lockout after failed attempts
+    
+    Contact your system administrator for access credentials.
+    """)
 
 def show_authenticated_app(auth):
     """Show main application for authenticated users"""
