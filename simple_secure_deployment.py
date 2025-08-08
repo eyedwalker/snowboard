@@ -520,7 +520,7 @@ def show_dashboard(auth, username, user_info):
     with col2:
         # Total Patients
         patient_query = """
-        SELECT COUNT(DISTINCT "PatientID") as patient_count 
+        SELECT COUNT(DISTINCT "ID") as patient_count 
         FROM "DBO_PATIENT"
         """
         patient_df = execute_safe_query(patient_query)
@@ -634,9 +634,9 @@ def show_financial_page(auth, username, user_info):
     # Total Revenue from POS Transactions
     with col1:
         revenue_query = """
-        SELECT SUM("Amount") as total_revenue 
+        SELECT SUM(CAST("Amount" AS FLOAT)) as total_revenue 
         FROM "DBO_POSTRANSACTION" 
-        WHERE "Amount" > 0
+        WHERE CAST("Amount" AS FLOAT) > 0
         """
         revenue_df = execute_safe_query(revenue_query)
         if revenue_df is not None and not revenue_df.empty:
@@ -661,9 +661,9 @@ def show_financial_page(auth, username, user_info):
     # Average Transaction
     with col3:
         avg_query = """
-        SELECT AVG("Amount") as avg_transaction 
+        SELECT AVG(CAST("Amount" AS FLOAT)) as avg_transaction 
         FROM "DBO_POSTRANSACTION" 
-        WHERE "Amount" > 0
+        WHERE CAST("Amount" AS FLOAT) > 0
         """
         avg_df = execute_safe_query(avg_query)
         if avg_df is not None and not avg_df.empty:
@@ -690,12 +690,12 @@ def show_financial_page(auth, username, user_info):
     office_revenue_query = """
     SELECT 
         o."OfficeName" as office_name,
-        SUM(pt."Amount") as total_revenue,
+        SUM(CAST(pt."Amount" AS FLOAT)) as total_revenue,
         COUNT(pt."TransactionID") as transaction_count
     FROM "DBO_POSTRANSACTION" pt
-    JOIN "DBO_PATIENT" p ON pt."PatientID" = p."PatientID"
-    JOIN "DBO_OFFICE" o ON p."OfficeID" = o."OfficeID"
-    WHERE pt."Amount" > 0
+    JOIN "DBO_PATIENT" p ON pt."PatientID" = p."ID"
+    JOIN "DBO_OFFICE" o ON p."HomeOffice" = o."OfficeId"
+    WHERE CAST(pt."Amount" AS FLOAT) > 0
     GROUP BY o."OfficeName"
     ORDER BY total_revenue DESC
     """
@@ -728,8 +728,8 @@ def show_financial_page(auth, username, user_info):
         pt."Amount",
         pt."TransactionTypeID"
     FROM "DBO_POSTRANSACTION" pt
-    JOIN "DBO_PATIENT" p ON pt."PatientID" = p."PatientID"
-    WHERE pt."Amount" > 0
+    JOIN "DBO_PATIENT" p ON pt."PatientID" = p."ID"
+    WHERE CAST(pt."Amount" AS FLOAT) > 0
     ORDER BY pt."TransactionDate" DESC
     LIMIT 20
     """
@@ -768,7 +768,7 @@ def show_clinical_page(auth, username, user_info):
     with col1:
         # Total Patients
         patient_query = """
-        SELECT COUNT(DISTINCT "PatientID") as patient_count 
+        SELECT COUNT(DISTINCT "ID") as patient_count 
         FROM "DBO_PATIENT"
         """
         patient_df = execute_safe_query(patient_query)
@@ -795,9 +795,9 @@ def show_clinical_page(auth, username, user_info):
     with col3:
         # Average Patient Age
         age_query = """
-        SELECT AVG(DATEDIFF(year, "DOB", CURRENT_DATE())) as avg_age
+        SELECT AVG(DATEDIFF(year, TRY_TO_DATE("BirthDate", 'MM/DD/YYYY'), CURRENT_DATE())) as avg_age
         FROM "DBO_PATIENT"
-        WHERE "DOB" IS NOT NULL
+        WHERE "BirthDate" IS NOT NULL AND "BirthDate" != ''
         """
         age_df = execute_safe_query(age_query)
         if age_df is not None and not age_df.empty:
@@ -828,11 +828,11 @@ def show_clinical_page(auth, username, user_info):
         # Gender Distribution
         gender_query = """
         SELECT 
-            "Gender",
+            "Sex" as gender,
             COUNT(*) as patient_count
         FROM "DBO_PATIENT"
-        WHERE "Gender" IS NOT NULL
-        GROUP BY "Gender"
+        WHERE "Sex" IS NOT NULL AND "Sex" != ''
+        GROUP BY "Sex"
         ORDER BY patient_count DESC
         """
         gender_df = execute_safe_query(gender_query)
@@ -852,15 +852,15 @@ def show_clinical_page(auth, username, user_info):
         age_group_query = """
         SELECT 
             CASE 
-                WHEN DATEDIFF(year, "DOB", CURRENT_DATE()) < 18 THEN 'Under 18'
-                WHEN DATEDIFF(year, "DOB", CURRENT_DATE()) BETWEEN 18 AND 35 THEN '18-35'
-                WHEN DATEDIFF(year, "DOB", CURRENT_DATE()) BETWEEN 36 AND 50 THEN '36-50'
-                WHEN DATEDIFF(year, "DOB", CURRENT_DATE()) BETWEEN 51 AND 65 THEN '51-65'
+                WHEN DATEDIFF(year, TRY_TO_DATE("BirthDate", 'MM/DD/YYYY'), CURRENT_DATE()) < 18 THEN 'Under 18'
+                WHEN DATEDIFF(year, TRY_TO_DATE("BirthDate", 'MM/DD/YYYY'), CURRENT_DATE()) BETWEEN 18 AND 35 THEN '18-35'
+                WHEN DATEDIFF(year, TRY_TO_DATE("BirthDate", 'MM/DD/YYYY'), CURRENT_DATE()) BETWEEN 36 AND 50 THEN '36-50'
+                WHEN DATEDIFF(year, TRY_TO_DATE("BirthDate", 'MM/DD/YYYY'), CURRENT_DATE()) BETWEEN 51 AND 65 THEN '51-65'
                 ELSE 'Over 65'
             END as age_group,
             COUNT(*) as patient_count
         FROM "DBO_PATIENT"
-        WHERE "DOB" IS NOT NULL
+        WHERE "BirthDate" IS NOT NULL AND "BirthDate" != ''
         GROUP BY age_group
         ORDER BY patient_count DESC
         """
@@ -882,13 +882,13 @@ def show_clinical_page(auth, username, user_info):
     recent_patients_query = """
     SELECT 
         p."FirstName" || ' ' || p."LastName" as patient_name,
-        p."DOB",
-        p."Gender",
+        p."BirthDate",
+        p."Sex" as gender,
         o."OfficeName" as office,
         pt."TransactionDate" as last_visit
     FROM "DBO_PATIENT" p
-    LEFT JOIN "DBO_OFFICE" o ON p."OfficeID" = o."OfficeID"
-    LEFT JOIN "DBO_POSTRANSACTION" pt ON p."PatientID" = pt."PatientID"
+    LEFT JOIN "DBO_OFFICE" o ON p."HomeOffice" = o."OfficeId"
+    LEFT JOIN "DBO_POSTRANSACTION" pt ON p."ID" = pt."PatientID"
     WHERE pt."TransactionDate" IS NOT NULL
     ORDER BY pt."TransactionDate" DESC
     LIMIT 20
@@ -955,9 +955,9 @@ def show_analytics_page(auth, username, user_info):
     with col3:
         # Average Product Price
         avg_price_query = """
-        SELECT AVG(pt."Amount") as avg_price
+        SELECT AVG(CAST(pt."Amount" AS FLOAT)) as avg_price
         FROM "DBO_POSTRANSACTION" pt
-        WHERE pt."Amount" > 0
+        WHERE CAST(pt."Amount" AS FLOAT) > 0
         """
         avg_price_df = execute_safe_query(avg_price_query)
         if avg_price_df is not None and not avg_price_df.empty:
@@ -990,10 +990,10 @@ def show_analytics_page(auth, username, user_info):
         SELECT 
             i."ItemName" as product_name,
             COUNT(*) as sales_count,
-            SUM(pt."Amount") as total_revenue
+            SUM(CAST(pt."Amount" AS FLOAT)) as total_revenue
         FROM "DBO_POSTRANSACTION" pt
-        JOIN "DBO_ITEM" i ON pt."ItemID" = i."ItemID"
-        WHERE pt."Amount" > 0
+        JOIN "DBO_ITEM" i ON pt."ItemID" = i."ID"
+        WHERE CAST(pt."Amount" AS FLOAT) > 0
         GROUP BY i."ItemName"
         ORDER BY sales_count DESC
         LIMIT 10
@@ -1017,12 +1017,12 @@ def show_analytics_page(auth, username, user_info):
         category_revenue_query = """
         SELECT 
             it."Description" as category,
-            SUM(pt."Amount") as total_revenue,
+            SUM(CAST(pt."Amount" AS FLOAT)) as total_revenue,
             COUNT(*) as transaction_count
         FROM "DBO_POSTRANSACTION" pt
-        JOIN "DBO_ITEM" i ON pt."ItemID" = i."ItemID"
+        JOIN "DBO_ITEM" i ON pt."ItemID" = i."ID"
         JOIN "DBO_ITEMTYPE" it ON i."ItemType" = it."ItemType"
-        WHERE pt."Amount" > 0
+        WHERE CAST(pt."Amount" AS FLOAT) > 0
         GROUP BY it."Description"
         ORDER BY total_revenue DESC
         LIMIT 10
@@ -1045,14 +1045,15 @@ def show_analytics_page(auth, username, user_info):
     # Monthly sales trend
     monthly_trend_query = """
     SELECT 
-        DATE_TRUNC('month', "TransactionDate") as month,
-        SUM("Amount") as monthly_revenue,
+        DATE_TRUNC('month', TRY_TO_DATE("TransactionDate", 'MM/DD/YYYY')) as month,
+        SUM(CAST("Amount" AS FLOAT)) as monthly_revenue,
         COUNT(*) as transaction_count
     FROM "DBO_POSTRANSACTION" 
-    WHERE "Amount" > 0 
+    WHERE CAST("Amount" AS FLOAT) > 0 
       AND "TransactionDate" IS NOT NULL
-      AND "TransactionDate" >= DATEADD(month, -12, CURRENT_DATE())
-    GROUP BY DATE_TRUNC('month', "TransactionDate")
+      AND "TransactionDate" != ''
+      AND TRY_TO_DATE("TransactionDate", 'MM/DD/YYYY') >= DATEADD(month, -12, CURRENT_DATE())
+    GROUP BY DATE_TRUNC('month', TRY_TO_DATE("TransactionDate", 'MM/DD/YYYY'))
     ORDER BY month
     """
     
@@ -1098,14 +1099,14 @@ def show_analytics_page(auth, username, user_info):
     office_performance_query = """
     SELECT 
         o."OfficeName" as office_name,
-        SUM(pt."Amount") as total_revenue,
+        SUM(CAST(pt."Amount" AS FLOAT)) as total_revenue,
         COUNT(pt."TransactionID") as transaction_count,
         COUNT(DISTINCT pt."PatientID") as unique_patients,
-        AVG(pt."Amount") as avg_transaction
+        AVG(CAST(pt."Amount" AS FLOAT)) as avg_transaction
     FROM "DBO_POSTRANSACTION" pt
-    JOIN "DBO_PATIENT" p ON pt."PatientID" = p."PatientID"
-    JOIN "DBO_OFFICE" o ON p."OfficeID" = o."OfficeID"
-    WHERE pt."Amount" > 0
+    JOIN "DBO_PATIENT" p ON pt."PatientID" = p."ID"
+    JOIN "DBO_OFFICE" o ON p."HomeOffice" = o."OfficeId"
+    WHERE CAST(pt."Amount" AS FLOAT) > 0
     GROUP BY o."OfficeName"
     ORDER BY total_revenue DESC
     """
