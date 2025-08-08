@@ -939,108 +939,112 @@ def show_analytics_page(auth, username, user_info):
             st.metric("📦 Total Products", "0")
     
     with col2:
-        # Transaction Types (different types of transactions)
-        transaction_types_query = """
-        SELECT COUNT(DISTINCT "TransactionTypeID") as transaction_types
-        FROM "DBO_POSTRANSACTION"
-        WHERE "TransactionTypeID" IS NOT NULL
+        # Products with Sales (items that have been sold)
+        active_products_query = """
+        SELECT COUNT(DISTINCT id."ItemID") as active_products
+        FROM "DBO_INVOICEDET" id
+        WHERE id."Amount" IS NOT NULL AND CAST(id."Amount" AS FLOAT) > 0
         """
-        types_df = execute_safe_query(transaction_types_query)
-        if types_df is not None and not types_df.empty:
-            transaction_types = types_df.iloc[0]['TRANSACTION_TYPES']
-            st.metric("🔄 Transaction Types", f"{transaction_types:,}")
+        active_df = execute_safe_query(active_products_query)
+        if active_df is not None and not active_df.empty:
+            active_products = active_df.iloc[0]['ACTIVE_PRODUCTS']
+            st.metric("🟢 Products with Sales", f"{active_products:,}")
         else:
-            st.metric("🔄 Transaction Types", "0")
+            st.metric("🟢 Products with Sales", "0")
     
     with col3:
-        # Average Transaction Amount
-        avg_amount_query = """
-        SELECT AVG(CAST(pt."Amount" AS FLOAT)) as avg_amount
-        FROM "DBO_POSTRANSACTION" pt
-        WHERE CAST(pt."Amount" AS FLOAT) > 0
+        # Average Product Price
+        avg_price_query = """
+        SELECT AVG(CAST(id."Price" AS FLOAT)) as avg_price
+        FROM "DBO_INVOICEDET" id
+        WHERE CAST(id."Price" AS FLOAT) > 0
         """
-        avg_amount_df = execute_safe_query(avg_amount_query)
-        if avg_amount_df is not None and not avg_amount_df.empty:
-            avg_amount = avg_amount_df.iloc[0]['AVG_AMOUNT'] or 0
-            st.metric("💰 Avg Transaction", f"${avg_amount:.2f}")
+        avg_price_df = execute_safe_query(avg_price_query)
+        if avg_price_df is not None and not avg_price_df.empty:
+            avg_price = avg_price_df.iloc[0]['AVG_PRICE'] or 0
+            st.metric("💰 Avg Product Price", f"${avg_price:.2f}")
         else:
-            st.metric("💰 Avg Transaction", "$0.00")
+            st.metric("💰 Avg Product Price", "$0.00")
     
     with col4:
-        # Total Revenue
-        revenue_query = """
-        SELECT SUM(CAST(pt."Amount" AS FLOAT)) as total_revenue
-        FROM "DBO_POSTRANSACTION" pt
-        WHERE CAST(pt."Amount" AS FLOAT) > 0
+        # Product Categories
+        category_query = """
+        SELECT COUNT(DISTINCT "ItemType") as category_count
+        FROM "DBO_ITEMTYPE"
         """
-        revenue_df = execute_safe_query(revenue_query)
-        if revenue_df is not None and not revenue_df.empty:
-            total_revenue = revenue_df.iloc[0]['TOTAL_REVENUE'] or 0
-            st.metric("💸 Total Revenue", f"${total_revenue:,.2f}")
+        category_df = execute_safe_query(category_query)
+        if category_df is not None and not category_df.empty:
+            category_count = category_df.iloc[0]['CATEGORY_COUNT']
+            st.metric("📋 Product Categories", f"{category_count:,}")
         else:
-            st.metric("💸 Total Revenue", "$0.00")
+            st.metric("📋 Product Categories", "0")
     
-    # Top Transaction Types
-    st.subheader("🔥 Top Transaction Types")
+    # Top Selling Products
+    st.subheader("🔥 Top Selling Products")
     with col1:
-        # Top transaction types by count and revenue
-        top_types_query = """
+        # Top products by sales volume
+        top_products_query = """
         SELECT 
-            "TransactionTypeID" as transaction_type,
-            COUNT(*) as transaction_count,
-            SUM(CAST("Amount" AS FLOAT)) as total_revenue
-        FROM "DBO_POSTRANSACTION"
-        WHERE CAST("Amount" AS FLOAT) > 0
-        GROUP BY "TransactionTypeID"
-        ORDER BY transaction_count DESC
+            i."ItemName" as product_name,
+            SUM(CAST(id."Quantity" AS FLOAT)) as total_quantity,
+            SUM(CAST(id."Amount" AS FLOAT)) as total_revenue,
+            COUNT(*) as sales_count
+        FROM "DBO_INVOICEDET" id
+        JOIN "DBO_ITEM" i ON id."ItemID" = i."ID"
+        WHERE CAST(id."Amount" AS FLOAT) > 0
+        GROUP BY i."ItemName"
+        ORDER BY total_quantity DESC
         LIMIT 10
         """
-        types_df = execute_safe_query(top_types_query)
-        if types_df is not None and not types_df.empty:
-            fig = px.bar(types_df, x='transaction_count', y='transaction_type', 
-                        title='Top Transaction Types by Count',
+        products_df = execute_safe_query(top_products_query)
+        if products_df is not None and not products_df.empty:
+            fig = px.bar(products_df, x='TOTAL_QUANTITY', y='PRODUCT_NAME', 
+                        title='Top Products by Sales Volume',
                         orientation='h')
             fig.update_layout(height=400)
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("📊 No transaction type data available")
+            st.info("📊 No product sales data available")
     
     with col2:
-        # Revenue by transaction type
-        type_revenue_query = """
+        # Revenue by product category
+        category_revenue_query = """
         SELECT 
-            "TransactionTypeID" as transaction_type,
-            SUM(CAST("Amount" AS FLOAT)) as total_revenue,
-            COUNT(*) as transaction_count
-        FROM "DBO_POSTRANSACTION"
-        WHERE CAST("Amount" AS FLOAT) > 0
-        GROUP BY "TransactionTypeID"
+            it."Description" as category,
+            SUM(CAST(id."Amount" AS FLOAT)) as total_revenue,
+            COUNT(*) as sales_count
+        FROM "DBO_INVOICEDET" id
+        JOIN "DBO_ITEMTYPE" it ON id."ItemType" = it."ItemType"
+        WHERE CAST(id."Amount" AS FLOAT) > 0
+        GROUP BY it."Description"
         ORDER BY total_revenue DESC
         LIMIT 10
         """
-        type_revenue_df = execute_safe_query(type_revenue_query)
-        if type_revenue_df is not None and not type_revenue_df.empty:
-            fig = px.pie(type_revenue_df, values='total_revenue', names='transaction_type', 
-                        title='Revenue by Transaction Type')
+        category_df = execute_safe_query(category_revenue_query)
+        if category_df is not None and not category_df.empty:
+            fig = px.pie(category_df, values='TOTAL_REVENUE', names='CATEGORY', 
+                        title='Revenue by Product Category')
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("📊 No transaction type revenue data available")
+            st.info("📊 No category revenue data available")
     
     # Sales Trends
     st.subheader("📈 Sales Trends Analysis")
     
-    # Monthly sales trend
+    # Monthly sales trend from invoice details
     monthly_trend_query = """
     SELECT 
-        DATE_TRUNC('month', TRY_TO_DATE("TransactionDate", 'MM/DD/YYYY')) as month,
-        SUM(CAST("Amount" AS FLOAT)) as monthly_revenue,
-        COUNT(*) as transaction_count
-    FROM "DBO_POSTRANSACTION" 
-    WHERE CAST("Amount" AS FLOAT) > 0 
-      AND "TransactionDate" IS NOT NULL
-      AND "TransactionDate" != ''
-      AND TRY_TO_DATE("TransactionDate", 'MM/DD/YYYY') >= DATEADD(month, -12, CURRENT_DATE())
-    GROUP BY DATE_TRUNC('month', TRY_TO_DATE("TransactionDate", 'MM/DD/YYYY'))
+        DATE_TRUNC('month', TRY_TO_DATE(isu."InvoiceDate", 'MM/DD/YYYY')) as month,
+        SUM(CAST(id."Amount" AS FLOAT)) as monthly_revenue,
+        SUM(CAST(id."Quantity" AS FLOAT)) as total_quantity,
+        COUNT(*) as sales_count
+    FROM "DBO_INVOICEDET" id
+    JOIN "DBO_INVOICESUM" isu ON id."InvoiceID" = isu."ID"
+    WHERE CAST(id."Amount" AS FLOAT) > 0 
+      AND isu."InvoiceDate" IS NOT NULL
+      AND isu."InvoiceDate" != ''
+      AND TRY_TO_DATE(isu."InvoiceDate", 'MM/DD/YYYY') >= DATEADD(month, -12, CURRENT_DATE())
+    GROUP BY DATE_TRUNC('month', TRY_TO_DATE(isu."InvoiceDate", 'MM/DD/YYYY'))
     ORDER BY month
     """
     
