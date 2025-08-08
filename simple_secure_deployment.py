@@ -488,75 +488,73 @@ def show_authenticated_app(auth):
         show_export_page(auth, username, user_info)
 
 def show_dashboard(auth, username, user_info):
-    """Show main dashboard"""
+    """Show main dashboard with live data"""
     st.header("📊 Dashboard Overview")
     auth.log_security_event('PAGE_ACCESS', username, 'Accessed dashboard overview')
     
-    # KPIs based on role
-    if user_info['role'] == 'admin':
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.markdown("""
-            <div class="metric-card">
-                <h3>$2.5M</h3>
-                <p>Total Revenue</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with col2:
-            st.markdown("""
-            <div class="metric-card">
-                <h3>15,847</h3>
-                <p>Patient Visits</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with col3:
-            st.markdown("""
-            <div class="metric-card">
-                <h3>94.2%</h3>
-                <p>Claims Approval</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with col4:
-            st.markdown("""
-            <div class="metric-card">
-                <h3>99.9%</h3>
-                <p>System Uptime</p>
-            </div>
-            """, unsafe_allow_html=True)
+    # Test connection
+    with st.spinner("🔄 Loading dashboard data..."):
+        conn = get_snowflake_connection()
+        if conn is None:
+            st.error("❌ Unable to connect to database. Please check your Snowflake configuration.")
+            return
+        conn.close()
     
-    elif user_info['role'] == 'manager':
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric("Monthly Revenue", "$425K", "↑ 12%")
-        with col2:
-            st.metric("Team Performance", "94.2%", "↑ 2%")
-        with col3:
-            st.metric("Customer Satisfaction", "4.6/5", "↑ 0.2")
+    # Live KPIs
+    col1, col2, col3, col4 = st.columns(4)
     
-    elif user_info['role'] == 'clinician':
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric("Patient Visits", "1,247", "↑ 5%")
-        with col2:
-            st.metric("Procedures", "892", "↑ 8%")
-        with col3:
-            st.metric("Satisfaction", "4.8/5", "↑ 0.1")
+    with col1:
+        # Total Revenue
+        revenue_query = """
+        SELECT SUM("Amount") as total_revenue 
+        FROM "DBO_POSTRANSACTION" 
+        WHERE "Amount" > 0
+        """
+        revenue_df = execute_safe_query(revenue_query)
+        if revenue_df is not None and not revenue_df.empty:
+            total_revenue = revenue_df['TOTAL_REVENUE'].iloc[0] or 0
+            st.metric("💰 Total Revenue", f"${total_revenue:,.0f}")
+        else:
+            st.metric("💰 Total Revenue", "$0")
     
-    else:  # analyst
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric("Data Quality", "98.5%", "↑ 1%")
-        with col2:
-            st.metric("Reports Generated", "156", "↑ 23")
-        with col3:
-            st.metric("Insights Created", "42", "↑ 8")
+    with col2:
+        # Total Patients
+        patient_query = """
+        SELECT COUNT(DISTINCT "PatientID") as patient_count 
+        FROM "DBO_PATIENT"
+        """
+        patient_df = execute_safe_query(patient_query)
+        if patient_df is not None and not patient_df.empty:
+            patient_count = patient_df['PATIENT_COUNT'].iloc[0] or 0
+            st.metric("👥 Total Patients", f"{patient_count:,}")
+        else:
+            st.metric("👥 Total Patients", "0")
+    
+    with col3:
+        # Total Products
+        product_query = """
+        SELECT COUNT(*) as product_count 
+        FROM "DBO_ITEM"
+        """
+        product_df = execute_safe_query(product_query)
+        if product_df is not None and not product_df.empty:
+            product_count = product_df['PRODUCT_COUNT'].iloc[0] or 0
+            st.metric("📦 Total Products", f"{product_count:,}")
+        else:
+            st.metric("📦 Total Products", "0")
+    
+    with col4:
+        # Total Offices
+        office_query = """
+        SELECT COUNT(*) as office_count 
+        FROM "DBO_OFFICE"
+        """
+        office_df = execute_safe_query(office_query)
+        if office_df is not None and not office_df.empty:
+            office_count = office_df['OFFICE_COUNT'].iloc[0] or 0
+            st.metric("🏢 Total Offices", f"{office_count:,}")
+        else:
+            st.metric("🏢 Total Offices", "0")
     
     # Recent activity
     st.subheader("📈 Recent Activity")
@@ -743,7 +741,7 @@ def show_financial_page(auth, username, user_info):
         st.info("📊 No recent transaction data available")
 
 def show_clinical_page(auth, username, user_info):
-    """Show clinical analytics"""
+    """Show clinical analytics with live data"""
     if not auth.check_permission(username, 'clinical'):
         st.error("🚫 Access Denied: Clinical data permissions required")
         auth.log_security_event('ACCESS_DENIED', username, 'Attempted to access clinical analytics')
@@ -753,10 +751,157 @@ def show_clinical_page(auth, username, user_info):
     auth.log_security_event('PAGE_ACCESS', username, 'Accessed clinical analytics')
     
     st.success("✅ Access granted to clinical analytics")
-    st.info("💡 This would show patient outcomes, procedure analytics, and clinical performance metrics.")
+    
+    # Test connection
+    with st.spinner("🔄 Loading clinical data..."):
+        conn = get_snowflake_connection()
+        if conn is None:
+            st.error("❌ Unable to connect to database. Please check your Snowflake configuration.")
+            return
+        conn.close()
+    
+    # Clinical KPIs
+    st.subheader("📊 Clinical Performance Metrics")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        # Total Patients
+        patient_query = """
+        SELECT COUNT(DISTINCT "PatientID") as patient_count 
+        FROM "DBO_PATIENT"
+        """
+        patient_df = execute_safe_query(patient_query)
+        if patient_df is not None and not patient_df.empty:
+            patient_count = patient_df['PATIENT_COUNT'].iloc[0] or 0
+            st.metric("👥 Total Patients", f"{patient_count:,}")
+        else:
+            st.metric("👥 Total Patients", "0")
+    
+    with col2:
+        # Active Patients (with recent transactions)
+        active_query = """
+        SELECT COUNT(DISTINCT pt."PatientID") as active_patients
+        FROM "DBO_POSTRANSACTION" pt
+        WHERE pt."TransactionDate" >= DATEADD(month, -12, CURRENT_DATE())
+        """
+        active_df = execute_safe_query(active_query)
+        if active_df is not None and not active_df.empty:
+            active_patients = active_df['ACTIVE_PATIENTS'].iloc[0] or 0
+            st.metric("🟢 Active Patients", f"{active_patients:,}")
+        else:
+            st.metric("🟢 Active Patients", "0")
+    
+    with col3:
+        # Average Patient Age
+        age_query = """
+        SELECT AVG(DATEDIFF(year, "DOB", CURRENT_DATE())) as avg_age
+        FROM "DBO_PATIENT"
+        WHERE "DOB" IS NOT NULL
+        """
+        age_df = execute_safe_query(age_query)
+        if age_df is not None and not age_df.empty:
+            avg_age = age_df['AVG_AGE'].iloc[0] or 0
+            st.metric("🎂 Average Age", f"{avg_age:.1f} years")
+        else:
+            st.metric("🎂 Average Age", "N/A")
+    
+    with col4:
+        # Total Offices
+        office_query = """
+        SELECT COUNT(*) as office_count 
+        FROM "DBO_OFFICE"
+        """
+        office_df = execute_safe_query(office_query)
+        if office_df is not None and not office_df.empty:
+            office_count = office_df['OFFICE_COUNT'].iloc[0] or 0
+            st.metric("🏢 Clinic Locations", f"{office_count:,}")
+        else:
+            st.metric("🏢 Clinic Locations", "0")
+    
+    # Patient Demographics
+    st.subheader("📊 Patient Demographics")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Gender Distribution
+        gender_query = """
+        SELECT 
+            "Gender",
+            COUNT(*) as patient_count
+        FROM "DBO_PATIENT"
+        WHERE "Gender" IS NOT NULL
+        GROUP BY "Gender"
+        ORDER BY patient_count DESC
+        """
+        gender_df = execute_safe_query(gender_query)
+        if gender_df is not None and not gender_df.empty:
+            fig = px.pie(
+                gender_df, 
+                values='PATIENT_COUNT', 
+                names='GENDER',
+                title='Patient Gender Distribution'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("📊 No gender distribution data available")
+    
+    with col2:
+        # Age Groups
+        age_group_query = """
+        SELECT 
+            CASE 
+                WHEN DATEDIFF(year, "DOB", CURRENT_DATE()) < 18 THEN 'Under 18'
+                WHEN DATEDIFF(year, "DOB", CURRENT_DATE()) BETWEEN 18 AND 35 THEN '18-35'
+                WHEN DATEDIFF(year, "DOB", CURRENT_DATE()) BETWEEN 36 AND 50 THEN '36-50'
+                WHEN DATEDIFF(year, "DOB", CURRENT_DATE()) BETWEEN 51 AND 65 THEN '51-65'
+                ELSE 'Over 65'
+            END as age_group,
+            COUNT(*) as patient_count
+        FROM "DBO_PATIENT"
+        WHERE "DOB" IS NOT NULL
+        GROUP BY age_group
+        ORDER BY patient_count DESC
+        """
+        age_group_df = execute_safe_query(age_group_query)
+        if age_group_df is not None and not age_group_df.empty:
+            fig = px.bar(
+                age_group_df, 
+                x='AGE_GROUP', 
+                y='PATIENT_COUNT',
+                title='Patient Age Groups',
+                labels={'PATIENT_COUNT': 'Number of Patients', 'AGE_GROUP': 'Age Group'}
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("📊 No age group data available")
+    
+    # Recent Patient Activity
+    st.subheader("🕒 Recent Patient Activity")
+    recent_patients_query = """
+    SELECT 
+        p."FirstName" || ' ' || p."LastName" as patient_name,
+        p."DOB",
+        p."Gender",
+        o."OfficeName" as office,
+        pt."TransactionDate" as last_visit
+    FROM "DBO_PATIENT" p
+    LEFT JOIN "DBO_OFFICE" o ON p."OfficeID" = o."OfficeID"
+    LEFT JOIN "DBO_POSTRANSACTION" pt ON p."PatientID" = pt."PatientID"
+    WHERE pt."TransactionDate" IS NOT NULL
+    ORDER BY pt."TransactionDate" DESC
+    LIMIT 20
+    """
+    
+    recent_patients_df = execute_safe_query(recent_patients_query)
+    if recent_patients_df is not None and not recent_patients_df.empty:
+        st.dataframe(recent_patients_df, use_container_width=True)
+    else:
+        st.info("📊 No recent patient activity data available")
 
 def show_analytics_page(auth, username, user_info):
-    """Show advanced analytics"""
+    """Show advanced analytics with live data"""
     if not auth.check_permission(username, 'analytics'):
         st.error("🚫 Access Denied: Analytics permissions required")
         auth.log_security_event('ACCESS_DENIED', username, 'Attempted to access advanced analytics')
@@ -766,7 +911,221 @@ def show_analytics_page(auth, username, user_info):
     auth.log_security_event('PAGE_ACCESS', username, 'Accessed advanced analytics')
     
     st.success("✅ Access granted to advanced analytics")
-    st.info("💡 This would show predictive models, trend analysis, and business intelligence insights.")
+    
+    # Test connection
+    with st.spinner("🔄 Loading analytics data..."):
+        conn = get_snowflake_connection()
+        if conn is None:
+            st.error("❌ Unable to connect to database. Please check your Snowflake configuration.")
+            return
+        conn.close()
+    
+    # Product Analytics
+    st.subheader("📦 Product Performance Analytics")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        # Total Products
+        product_query = """
+        SELECT COUNT(*) as product_count 
+        FROM "DBO_ITEM"
+        """
+        product_df = execute_safe_query(product_query)
+        if product_df is not None and not product_df.empty:
+            product_count = product_df['PRODUCT_COUNT'].iloc[0] or 0
+            st.metric("📦 Total Products", f"{product_count:,}")
+        else:
+            st.metric("📦 Total Products", "0")
+    
+    with col2:
+        # Active Products (with sales)
+        active_products_query = """
+        SELECT COUNT(DISTINCT pt."ItemID") as active_products
+        FROM "DBO_POSTRANSACTION" pt
+        WHERE pt."Amount" > 0 AND pt."ItemID" IS NOT NULL
+        """
+        active_products_df = execute_safe_query(active_products_query)
+        if active_products_df is not None and not active_products_df.empty:
+            active_products = active_products_df['ACTIVE_PRODUCTS'].iloc[0] or 0
+            st.metric("🟢 Products with Sales", f"{active_products:,}")
+        else:
+            st.metric("🟢 Products with Sales", "0")
+    
+    with col3:
+        # Average Product Price
+        avg_price_query = """
+        SELECT AVG(pt."Amount") as avg_price
+        FROM "DBO_POSTRANSACTION" pt
+        WHERE pt."Amount" > 0
+        """
+        avg_price_df = execute_safe_query(avg_price_query)
+        if avg_price_df is not None and not avg_price_df.empty:
+            avg_price = avg_price_df['AVG_PRICE'].iloc[0] or 0
+            st.metric("💰 Avg Transaction", f"${avg_price:.2f}")
+        else:
+            st.metric("💰 Avg Transaction", "$0.00")
+    
+    with col4:
+        # Product Categories
+        category_query = """
+        SELECT COUNT(DISTINCT "ItemType") as category_count
+        FROM "DBO_ITEMTYPE"
+        """
+        category_df = execute_safe_query(category_query)
+        if category_df is not None and not category_df.empty:
+            category_count = category_df['CATEGORY_COUNT'].iloc[0] or 0
+            st.metric("📋 Product Categories", f"{category_count:,}")
+        else:
+            st.metric("📋 Product Categories", "0")
+    
+    # Top Selling Products
+    st.subheader("🔥 Top Selling Products")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Top products by sales count
+        top_products_query = """
+        SELECT 
+            i."ItemName" as product_name,
+            COUNT(*) as sales_count,
+            SUM(pt."Amount") as total_revenue
+        FROM "DBO_POSTRANSACTION" pt
+        JOIN "DBO_ITEM" i ON pt."ItemID" = i."ItemID"
+        WHERE pt."Amount" > 0
+        GROUP BY i."ItemName"
+        ORDER BY sales_count DESC
+        LIMIT 10
+        """
+        top_products_df = execute_safe_query(top_products_query)
+        if top_products_df is not None and not top_products_df.empty:
+            fig = px.bar(
+                top_products_df, 
+                x='SALES_COUNT', 
+                y='PRODUCT_NAME',
+                title='Top Products by Sales Volume',
+                labels={'SALES_COUNT': 'Number of Sales', 'PRODUCT_NAME': 'Product'},
+                orientation='h'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("📊 No product sales data available")
+    
+    with col2:
+        # Revenue by product category
+        category_revenue_query = """
+        SELECT 
+            it."Description" as category,
+            SUM(pt."Amount") as total_revenue,
+            COUNT(*) as transaction_count
+        FROM "DBO_POSTRANSACTION" pt
+        JOIN "DBO_ITEM" i ON pt."ItemID" = i."ItemID"
+        JOIN "DBO_ITEMTYPE" it ON i."ItemType" = it."ItemType"
+        WHERE pt."Amount" > 0
+        GROUP BY it."Description"
+        ORDER BY total_revenue DESC
+        LIMIT 10
+        """
+        category_revenue_df = execute_safe_query(category_revenue_query)
+        if category_revenue_df is not None and not category_revenue_df.empty:
+            fig = px.pie(
+                category_revenue_df, 
+                values='TOTAL_REVENUE', 
+                names='CATEGORY',
+                title='Revenue by Product Category'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("📊 No category revenue data available")
+    
+    # Sales Trends
+    st.subheader("📈 Sales Trends Analysis")
+    
+    # Monthly sales trend
+    monthly_trend_query = """
+    SELECT 
+        DATE_TRUNC('month', "TransactionDate") as month,
+        SUM("Amount") as monthly_revenue,
+        COUNT(*) as transaction_count
+    FROM "DBO_POSTRANSACTION" 
+    WHERE "Amount" > 0 
+      AND "TransactionDate" IS NOT NULL
+      AND "TransactionDate" >= DATEADD(month, -12, CURRENT_DATE())
+    GROUP BY DATE_TRUNC('month', "TransactionDate")
+    ORDER BY month
+    """
+    
+    monthly_trend_df = execute_safe_query(monthly_trend_query)
+    if monthly_trend_df is not None and not monthly_trend_df.empty:
+        fig = go.Figure()
+        
+        # Add revenue line
+        fig.add_trace(go.Scatter(
+            x=monthly_trend_df['MONTH'],
+            y=monthly_trend_df['MONTHLY_REVENUE'],
+            mode='lines+markers',
+            name='Revenue',
+            yaxis='y',
+            line=dict(color='blue')
+        ))
+        
+        # Add transaction count line
+        fig.add_trace(go.Scatter(
+            x=monthly_trend_df['MONTH'],
+            y=monthly_trend_df['TRANSACTION_COUNT'],
+            mode='lines+markers',
+            name='Transactions',
+            yaxis='y2',
+            line=dict(color='red')
+        ))
+        
+        # Update layout for dual y-axis
+        fig.update_layout(
+            title='Monthly Revenue and Transaction Trends',
+            xaxis_title='Month',
+            yaxis=dict(title='Revenue ($)', side='left'),
+            yaxis2=dict(title='Transaction Count', side='right', overlaying='y'),
+            legend=dict(x=0.01, y=0.99)
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("📊 No monthly trend data available")
+    
+    # Office Performance Comparison
+    st.subheader("🏢 Office Performance Comparison")
+    office_performance_query = """
+    SELECT 
+        o."OfficeName" as office_name,
+        SUM(pt."Amount") as total_revenue,
+        COUNT(pt."TransactionID") as transaction_count,
+        COUNT(DISTINCT pt."PatientID") as unique_patients,
+        AVG(pt."Amount") as avg_transaction
+    FROM "DBO_POSTRANSACTION" pt
+    JOIN "DBO_PATIENT" p ON pt."PatientID" = p."PatientID"
+    JOIN "DBO_OFFICE" o ON p."OfficeID" = o."OfficeID"
+    WHERE pt."Amount" > 0
+    GROUP BY o."OfficeName"
+    ORDER BY total_revenue DESC
+    """
+    
+    office_performance_df = execute_safe_query(office_performance_query)
+    if office_performance_df is not None and not office_performance_df.empty:
+        st.dataframe(office_performance_df, use_container_width=True)
+        
+        # Office revenue comparison chart
+        fig = px.bar(
+            office_performance_df, 
+            x='OFFICE_NAME', 
+            y='TOTAL_REVENUE',
+            title='Revenue by Office Location',
+            labels={'TOTAL_REVENUE': 'Revenue ($)', 'OFFICE_NAME': 'Office'}
+        )
+        fig.update_layout(xaxis_tickangle=-45)
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("📊 No office performance data available")
 
 def show_security_dashboard(auth, username, user_info):
     """Show security dashboard"""
