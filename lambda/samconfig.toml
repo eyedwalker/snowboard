@@ -1,0 +1,11 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "snowflake-action-group-dev"
+resolve_s3 = true
+s3_prefix = "snowflake-action-group"
+region = "us-west-2"
+profile = "eyentelligence"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+parameter_overrides = "Stage=dev"

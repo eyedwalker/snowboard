@@ -1,0 +1,309 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Snowflake Eyecare Analytics Action Group",
+    "description": "Tools for querying VSP Snowflake data warehouse with eyecare practice data including patients, orders, billing, insurance, appointments, and products. Can generate Excel/CSV reports and charts.",
+    "version": "2.0.0"
+  },
+  "paths": {
+    "/list_tables": {
+      "post": {
+        "operationId": "listTables",
+        "summary": "List tables and views in a schema with row counts.",
+        "description": "Use schema=DATAWAREHOUSE for clean business views (Patient, Order, InvoiceSummary, BillingTransaction, etc.) or schema=DATAMART for pre-built dim/fact tables.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "type": "string",
+                    "description": "Schema name: DATAWAREHOUSE or DATAMART",
+                    "default": "DATAWAREHOUSE"
+                  },
+                  "filter": {
+                    "type": "string",
+                    "description": "Optional keyword to filter table names (case-insensitive)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of tables/views with metadata",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/describe_table": {
+      "post": {
+        "operationId": "describeTable",
+        "summary": "Get column names, types, and sample values for a table or view.",
+        "description": "Use this to understand what data is in a table before writing a query. Returns column definitions and 3 sample rows.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "table": {
+                    "type": "string",
+                    "description": "Table or view name (e.g. InvoiceSummary, Patient, Order)"
+                  },
+                  "schema": {
+                    "type": "string",
+                    "description": "Schema name",
+                    "default": "DATAWAREHOUSE"
+                  }
+                },
+                "required": ["table"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Table schema with columns and sample data",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/run_query": {
+      "post": {
+        "operationId": "runQuery",
+        "summary": "Execute a read-only SQL query against Snowflake.",
+        "description": "Only SELECT, WITH, SHOW, and DESCRIBE statements are allowed. All table/column names are case-sensitive and must be quoted. Example: SELECT \"TotalAmount\" FROM DATAWAREHOUSE.\"InvoiceSummary\" LIMIT 10",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sql": {
+                    "type": "string",
+                    "description": "The SQL query to execute (SELECT only). Quote all identifiers."
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Max rows to return (default 100)",
+                    "default": 100
+                  }
+                },
+                "required": ["sql"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query results with columns and rows",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/revenue_summary": {
+      "post": {
+        "operationId": "revenueSummary",
+        "summary": "Get revenue summary with totals, averages, and trends.",
+        "description": "Pre-built revenue analytics from InvoiceDetail. Can group by month, quarter, or year.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "start_date": { "type": "string", "description": "Start date (YYYY-MM-DD)" },
+                  "end_date": { "type": "string", "description": "End date (YYYY-MM-DD)" },
+                  "group_by": { "type": "string", "description": "Group by: month, quarter, year", "default": "month" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Revenue summary with totals and grouped data",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/patient_summary": {
+      "post": {
+        "operationId": "patientSummary",
+        "summary": "Get patient demographics summary.",
+        "description": "Returns total patient count, gender breakdown, and office distribution.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "office_id": { "type": "string", "description": "Filter by office ID (optional)" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Patient summary statistics",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/top_products": {
+      "post": {
+        "operationId": "topProducts",
+        "summary": "Get top products by revenue or quantity sold.",
+        "description": "Returns the top N products from invoice data, ranked by revenue or quantity.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "n": { "type": "integer", "description": "Number of top products to return", "default": 10 },
+                  "metric": { "type": "string", "description": "Rank by 'revenue' or 'quantity'", "default": "revenue" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Top products list",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/appointment_utilization": {
+      "post": {
+        "operationId": "appointmentUtilization",
+        "summary": "Get appointment scheduling metrics.",
+        "description": "Returns appointment counts by status, show/no-show rates. Optionally filter by office or date.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "office_id": { "type": "string", "description": "Filter by office ID (optional)" },
+                  "start_date": { "type": "string", "description": "Start date (YYYY-MM-DD)" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Appointment utilization data",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/generate_report": {
+      "post": {
+        "operationId": "generateReport",
+        "summary": "Generate a downloadable Excel or CSV report from a SQL query.",
+        "description": "Runs a SQL query and creates a formatted Excel file with headers, auto-width columns, number formatting, filters, summary sheet, and embedded chart. Returns a presigned S3 download URL valid for 1 hour. Use when the user asks to export data, download a report, create a spreadsheet, or get an Excel file.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sql": { "type": "string", "description": "The SQL query to run. Must be a SELECT statement." },
+                  "title": { "type": "string", "description": "Report title (used as sheet name and filename)", "default": "Report" },
+                  "format": { "type": "string", "description": "'excel' or 'csv'", "default": "excel" },
+                  "chart_type": { "type": "string", "description": "'bar', 'line', or 'pie'", "default": "bar" }
+                },
+                "required": ["sql"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Report download URL and metadata",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/generate_chart": {
+      "post": {
+        "operationId": "generateChart",
+        "summary": "Generate an inline chart visualization from a SQL query.",
+        "description": "Runs a SQL query and generates an SVG chart (bar, line, or pie) as a base64-encoded image that displays directly in the chat. Use when the user asks to visualize, chart, or graph data.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sql": { "type": "string", "description": "The SQL query to run. Must be a SELECT statement." },
+                  "chart_type": { "type": "string", "description": "'bar', 'line', or 'pie'", "default": "bar" },
+                  "title": { "type": "string", "description": "Chart title", "default": "Chart" }
+                },
+                "required": ["sql"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Base64-encoded SVG chart image",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/multi_report": {
+      "post": {
+        "operationId": "multiReport",
+        "summary": "Generate a multi-sheet Excel report from multiple queries.",
+        "description": "Creates a comprehensive Excel report where each query becomes a separate sheet with its own chart. Use for full practice reports covering revenue, patients, products, and appointments in one file.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "description": "Overall report title" },
+                  "queries": { "type": "string", "description": "JSON array: [{\"name\": \"Sheet\", \"sql\": \"SELECT ...\", \"chart_type\": \"bar\"}]" }
+                },
+                "required": ["title", "queries"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Report download URL and metadata",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    }
+  }
+}

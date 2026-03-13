@@ -4,3 +4,8 @@ snowflake-connector-python[pandas]
 pandas
 numpy
 plotly
+
+# Agentic AI
+anthropic>=0.40.0
+mcp>=1.0.0
+python-dotenv

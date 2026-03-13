@@ -1,0 +1,131 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Snowflake Eyecare Analytics - Bedrock Agent Action Group Lambda
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+
+  SnowflakeAccount:
+    Type: String
+    Default: eyefinity-dev
+
+  SnowflakeUser:
+    Type: String
+    Default: DEV_WINDSURF
+
+  SnowflakeSecretArn:
+    Type: String
+    Description: ARN of Secrets Manager secret containing Snowflake password
+    Default: arn:aws:secretsmanager:us-west-2:780457123717:secret:snowflake/dev-windsurf-wQ6LZv
+
+  SnowflakeWarehouse:
+    Type: String
+    Default: DEV_COMPUTE_WINDSURF
+
+  SnowflakeDatabase:
+    Type: String
+    Default: DEV_ANALYTICS
+
+  SnowflakeSchema:
+    Type: String
+    Default: DATAWAREHOUSE
+
+  SnowflakeRole:
+    Type: String
+    Default: FR_DEV_WINDSURF
+
+  BedrockAgentId:
+    Type: String
+    Description: ID of the Bedrock Agent to attach the action group to
+    Default: KBAQR27COL
+
+Globals:
+  Function:
+    Runtime: python3.11
+    Timeout: 60
+    MemorySize: 512
+    Architectures:
+      - x86_64
+
+Resources:
+
+  # S3 bucket for generated reports (Excel/CSV downloads)
+  ReportsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub snowflake-eyecare-reports-${Stage}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireReports
+            Status: Enabled
+            ExpirationInDays: 7
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ['*']
+            AllowedMethods: [GET]
+            AllowedOrigins: ['*']
+            MaxAge: 3600
+
+  SnowflakeActionGroupFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub snowflake-action-group-${Stage}
+      Handler: lambda/handler.handler
+      CodeUri: ../
+      Description: Bedrock Agent Action Group for Snowflake Eyecare Analytics
+      Timeout: 120
+      MemorySize: 1024
+      Environment:
+        Variables:
+          SNOWFLAKE_ACCOUNT: !Ref SnowflakeAccount
+          SNOWFLAKE_USER: !Ref SnowflakeUser
+          SNOWFLAKE_PASSWORD_SECRET_ARN: !Ref SnowflakeSecretArn
+          SNOWFLAKE_WAREHOUSE: !Ref SnowflakeWarehouse
+          SNOWFLAKE_DATABASE: !Ref SnowflakeDatabase
+          SNOWFLAKE_SCHEMA: !Ref SnowflakeSchema
+          SNOWFLAKE_ROLE: !Ref SnowflakeRole
+          STAGE: !Ref Stage
+          REPORT_BUCKET: !Ref ReportsBucket
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Ref SnowflakeSecretArn
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+                - s3:GetObject
+              Resource: !Sub arn:aws:s3:::${ReportsBucket}/*
+
+  # Permission for Bedrock to invoke the Lambda
+  BedrockInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SnowflakeActionGroupFunction
+      Action: lambda:InvokeFunction
+      Principal: bedrock.amazonaws.com
+      SourceArn: !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:agent/*
+
+Outputs:
+  FunctionArn:
+    Description: ARN of the Snowflake Action Group Lambda
+    Value: !GetAtt SnowflakeActionGroupFunction.Arn
+
+  FunctionName:
+    Description: Name of the Lambda function
+    Value: !Ref SnowflakeActionGroupFunction
+
+  ReportsBucketName:
+    Description: S3 bucket for generated reports
+    Value: !Ref ReportsBucket

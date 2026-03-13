@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "snowflake-eyecare": {
+      "command": "python",
+      "args": ["-m", "src.mcp.server"],
+      "cwd": "/Users/daviwa2@vsp.com/Analytics and Insights/CascadeProjects/snowflake-eyecare-platform",
+      "env": {
+        "PYTHONPATH": "/Users/daviwa2@vsp.com/Analytics and Insights/CascadeProjects/snowflake-eyecare-platform"
+      }
+    }
+  }
+}
