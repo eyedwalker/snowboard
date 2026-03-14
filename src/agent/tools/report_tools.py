@@ -35,9 +35,10 @@ def _upload_to_s3(data: bytes, key: str, content_type: str, filename: str) -> st
         ContentType=content_type,
         ContentDisposition=f'attachment; filename="{filename}"',
     )
-    # Return direct S3 URL (bucket policy allows public read on reports/ prefix)
-    url = f"https://{REPORT_BUCKET}.s3.{region}.amazonaws.com/{key}"
-    return url
+    cdn_domain = os.getenv("CDN_DOMAIN", "")
+    if cdn_domain:
+        return f"https://{cdn_domain}/{key}"
+    return f"https://{REPORT_BUCKET}.s3.{region}.amazonaws.com/{key}"
 
 
 # ── SVG Chart Generation (zero-dependency) ────────────────────────────────────
@@ -543,15 +544,26 @@ def generate_chart(sql, chart_type="bar", x_column=None, y_column=None, title="C
     if not svg:
         return {"error": "Could not generate chart from the data."}
 
-    # Encode as base64 data URI
-    svg_b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
+    # Upload SVG to S3 so it doesn't hit Bedrock's 25KB response limit
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    import re as _re
+    safe_title = _re.sub(r"[^a-zA-Z0-9_-]", "_", title)[:40]
+    filename = f"{safe_title}_{ts}.svg"
+    key = f"{REPORT_PREFIX}charts/{filename}"
+    try:
+        chart_url = _upload_to_s3(svg.encode("utf-8"), key, "image/svg+xml", filename)
+    except Exception as e:
+        # Fallback to inline base64 if S3 upload fails
+        svg_b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
+        chart_url = f"data:image/svg+xml;base64,{svg_b64}"
 
     return {
-        "chart_image": f"data:image/svg+xml;base64,{svg_b64}",
+        "chart_image": chart_url,
         "chart_type": chart_type,
         "data_points": len(labels),
         "x_column": x_col,
         "y_column": y_col,
+        "title": title,
     }
 
 

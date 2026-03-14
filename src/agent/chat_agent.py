@@ -31,6 +31,7 @@ import src.agent.tools.query_tools
 import src.agent.tools.analytics_tools
 import src.agent.tools.visualization_tools
 import src.agent.tools.cortex_tools
+import src.agent.tools.report_tools
 
 
 class ChatAgent:

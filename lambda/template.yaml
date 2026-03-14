@@ -71,9 +71,11 @@ Resources:
 
   SnowflakeActionGroupFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:
       FunctionName: !Sub snowflake-action-group-${Stage}
-      Handler: lambda/handler.handler
+      Handler: handler.handler
       CodeUri: ../
       Description: Bedrock Agent Action Group for Snowflake Eyecare Analytics
       Timeout: 120
@@ -89,6 +91,7 @@ Resources:
           SNOWFLAKE_ROLE: !Ref SnowflakeRole
           STAGE: !Ref Stage
           REPORT_BUCKET: !Ref ReportsBucket
+          DOWNLOAD_BASE_URL: !Sub "https://2p595psdt1.execute-api.${AWS::Region}.amazonaws.com/${Stage}"
       Policies:
         - Version: '2012-10-17'
           Statement:

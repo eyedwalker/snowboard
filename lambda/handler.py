@@ -21,8 +21,12 @@ import os
 import sys
 import logging
 
-# Add project root to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add package root to path for imports
+# In Lambda, handler.py is at /var/task/handler.py with src/ at /var/task/src/
+# Locally, handler.py is in lambda/ so we also add the parent (project root)
+_here = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _here)
+sys.path.insert(0, os.path.dirname(_here))
 
 from src.agent.tools.registry import dispatch_tool
 
