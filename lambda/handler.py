@@ -118,6 +118,11 @@ def handler(event, context):
     logger.info(f"Action group event: {json.dumps(event, default=str)}")
 
     api_path = event.get("apiPath", "")
+
+    # Forward /schedule_report to the Chat Agent API Lambda (front-office-actions)
+    if api_path == "/schedule_report":
+        return _forward_to_api_lambda(event)
+
     tool_name = API_PATH_TO_TOOL.get(api_path)
 
     if not tool_name:
@@ -154,3 +159,33 @@ def handler(event, context):
             "error": str(e),
             "tool": tool_name,
         }))
+
+
+def _forward_to_api_lambda(event):
+    """Forward action group events to the Chat Agent API Lambda for front-office actions."""
+    import boto3
+
+    original_api_path = event.get("apiPath", "")
+    api_lambda_name = os.environ.get(
+        "API_LAMBDA_NAME", "chat-agent-api-dev"
+    )
+
+    # Remap apiPath from /schedule_report to /scheduleReport for front-office-actions handler
+    forwarded_event = dict(event)
+    forwarded_event["apiPath"] = "/scheduleReport"
+
+    lambda_client = boto3.client("lambda", region_name=os.environ.get("AWS_REGION", "us-west-2"))
+    response = lambda_client.invoke(
+        FunctionName=api_lambda_name,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(forwarded_event).encode(),
+    )
+
+    result = json.loads(response["Payload"].read())
+    logger.info(f"API Lambda response: {json.dumps(result, default=str)[:500]}")
+
+    # Fix apiPath in response to match original request (Bedrock validates this)
+    if "response" in result and "apiPath" in result.get("response", {}):
+        result["response"]["apiPath"] = original_api_path
+
+    return result
